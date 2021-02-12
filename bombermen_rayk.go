@@ -190,7 +190,7 @@ func run() {
 		panic(err)
 	}
 
-	go playSound("sound/through space.ogg")
+	go playSound("sounds/through space.ogg")
 
 	showIntro(win)
 
