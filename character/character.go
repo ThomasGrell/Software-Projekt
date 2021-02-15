@@ -33,6 +33,13 @@ const (
 	Teddy          = 10
 	Ghost          = 11
 	Drop           = 12
+	Pinky          = 13
+	BluePopEye     = 14
+	Jellyfish      = 15
+	Snake          = 16
+	Spinner        = 17
+	YellowPopEye   = 18
+	Snowy          = 19
 )
 
 // Definition der Bewegungsrichtungen
@@ -42,6 +49,7 @@ const (
 	Down  = 2
 	Left  = 3
 	Right = 4
+	Dead  = 5
 )
 
 // Bild, welches die Sprites aller Charaktere enthält
@@ -82,10 +90,12 @@ type character struct {
 	bombs    int     // Anzahl der aktuell gelegten Bomben
 	speed    float64 // max. Bewegungsgeschwindigkeit in Pixel pro Sekunde
 
-	kick   bool // kann Bomben wegkicken
-	mortal bool // Sterblichkeit
-	ghost  bool // kann durch Wände laufen
-	follow bool // Folgt einem Spieler
+	kick      bool // kann Bomben wegkicken
+	mortal    bool // Sterblichkeit
+	wallghost bool // kann durch Wände laufen
+	bombghost bool // kann durch Bomben laufen
+	follow    bool // Folgt einem Spieler
+	invisible bool // Unsichtbarer Sprite
 
 	// Position/Bewegung:
 
@@ -106,11 +116,17 @@ type character struct {
 	cwidth pixel.Vec // Breite und Höhe des Charakter-Sprites
 	count  int       // Nummer des zuletzt gezeichneten Sprites der Animationssequenz beginnend bei 1
 	delta  int       // entweder -1 oder 1 für Animationsreihenfolge vor und zurück
+	seesaw bool      // Bei true geht die Animation hin und her (delta=+1/-1). Bei false werden
+	// die Sprites immer in derselben Reihenfolge durchlaufen (delta=1)
+	hasIntro bool // True, wenn das Monster eine Animation zum Erscheinen hat.
 
 	spos pixel.Vec // Pixelgenaue Position des Sprites innerhalb des png für den ruhenden Charakter
 
 	lpos pixel.Vec // Pixelgenaue Position des Sprites innerhalb des png für nach links bewegenden Charakter
 	ln   int       // Anzahl der Sprites für Animationseffekte
+
+	rpos pixel.Vec // Pixelgenaue Position des Sprites innerhalb des png für nach rechts bewegenden Charakter
+	rn   int       // Anzahl der Sprites für Animationseffekte
 
 	// Für rechtsläufige Figuren wird die linksläufige Animation gespiegelt.
 
@@ -120,6 +136,11 @@ type character struct {
 	dpos pixel.Vec // Pixelgenaue Position des Sprites innerhalb des png für nach unten bewegenden Charakter
 	dn   int       // Anzahl der Sprites für Animationseffekte
 
+	ipos pixel.Vec // intro position - Pixelgenaue Position des Sprites für Erscheinungsanimation
+	in   int       // Anzahl der Sprites für die Erscheinungssequenz
+
+	kpos pixel.Vec // kill position - Pixelgenaue Position des Sprites für Todessequenz
+	kn   int       // Anzahl der Sprites für die Todessequenz
 }
 
 func NewCharacter(t int) *character {
@@ -138,6 +159,7 @@ func NewCharacter(t int) *character {
 		c.lpos.Y = 336
 		c.upos.Y = 336
 		c.dpos.Y = 336
+		c.kpos.Y = 336
 	}
 	if t == BlueBomberman {
 		*c = *bm
@@ -145,6 +167,7 @@ func NewCharacter(t int) *character {
 		c.lpos.Y = 312
 		c.upos.Y = 312
 		c.dpos.Y = 312
+		c.kpos.Y = 312
 	}
 	if t == RedBomberman {
 		*c = *bm
@@ -152,6 +175,7 @@ func NewCharacter(t int) *character {
 		c.lpos.Y = 288
 		c.upos.Y = 288
 		c.dpos.Y = 288
+		c.kpos.Y = 288
 	}
 	if t == WhiteBattleman {
 		c.life = 1
@@ -163,6 +187,7 @@ func NewCharacter(t int) *character {
 		c.lpos.Y = 336
 		c.upos.Y = 336
 		c.dpos.Y = 336
+		c.kpos.Y = 336
 	}
 	if t == BlueBattleman {
 		*c = *bm
@@ -170,6 +195,7 @@ func NewCharacter(t int) *character {
 		c.spos.Y = 312
 		c.lpos.Y = 312
 		c.upos.Y = 312
+		c.dpos.Y = 312
 		c.dpos.Y = 312
 	}
 	if t == RedBattleman {
@@ -179,6 +205,7 @@ func NewCharacter(t int) *character {
 		c.lpos.Y = 288
 		c.upos.Y = 288
 		c.dpos.Y = 288
+		c.kpos.Y = 288
 	}
 	if t == Balloon {
 		*c = *mo
@@ -189,6 +216,8 @@ func NewCharacter(t int) *character {
 		c.upos.Y = 352
 		c.dpos.Y = 352
 		c.lpos.Y = 352
+		c.rpos.Y = 352
+		c.kpos.Y = 352
 		c.follow = true
 	}
 	if t == Ghost {
@@ -197,23 +226,119 @@ func NewCharacter(t int) *character {
 		c.upos.Y = 336
 		c.dpos.Y = 336
 		c.lpos.Y = 336
-		c.ghost = true
+		c.rpos.Y = 336
+		mo.kpos.Y = 21 * 16
+		mo.kn = 9
+		c.wallghost = true
 	}
 	if t == Drop {
 		*c = *mo
-		c.spos.Y = 320
-		c.upos.Y = 320
-		c.dpos.Y = 320
-		c.lpos.Y = 320
+		c.spos.Y = 20 * 16
+		c.upos.Y = 20 * 16
+		c.dpos.Y = 20 * 16
+		c.lpos.Y = 20 * 16
+		c.rpos.Y = 20 * 16
+		c.kpos.Y = 20 * 16
 	}
+	if t == Pinky {
+		*c = *mo
+		c.spos.Y = 19 * 16
+		c.upos.Y = 19 * 16
+		c.dpos.Y = 19 * 16
+		c.lpos.Y = 19 * 16
+		c.rpos.Y = 19 * 16
+		c.kpos.Y = 19 * 16
+	}
+	if t == BluePopEye {
+		*c = *mo
+		c.spos.Y = 18 * 16
+		c.upos.Y = 18 * 16
+		c.dpos.Y = 18 * 16
+		c.lpos.Y = 18 * 16
+		c.rpos.Y = 18 * 16
+		c.kpos.Y = 18 * 16
+		c.kn = 9
+	}
+	if t == Jellyfish {
+		*c = *mo
+		c.spos.Y = 17 * 16
+		c.upos.Y = 17 * 16
+		c.dpos.Y = 17 * 16
+		c.lpos.Y = 17 * 16
+		c.rpos.Y = 17 * 16
+		c.kpos.Y = 17 * 16
+	}
+	if t == Snake {
+		*c = *mo
+		c.spos.Y = 16 * 16
+		c.upos.Y = 16 * 16
+		c.dpos.Y = 16 * 16
+		c.lpos.Y = 16 * 16
+		c.rpos.Y = 16 * 16
+	}
+	if t == Spinner {
+		*c = *mo
+		c.seesaw = false
+		c.dn = 4
+		c.un = 4
+		c.ln = 4
+		c.rn = 4
+		c.spos.X = 20 * 16
+		c.spos.Y = 15 * 16
+		c.upos.X = 19 * 16
+		c.upos.Y = 15 * 16
+		c.dpos.X = 19 * 16
+		c.dpos.Y = 15 * 16
+		c.lpos.X = 19 * 16
+		c.lpos.Y = 15 * 16
+		c.rpos.X = 19 * 16
+		c.rpos.Y = 15 * 16
+		c.kpos.X = 304 + 4*16
+		c.kpos.Y = 15 * 16
+	}
+	if t == YellowPopEye {
+		*c = *mo
+		c.spos.Y = 13 * 16
+		c.upos.Y = 13 * 16
+		c.dpos.Y = 13 * 16
+		c.lpos.Y = 13 * 16
+		c.rpos.Y = 13 * 16
+		c.kpos.Y = 13 * 16
+	}
+	if t == Snowy {
+		*c = *mo
+		c.spos.X = 224
+		c.spos.Y = 224
+		c.upos.X = 256
+		c.upos.Y = 224
+		c.dpos.X = 208
+		c.dpos.Y = 224
+		c.lpos.X = 304
+		c.lpos.Y = 224
+		c.ln = 2
+		c.rpos.X = 336
+		c.rpos.Y = 224
+		c.rn = 2
+		c.kpos.X = 336 + 2*16
+		c.kpos.Y = 224
+	}
+
 	c.sprite = pixel.NewSprite(characterImage, pixel.R(c.spos.X, c.spos.Y, c.spos.X+c.cwidth.X, c.spos.Y+c.cwidth.Y))
 
 	return c
 }
 
 func (c *character) DecLife() {
+	if c.life == 0 {
+		return
+	}
 	if c.mortal {
 		c.life--
+		if c.life == 0 {
+			c.count = 1
+			c.delta = 1
+			c.direction = Dead
+		}
 	}
 }
 
@@ -270,6 +395,11 @@ func (c *character) GetSpriteCoords() pixel.Rect {
 
 	// Wenn die Figur ruht, wird stets derselbe Sprite in Blickrichtung der Figur ausgegeben.
 	// Bewegt sie sich, so wird die Animation durchlaufen.
+
+	if c.invisible {
+		return pixel.R(16*16, 22*16, 17*16, 23*16)
+	}
+
 	if c.direction == Stay {
 		v = c.spos
 	} else {
@@ -290,6 +420,10 @@ func (c *character) GetSpriteCoords() pixel.Rect {
 			v = c.lpos
 			n = c.ln
 		}
+		if c.direction == Dead {
+			v = c.kpos
+			n = c.kn
+		}
 
 		// Es wird geprüft, ob das nächste Sprite der Animation gezeigt werden muss, falls es eines gibt.
 		if n > 1 {
@@ -297,8 +431,14 @@ func (c *character) GetSpriteCoords() pixel.Rect {
 			if timenow-c.lastUpdate > c.interval {
 				c.lastUpdate = timenow
 				if c.count == n { // rechts angekommen in der Bildfolge --> Rückwärtsgang
-					c.count--
-					c.delta = -1
+					if c.direction == Dead {
+						c.invisible = true
+					} else if c.seesaw {
+						c.count--
+						c.delta = -1
+					} else {
+						c.count = 1
+					}
 				} else if c.count == 1 {
 					c.count++ // links angekommen in der Bildfolge --> Vorwärtsgang
 					c.delta = 1
@@ -378,7 +518,9 @@ func init() {
 	bm.speed = 100
 	bm.kick = false
 	bm.mortal = true
-	bm.ghost = false
+	bm.wallghost = false
+	bm.bombghost = false
+	bm.invisible = false
 	bm.pos.X = 19
 	bm.pos.Y = 19
 	bm.width.X = 10
@@ -393,12 +535,18 @@ func init() {
 	bm.lpos.X = 3 * 16
 	bm.lpos.Y = 360
 	bm.ln = 3
+	bm.rpos.X = 9 * 16
+	bm.rpos.Y = 360
+	bm.rn = 3
 	bm.upos.X = 6 * 16
 	bm.upos.Y = 360
 	bm.un = 3
 	bm.dpos.X = 0
 	bm.dpos.Y = 360
 	bm.dn = 3
+	bm.kpos.X = 12 * 16
+	bm.kpos.Y = 360
+	bm.kn = 4
 
 	// Monster Prototyp
 	mo = new(character)
@@ -410,8 +558,10 @@ func init() {
 	mo.speed = 100
 	mo.kick = false
 	mo.mortal = true
-	mo.ghost = false
+	mo.wallghost = false
+	mo.bombghost = false
 	mo.follow = false
+	mo.invisible = false
 	mo.width.X = 10
 	mo.width.Y = 10
 	mo.direction = Down
@@ -419,16 +569,23 @@ func init() {
 	mo.cwidth.Y = 16
 	mo.count = 2
 	mo.delta = 1
-	mo.spos.X = 256 + 16
+	mo.seesaw = true
+	mo.hasIntro = false
+	mo.spos.X = 304 + 16
 	mo.spos.Y = 368
-	mo.lpos.X = 256
+	mo.lpos.X = 304
 	mo.lpos.Y = 368
 	mo.ln = 3
-	mo.upos.X = 256
+	mo.rpos.X = 304
+	mo.rpos.Y = 368
+	mo.rn = 3
+	mo.upos.X = 304
 	mo.upos.Y = 368
 	mo.un = 3
-	mo.dpos.X = 256
+	mo.dpos.X = 304
 	mo.dpos.Y = 368
 	mo.dn = 3
-
+	mo.kpos.X = 304 + 3*16
+	mo.kpos.Y = 23 * 16
+	mo.kn = 7
 }

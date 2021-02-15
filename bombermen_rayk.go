@@ -100,8 +100,28 @@ func fadeOut(win *pixelgl.Window) {
 	}
 }
 
-func walkIn(win *pixelgl.Window, wB character.Character) {
+func die(win *pixelgl.Window, wB character.Character) {
 	var t int
+	wB.DecLife()
+	wB.DecLife()
+	wB.DecLife()
+	t = time.Now().Second()
+	for time.Now().Second()-t < 5 {
+		if win.Closed() {
+			break
+		}
+		if win.Pressed(pixelgl.KeyEscape) {
+			win.Destroy()
+			break
+		}
+		win.Clear(colornames.Black)
+		wB.Update()
+		wB.GetSprite().Draw(win, pixel.IM.Scaled(pixel.ZV, 9).Moved(wB.GetMinPos()))
+		win.Update()
+	}
+}
+
+func walkIn(win *pixelgl.Window, wB character.Character) {
 
 	//Figur kommt Betrachter entgegen und wird größer
 	for i := 0.1; i <= 3; i += 0.02 {
@@ -117,6 +137,9 @@ func walkIn(win *pixelgl.Window, wB character.Character) {
 		wB.GetSprite().Draw(win, pixel.IM.Scaled(pixel.ZV, i*i).Moved(win.Bounds().Center()))
 		win.Update()
 	}
+}
+
+func stay(win *pixelgl.Window, wB character.Character) {
 
 	// Figur steht still da
 	wB.Direction(character.Stay)
@@ -125,7 +148,6 @@ func walkIn(win *pixelgl.Window, wB character.Character) {
 	wB.SetMinPos(win.Bounds().Center())
 	wB.GetSprite().Draw(win, pixel.IM.Scaled(pixel.ZV, 9).Moved(wB.GetMinPos()))
 	win.Update()
-
 	for !win.Pressed(pixelgl.KeyEnter) {
 		if win.Closed() {
 			break
@@ -136,6 +158,10 @@ func walkIn(win *pixelgl.Window, wB character.Character) {
 		}
 		win.Update()
 	}
+
+}
+func walkAway(win *pixelgl.Window, wB character.Character) {
+	var t int
 
 	// Figur läuft nach links
 	t = time.Now().Second()
@@ -195,15 +221,16 @@ func run() {
 	showIntro(win)
 
 	var wB character.Character
-	wB = character.NewCharacter(character.RedBomberman)
+	wB = character.NewCharacter(character.Snowy)
 
 	time.Sleep(3 * time.Second)
 
 	fadeOut(win)
-
 	win.SetSmooth(false)
 
 	walkIn(win, wB)
+	stay(win, wB)
+	die(win, wB)
 
 }
 
