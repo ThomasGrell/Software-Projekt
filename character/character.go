@@ -12,90 +12,43 @@ import (
 )
 
 /*
-
 Der Ursprung des Koordinatensystems von "pixel" ist unten links.
 Monster werden stets animiert.
 Bombermen sind nur bei Bewegung animiert.
 Animationen sind teilweise von Bewegungsrichtung abhängig.
 */
 
-// Definition der Charaktertypen
-const (
-	WhiteBomberman = 1 // Spielfiguren im Single Player Mode
-	BlackBomberman = 2
-	BlueBomberman  = 3
-	RedBomberman   = 4
-	WhiteBattleman = 5 // Spielfiguren im Multi Player Mode
-	BlackBattleman = 6
-	BlueBattleman  = 7
-	RedBattleman   = 8
-	Balloon        = 9
-	Teddy          = 10
-	Ghost          = 11
-	Drop           = 12
-	Pinky          = 13
-	BluePopEye     = 14
-	Jellyfish      = 15
-	Snake          = 16
-	Spinner        = 17
-	YellowPopEye   = 18
-	Snowy          = 19
-)
-
-// Definition der Bewegungsrichtungen
-const (
-	Stay  = 0
-	Up    = 1
-	Down  = 2
-	Left  = 3
-	Right = 4
-	Dead  = 5
-)
-
 // Bild, welches die Sprites aller Charaktere enthält
 var characterImage *pixel.PictureData
-var bm, mo *character
+var bm *player
+var en *enemy
 
-type Character interface {
-	DecLife()
-	IncLife()
-	IncSpeed()
-	DecSpeed()
-	GetSpeed() float64
-	SetMinPos(v pixel.Vec)
-	GetMinPos() pixel.Vec
-	GetMaxPos() pixel.Vec
-	GetCenterPos() pixel.Vec
-	IsAlife() bool
-	IsMortal() bool
-	SetMortal(bool)
-	GetSpriteCoords() pixel.Rect
-	GetSprite() *pixel.Sprite
-	Update()
+type player struct {
+	character
+	bombs    int  // Anzahl der aktuell gelegten Bomben
+	kick     bool // kann Bomben wegkicken
+	maxBombs int  // maximale Anzahl der legbaren Bomben
+	power    int  // Wirkungsradius der Bomben
+	wins     int  // Siege für Multi-Player-Modus
+}
 
-	// Move() legt die Bewegungsrichtung des Charakters fest.
-	// Übergeben wird eine der definierten Konstanten stay, left, right, up oder down
-	// stay deaktiviert die Animation. Der Charakter schaut in Richtung seiner letzten Bewegung.
-	Direction(direction int)
+type enemy struct {
+	character
+	follow bool // Folgt einem Spieler
 }
 
 type character struct {
-
-	// Fähigkeiten:
-
-	points   int     // Punkte für den Multi-Player-Modus
-	life     int     // verbleibende Anzahl der Leben
-	maxBombs int     // maximale Anzahl der legbaren Bomben
-	power    int     // Wirkungsradius der Bomben
-	bombs    int     // Anzahl der aktuell gelegten Bomben
-	speed    float64 // max. Bewegungsgeschwindigkeit in Pixel pro Sekunde
-
-	kick      bool // kann Bomben wegkicken
-	mortal    bool // Sterblichkeit
-	wallghost bool // kann durch Wände laufen
+	animation
 	bombghost bool // kann durch Bomben laufen
-	follow    bool // Folgt einem Spieler
-	invisible bool // Unsichtbarer Sprite
+	life      int  // verbleibende Anzahl der Leben
+	mortal    bool // Sterblichkeit
+	points    int  // Punkte
+	wallghost bool // kann durch Wände laufen
+}
+
+type animation struct {
+	visible bool    // Unsichtbarer Sprite
+	speed   float64 // max. Bewegungsgeschwindigkeit in Pixel pro Sekunde
 
 	// Position/Bewegung:
 
@@ -128,24 +81,25 @@ type character struct {
 	rpos pixel.Vec // Pixelgenaue Position des Sprites innerhalb des png für nach rechts bewegenden Charakter
 	rn   int       // Anzahl der Sprites für Animationseffekte
 
-	// Für rechtsläufige Figuren wird die linksläufige Animation gespiegelt.
-
 	upos pixel.Vec // Pixelgenaue Position des Sprites innerhalb des png für nach oben bewegenden Charakter
 	un   int       // Anzahl der Sprites für Animationseffekte
 
 	dpos pixel.Vec // Pixelgenaue Position des Sprites innerhalb des png für nach unten bewegenden Charakter
 	dn   int       // Anzahl der Sprites für Animationseffekte
 
-	ipos pixel.Vec // intro position - Pixelgenaue Position des Sprites für Erscheinungsanimation
-	in   int       // Anzahl der Sprites für die Erscheinungssequenz
+	ipos   pixel.Vec // intro position - Pixelgenaue Position des Sprites für Erscheinungsanimation
+	in     int       // Anzahl der Sprites für die Erscheinungssequenz
+	iwidth pixel.Vec // Spritegröße für Introanimation
 
-	kpos pixel.Vec // kill position - Pixelgenaue Position des Sprites für Todessequenz
-	kn   int       // Anzahl der Sprites für die Todessequenz
+	kpos   pixel.Vec // kill position - Pixelgenaue Position des Sprites für Todessequenz
+	kn     int       // Anzahl der Sprites für die Todessequenz
+	kwidth pixel.Vec // Spritegröße für Todesanimation
+
+	child *animation // Für den Endgegner, den langen Drachen, welcher aus mehreren Segmenten besteht
 }
 
-func NewCharacter(t int) *character {
-
-	c := new(character)
+func NewPlayer(t int) *player {
+	c := new(player)
 
 	c.lastUpdate = time.Now().UnixNano()
 	c.interval = 2e8
@@ -207,11 +161,23 @@ func NewCharacter(t int) *character {
 		c.dpos.Y = 288
 		c.kpos.Y = 288
 	}
+
+	c.sprite = pixel.NewSprite(characterImage, pixel.R(c.spos.X, c.spos.Y, c.spos.X+c.cwidth.X, c.spos.Y+c.cwidth.Y))
+
+	return c
+}
+
+func NewEnemy(t int) *enemy {
+	c := new(enemy)
+
+	c.lastUpdate = time.Now().UnixNano()
+	c.interval = 2e8
+
 	if t == Balloon {
-		*c = *mo
+		*c = *en
 	}
 	if t == Teddy {
-		*c = *mo
+		*c = *en
 		c.spos.Y = 352
 		c.upos.Y = 352
 		c.dpos.Y = 352
@@ -221,18 +187,18 @@ func NewCharacter(t int) *character {
 		c.follow = true
 	}
 	if t == Ghost {
-		*c = *mo
+		*c = *en
 		c.spos.Y = 336
 		c.upos.Y = 336
 		c.dpos.Y = 336
 		c.lpos.Y = 336
 		c.rpos.Y = 336
-		mo.kpos.Y = 21 * 16
-		mo.kn = 9
+		en.kpos.Y = 21 * 16
+		en.kn = 9
 		c.wallghost = true
 	}
 	if t == Drop {
-		*c = *mo
+		*c = *en
 		c.spos.Y = 20 * 16
 		c.upos.Y = 20 * 16
 		c.dpos.Y = 20 * 16
@@ -241,7 +207,7 @@ func NewCharacter(t int) *character {
 		c.kpos.Y = 20 * 16
 	}
 	if t == Pinky {
-		*c = *mo
+		*c = *en
 		c.spos.Y = 19 * 16
 		c.upos.Y = 19 * 16
 		c.dpos.Y = 19 * 16
@@ -250,7 +216,7 @@ func NewCharacter(t int) *character {
 		c.kpos.Y = 19 * 16
 	}
 	if t == BluePopEye {
-		*c = *mo
+		*c = *en
 		c.spos.Y = 18 * 16
 		c.upos.Y = 18 * 16
 		c.dpos.Y = 18 * 16
@@ -260,7 +226,7 @@ func NewCharacter(t int) *character {
 		c.kn = 9
 	}
 	if t == Jellyfish {
-		*c = *mo
+		*c = *en
 		c.spos.Y = 17 * 16
 		c.upos.Y = 17 * 16
 		c.dpos.Y = 17 * 16
@@ -269,7 +235,7 @@ func NewCharacter(t int) *character {
 		c.kpos.Y = 17 * 16
 	}
 	if t == Snake {
-		*c = *mo
+		*c = *en
 		c.spos.Y = 16 * 16
 		c.upos.Y = 16 * 16
 		c.dpos.Y = 16 * 16
@@ -277,7 +243,7 @@ func NewCharacter(t int) *character {
 		c.rpos.Y = 16 * 16
 	}
 	if t == Spinner {
-		*c = *mo
+		*c = *en
 		c.seesaw = false
 		c.dn = 4
 		c.un = 4
@@ -297,7 +263,7 @@ func NewCharacter(t int) *character {
 		c.kpos.Y = 15 * 16
 	}
 	if t == YellowPopEye {
-		*c = *mo
+		*c = *en
 		c.spos.Y = 13 * 16
 		c.upos.Y = 13 * 16
 		c.dpos.Y = 13 * 16
@@ -306,7 +272,7 @@ func NewCharacter(t int) *character {
 		c.kpos.Y = 13 * 16
 	}
 	if t == Snowy {
-		*c = *mo
+		*c = *en
 		c.spos.X = 224
 		c.spos.Y = 224
 		c.upos.X = 256
@@ -328,6 +294,36 @@ func NewCharacter(t int) *character {
 	return c
 }
 
+func (c *enemy) IsFollowing() bool {
+	return c.follow
+}
+
+func (c *player) AddPoints(p int) {
+	c.points += p
+}
+func (c *player) GetMaxBombs() int { return c.maxBombs }
+func (c *player) GetWins() int     { return c.wins }
+func (c *player) IncLife() {
+	c.life++
+}
+func (c *player) IncMaxBombs() { c.maxBombs++ }
+func (c *player) IncWins()     { c.wins++ }
+func (c *player) ResetWins()   { c.wins = 0 }
+func (c *player) SetLife(l int) {
+	if l >= 0 {
+		c.life = l
+	}
+}
+func (c *player) SetMaxBombs(b int) {
+	if b >= 0 {
+		c.maxBombs = b
+	}
+}
+func (c *player) SetMortal(b bool) {
+	c.mortal = b
+}
+func (c *player) SetWallghost(w bool) { c.wallghost = w }
+
 func (c *character) DecLife() {
 	if c.life == 0 {
 		return
@@ -335,75 +331,63 @@ func (c *character) DecLife() {
 	if c.mortal {
 		c.life--
 		if c.life == 0 {
-			c.count = 1
-			c.delta = 1
-			c.direction = Dead
+			c.die()
 		}
 	}
 }
-
-func (c *character) IncLife() {
-	c.life++
+func (c *character) GetPoints() int { return c.points }
+func (c *character) IsAlife() bool {
+	return c.life > 0
 }
+func (c *character) IsBombghost() bool { return c.bombghost }
+func (c *character) IsMortal() bool {
+	return c.mortal
+}
+func (c *character) IsWallghost() bool   { return c.wallghost }
+func (c *character) SetBombghost(b bool) { c.bombghost = b }
 
-func (c *character) DecSpeed() {
+func (c *animation) DecSpeed() {
 	if c.speed > 10 {
 		c.speed -= 10
 	}
 }
-
-func (c *character) IncSpeed() {
-	c.speed += 10
+func (c *animation) die() {
+	c.count = 1
+	c.delta = 1
+	c.direction = Dead
 }
-
-// GetSpeed() gibt die Geschwindigkeit in Pixel/Sekunde zurück.
-func (c *character) GetSpeed() float64 {
-	return c.speed
-}
-
-func (c *character) SetMinPos(v pixel.Vec) {
-	c.pos = v
-}
-
-func (c *character) GetMinPos() pixel.Vec {
-	return c.pos
-}
-
-func (c *character) GetMaxPos() pixel.Vec {
-	return c.pos.Add(c.width)
-}
-
-func (c *character) GetCenterPos() (v pixel.Vec) {
+func (c *animation) GetCenterPos() (v pixel.Vec) {
 	return c.pos.Add(c.width.Scaled(0.5))
 }
-
-func (c *character) IsAlife() bool {
-	return c.life > 0
+func (c *animation) GetMaxPos() pixel.Vec {
+	return c.pos.Add(c.width)
 }
-
-func (c *character) IsMortal() bool {
-	return c.mortal
+func (c *animation) GetMinPos() pixel.Vec {
+	return c.pos
 }
-
-func (c *character) SetMortal(b bool) {
-	c.mortal = b
+func (c *animation) GetOffset() pixel.Vec { return c.cpos }
+func (c *animation) GetSpeed() float64 {
+	// GetSpeed() gibt die Geschwindigkeit in Pixel/Sekunde zurück.
+	return c.speed
 }
-
-func (c *character) GetSpriteCoords() pixel.Rect {
+func (c *animation) GetSprite() *pixel.Sprite {
+	// GetSprite() liefert den aktuell zu zeichnenden Sprite.
+	return c.sprite
+}
+func (c *animation) GetSpriteCoords() pixel.Rect {
 	var v pixel.Vec
 	var n int
 
 	// Wenn die Figur ruht, wird stets derselbe Sprite in Blickrichtung der Figur ausgegeben.
 	// Bewegt sie sich, so wird die Animation durchlaufen.
 
-	if c.invisible {
+	if !c.visible {
 		return pixel.R(16*16, 22*16, 17*16, 23*16)
 	}
 
 	if c.direction == Stay {
 		v = c.spos
 	} else {
-
 		if c.direction == Up {
 			v = c.upos
 			n = c.un
@@ -424,6 +408,10 @@ func (c *character) GetSpriteCoords() pixel.Rect {
 			v = c.kpos
 			n = c.kn
 		}
+		if c.direction == Intro {
+			v = c.ipos
+			n = c.in
+		}
 
 		// Es wird geprüft, ob das nächste Sprite der Animation gezeigt werden muss, falls es eines gibt.
 		if n > 1 {
@@ -432,7 +420,7 @@ func (c *character) GetSpriteCoords() pixel.Rect {
 				c.lastUpdate = timenow
 				if c.count == n { // rechts angekommen in der Bildfolge --> Rückwärtsgang
 					if c.direction == Dead {
-						c.invisible = true
+						c.visible = false
 					} else if c.seesaw {
 						c.count--
 						c.delta = -1
@@ -448,24 +436,27 @@ func (c *character) GetSpriteCoords() pixel.Rect {
 			}
 		}
 
-		v.X += c.cwidth.X * float64(c.count-1)
+		switch c.direction {
+		case Dead:
+			v.X += c.kwidth.X * float64(c.count-1)
+		case Intro:
+			v.X += c.iwidth.X * float64(c.count-1)
+		default:
+			v.X += c.cwidth.X * float64(c.count-1)
+		}
 	}
 
 	return pixel.R(v.X, v.Y, v.X+c.cwidth.X, v.Y+c.cwidth.Y)
 }
-
-func (c *character) Update() {
-	c.sprite.Set(characterImage, c.GetSpriteCoords())
+func (c *animation) IncSpeed() {
+	c.speed += 10
 }
-
-// GetSprite() liefert den aktuell zu zeichnenden Sprite.
-func (c *character) GetSprite() *pixel.Sprite {
-	return c.sprite
+func (c *animation) IsVisible() bool {
+	return c.visible
 }
-
-// Direction() setzt die Bewegungsrichtung neu.
-// Mögliche Eingabewerte sind Stay, Left, Right, Up, Down.
-func (c *character) Direction(direction int) {
+func (c *animation) SetDirection(direction int) {
+	// SetDirection() setzt die Bewegungsrichtung neu.
+	// Mögliche Eingabewerte sind Stay, Left, Right, Up, Down, Dead.
 	// Im character.png ist bei animierten Charakteren
 	// der zweite Sprite stets für die ruhende Figur.
 	// Es muss dann die Charakterbreite addiert werden.
@@ -490,6 +481,13 @@ func (c *character) Direction(direction int) {
 	}
 	c.direction = direction
 }
+func (c *animation) SetMinPos(v pixel.Vec) {
+	c.pos = v
+}
+func (c *animation) SetVisible(b bool) { c.visible = b }
+func (c *animation) Update() {
+	c.sprite.Set(characterImage, c.GetSpriteCoords())
+}
 
 // init() wird beim Import dieses Packets automatisch ausgeführt.
 // Es lädt die Bilddatei mit den Charakteren in den Speicher.
@@ -509,23 +507,24 @@ func init() {
 	characterImage = pixel.PictureDataFromImage(img)
 
 	// Bomberman Prototyp
-	bm = new(character)
+	bm = new(player)
 	bm.lastUpdate = time.Now().UnixNano()
-	bm.interval = 2e8
+	bm.interval = 3e8
 	bm.life = 3
 	bm.maxBombs = 1
 	bm.power = 1
-	bm.speed = 100
+	bm.speed = 10
 	bm.kick = false
 	bm.mortal = true
 	bm.wallghost = false
 	bm.bombghost = false
-	bm.invisible = false
+	bm.visible = true
 	bm.pos.X = 19
 	bm.pos.Y = 19
 	bm.width.X = 10
 	bm.width.Y = 10
 	bm.direction = Down
+	bm.seesaw = true
 	bm.cwidth.X = 16
 	bm.cwidth.Y = 24
 	bm.count = 2
@@ -547,45 +546,45 @@ func init() {
 	bm.kpos.X = 12 * 16
 	bm.kpos.Y = 360
 	bm.kn = 4
+	bm.kwidth = bm.cwidth
 
 	// Monster Prototyp
-	mo = new(character)
-	mo.lastUpdate = time.Now().UnixNano()
-	mo.interval = 2e8
-	mo.life = 1
-	mo.maxBombs = 0
-	mo.power = 0
-	mo.speed = 100
-	mo.kick = false
-	mo.mortal = true
-	mo.wallghost = false
-	mo.bombghost = false
-	mo.follow = false
-	mo.invisible = false
-	mo.width.X = 10
-	mo.width.Y = 10
-	mo.direction = Down
-	mo.cwidth.X = 16
-	mo.cwidth.Y = 16
-	mo.count = 2
-	mo.delta = 1
-	mo.seesaw = true
-	mo.hasIntro = false
-	mo.spos.X = 304 + 16
-	mo.spos.Y = 368
-	mo.lpos.X = 304
-	mo.lpos.Y = 368
-	mo.ln = 3
-	mo.rpos.X = 304
-	mo.rpos.Y = 368
-	mo.rn = 3
-	mo.upos.X = 304
-	mo.upos.Y = 368
-	mo.un = 3
-	mo.dpos.X = 304
-	mo.dpos.Y = 368
-	mo.dn = 3
-	mo.kpos.X = 304 + 3*16
-	mo.kpos.Y = 23 * 16
-	mo.kn = 7
+	en = new(enemy)
+	en.lastUpdate = time.Now().UnixNano()
+	en.interval = 2e8
+	en.life = 1
+	en.speed = 10
+	en.mortal = true
+	en.wallghost = false
+	en.bombghost = false
+	en.follow = false
+	en.visible = true
+	en.width.X = 10
+	en.width.Y = 10
+	en.direction = Down
+	en.cpos = pixel.V(5, 8)
+	en.cwidth.X = 16
+	en.cwidth.Y = 16
+	en.count = 2
+	en.delta = 1
+	en.seesaw = true
+	en.hasIntro = false
+	en.spos.X = 304 + 16
+	en.spos.Y = 368
+	en.lpos.X = 304
+	en.lpos.Y = 368
+	en.ln = 3
+	en.rpos.X = 304
+	en.rpos.Y = 368
+	en.rn = 3
+	en.upos.X = 304
+	en.upos.Y = 368
+	en.un = 3
+	en.dpos.X = 304
+	en.dpos.Y = 368
+	en.dn = 3
+	en.kpos.X = 304 + 3*16
+	en.kpos.Y = 23 * 16
+	en.kn = 7
+	en.kwidth = en.cwidth
 }

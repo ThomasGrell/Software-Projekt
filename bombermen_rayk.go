@@ -54,8 +54,6 @@ func loadPic(path string) (pixel.Picture, error) {
 
 func showIntro(win *pixelgl.Window) {
 
-	var mat pixel.Matrix
-
 	pic, err := loadPic("graphics/bomberman.png")
 	if err != nil {
 		panic(err)
@@ -68,39 +66,32 @@ func showIntro(win *pixelgl.Window) {
 
 	// Startbild: Zoom in
 	for i := float64(0); i <= 0.5; i = i + 0.01 {
-		mat = pixel.IM
-		mat = mat.Scaled(pixel.ZV, i)
-		mat = mat.Moved(win.Bounds().Center())
-		sprite.Draw(win, mat)
+		sprite.Draw(win, pixel.IM.Scaled(pixel.ZV, i))
 		win.Update()
 	}
 
 	// Startbild: Rotate
 	for i := float64(0); i <= 6.282; i = i + 0.3141 {
-		mat = pixel.IM
-		mat = mat.Scaled(pixel.ZV, 0.5)
-		mat = mat.Rotated(pixel.ZV, i)
-		mat = mat.Moved(win.Bounds().Center())
-		sprite.Draw(win, mat)
+		sprite.Draw(win, pixel.IM.Scaled(pixel.ZV, 0.5).Rotated(pixel.ZV, i))
 		win.Update()
 	}
 }
 
 func fadeOut(win *pixelgl.Window) {
+	imd := imdraw.New(nil)
+	imd.Color = colornames.Black
+	imd.SetColorMask(pixel.Alpha(0.05))
+	imd.Push(pixel.V(-win.Bounds().W()/2, -win.Bounds().H()/2))
+	imd.Push(pixel.V(win.Bounds().W()/2, win.Bounds().H()/2))
+	imd.Rectangle(0)
 	for i := 0; i < 100; i++ {
-		imd := imdraw.New(nil)
-		imd.Color = colornames.Black
-		imd.SetColorMask(pixel.Alpha(0.05))
-		imd.Push(pixel.V(0, 0))
-		imd.Push(pixel.V(win.Bounds().W(), win.Bounds().H()))
-		imd.Rectangle(0)
 		imd.Draw(win)
 		win.Update()
-		time.Sleep(20 * time.Millisecond)
+		time.Sleep(50 * time.Millisecond)
 	}
 }
 
-func die(win *pixelgl.Window, wB character.Character) {
+func die(win *pixelgl.Window, wB character.Player) {
 	var t int
 	wB.DecLife()
 	wB.DecLife()
@@ -116,12 +107,12 @@ func die(win *pixelgl.Window, wB character.Character) {
 		}
 		win.Clear(colornames.Black)
 		wB.Update()
-		wB.GetSprite().Draw(win, pixel.IM.Scaled(pixel.ZV, 9).Moved(wB.GetMinPos()))
+		wB.GetSprite().Draw(win, pixel.IM.Moved(wB.GetMinPos()))
 		win.Update()
 	}
 }
 
-func walkIn(win *pixelgl.Window, wB character.Character) {
+func walkIn(win *pixelgl.Window, wB character.Player) {
 
 	//Figur kommt Betrachter entgegen und wird größer
 	for i := 0.1; i <= 3; i += 0.02 {
@@ -134,19 +125,20 @@ func walkIn(win *pixelgl.Window, wB character.Character) {
 		}
 		win.Clear(colornames.Black)
 		wB.Update()
-		wB.GetSprite().Draw(win, pixel.IM.Scaled(pixel.ZV, i*i).Moved(win.Bounds().Center()))
+		wB.GetSprite().Draw(win, pixel.IM)
+		win.SetMatrix(pixel.IM.Scaled(pixel.ZV, i*i).Moved(win.Bounds().Center()))
 		win.Update()
 	}
 }
 
-func stay(win *pixelgl.Window, wB character.Character) {
+func stay(win *pixelgl.Window, wB character.Player) {
 
 	// Figur steht still da
-	wB.Direction(character.Stay)
+	wB.SetDirection(character.Stay)
 	wB.Update()
 	win.Clear(colornames.Black)
-	wB.SetMinPos(win.Bounds().Center())
-	wB.GetSprite().Draw(win, pixel.IM.Scaled(pixel.ZV, 9).Moved(wB.GetMinPos()))
+	wB.SetMinPos(pixel.V(0, 0))
+	wB.GetSprite().Draw(win, pixel.IM)
 	win.Update()
 	for !win.Pressed(pixelgl.KeyEnter) {
 		if win.Closed() {
@@ -160,16 +152,17 @@ func stay(win *pixelgl.Window, wB character.Character) {
 	}
 
 }
-func walkAway(win *pixelgl.Window, wB character.Character) {
+
+func walkAway(win *pixelgl.Window, wB character.Player) {
 	var t int
 
 	// Figur läuft nach links
 	t = time.Now().Second()
-	wB.Direction(character.Left)
+	wB.SetDirection(character.Left)
 	var dt float64
 	last := time.Now()
 	dt = time.Since(last).Seconds()
-	for time.Now().Second()-t < 3 {
+	for time.Now().Second()-t < 5 {
 		if win.Closed() {
 			break
 		}
@@ -183,25 +176,26 @@ func walkAway(win *pixelgl.Window, wB character.Character) {
 		dt = time.Since(last).Seconds()
 		last = time.Now()
 		wB.SetMinPos(v.Sub(pixel.V(wB.GetSpeed()*dt, 0)))
-		wB.GetSprite().Draw(win, pixel.IM.Scaled(pixel.ZV, 9).Moved(wB.GetMinPos()))
+		wB.GetSprite().Draw(win, pixel.IM.Moved(wB.GetMinPos()))
 		win.Update()
 	}
-
-	// Figur läuft weg und wird kleiner
-	wB.Direction(character.Up)
-	for i := 3.0; i > 0.1; i -= 0.02 {
-		if win.Closed() {
-			break
-		}
-		if win.Pressed(pixelgl.KeyEscape) {
-			win.Destroy()
-			break
-		}
-		wB.Update()
-		win.Clear(colornames.Black)
-		wB.GetSprite().Draw(win, pixel.IM.Scaled(pixel.ZV, i*i).Moved(wB.GetMinPos()))
-		win.Update()
-	}
+	/*
+		// Figur läuft weg und wird kleiner
+		wB.SetDirection(character.Up)
+		for i := 3.0; i > 0.1; i -= 0.02 {
+			if win.Closed() {
+				break
+			}
+			if win.Pressed(pixelgl.KeyEscape) {
+				win.Destroy()
+				break
+			}
+			wB.Update()
+			win.Clear(colornames.Black)
+			wB.GetSprite().Draw(win, pixel.IM.Moved(wB.GetMinPos()))
+			win.SetMatrix(pixel.IM.Scaled(pixel.ZV, i*i))
+			win.Update()
+		}*/
 }
 
 func run() {
@@ -215,13 +209,13 @@ func run() {
 	if err != nil {
 		panic(err)
 	}
+	win.SetMatrix(pixel.IM.Moved(win.Bounds().Center()))
 
 	go playSound("sounds/through space.ogg")
 
 	showIntro(win)
 
-	var wB character.Character
-	wB = character.NewCharacter(character.Snowy)
+	wB := character.NewPlayer(character.RedBomberman)
 
 	time.Sleep(3 * time.Second)
 
@@ -230,6 +224,7 @@ func run() {
 
 	walkIn(win, wB)
 	stay(win, wB)
+	walkAway(win, wB)
 	die(win, wB)
 
 }
