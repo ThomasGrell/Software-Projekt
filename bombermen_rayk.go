@@ -1,7 +1,7 @@
 package main
 
 import (
-	"./character"
+	"github.com/ThomasGrell/Software-Projekt/character"
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/speaker"
 	"github.com/faiface/beep/vorbis"
