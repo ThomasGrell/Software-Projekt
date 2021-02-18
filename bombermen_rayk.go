@@ -1,7 +1,8 @@
 package main
 
 import (
-	"github.com/ThomasGrell/Software-Projekt/character"
+	"./characters"
+	. "./constants"
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/speaker"
 	"github.com/faiface/beep/vorbis"
@@ -91,7 +92,7 @@ func fadeOut(win *pixelgl.Window) {
 	}
 }
 
-func die(win *pixelgl.Window, wB character.Player) {
+func die(win *pixelgl.Window, wB characters.Player) {
 	var t int
 	wB.DecLife()
 	wB.DecLife()
@@ -106,13 +107,13 @@ func die(win *pixelgl.Window, wB character.Player) {
 			break
 		}
 		win.Clear(colornames.Black)
-		wB.Update()
-		wB.GetSprite().Draw(win, pixel.IM.Moved(wB.GetMinPos()))
+		wB.Ani().Update()
+		wB.Ani().GetSprite().Draw(win, pixel.IM.Moved(wB.Ani().GetMinPos()))
 		win.Update()
 	}
 }
 
-func walkIn(win *pixelgl.Window, wB character.Player) {
+func walkIn(win *pixelgl.Window, wB characters.Player) {
 
 	//Figur kommt Betrachter entgegen und wird größer
 	for i := 0.1; i <= 3; i += 0.02 {
@@ -124,21 +125,21 @@ func walkIn(win *pixelgl.Window, wB character.Player) {
 			break
 		}
 		win.Clear(colornames.Black)
-		wB.Update()
-		wB.GetSprite().Draw(win, pixel.IM)
+		wB.Ani().Update()
+		wB.Ani().GetSprite().Draw(win, pixel.IM)
 		win.SetMatrix(pixel.IM.Scaled(pixel.ZV, i*i).Moved(win.Bounds().Center()))
 		win.Update()
 	}
 }
 
-func stay(win *pixelgl.Window, wB character.Player) {
+func stay(win *pixelgl.Window, wB characters.Player) {
 
 	// Figur steht still da
-	wB.SetDirection(character.Stay)
-	wB.Update()
+	wB.Ani().SetDirection(Stay)
+	wB.Ani().Update()
 	win.Clear(colornames.Black)
-	wB.SetMinPos(pixel.V(0, 0))
-	wB.GetSprite().Draw(win, pixel.IM)
+	wB.Ani().SetMinPos(pixel.V(0, 0))
+	wB.Ani().GetSprite().Draw(win, pixel.IM)
 	win.Update()
 	for !win.Pressed(pixelgl.KeyEnter) {
 		if win.Closed() {
@@ -153,12 +154,12 @@ func stay(win *pixelgl.Window, wB character.Player) {
 
 }
 
-func walkAway(win *pixelgl.Window, wB character.Player) {
+func walkAway(win *pixelgl.Window, wB characters.Player) {
 	var t int
 
 	// Figur läuft nach links
 	t = time.Now().Second()
-	wB.SetDirection(character.Left)
+	wB.Ani().SetDirection(Left)
 	var dt float64
 	last := time.Now()
 	dt = time.Since(last).Seconds()
@@ -170,13 +171,13 @@ func walkAway(win *pixelgl.Window, wB character.Player) {
 			win.Destroy()
 			break
 		}
-		wB.Update()
+		wB.Ani().Update()
 		win.Clear(colornames.Black)
-		v := wB.GetMinPos()
+		v := wB.Ani().GetMinPos()
 		dt = time.Since(last).Seconds()
 		last = time.Now()
-		wB.SetMinPos(v.Sub(pixel.V(wB.GetSpeed()*dt, 0)))
-		wB.GetSprite().Draw(win, pixel.IM.Moved(wB.GetMinPos()))
+		wB.Ani().SetMinPos(v.Sub(pixel.V(wB.GetSpeed()*dt, 0)))
+		wB.Ani().GetSprite().Draw(win, pixel.IM.Moved(wB.Ani().GetMinPos()))
 		win.Update()
 	}
 	/*
@@ -215,7 +216,7 @@ func run() {
 
 	showIntro(win)
 
-	wB := character.NewPlayer(character.RedBomberman)
+	wB := characters.NewPlayer(RedBomberman)
 
 	time.Sleep(3 * time.Second)
 
