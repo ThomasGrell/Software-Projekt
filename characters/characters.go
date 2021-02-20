@@ -48,7 +48,6 @@ type character struct {
 
 func NewPlayer(t uint8) *player {
 	c := new(player)
-	c.ani = animations.NewAnimation(t)
 	switch t {
 	case WhiteBomberman, BlackBomberman, BlueBomberman, RedBomberman:
 		*c = *bm
@@ -56,6 +55,7 @@ func NewPlayer(t uint8) *player {
 		*c = *bm
 		c.life = 1
 	}
+	c.ani = animations.NewAnimation(t)
 
 	return c
 }

@@ -60,10 +60,34 @@ type animation struct {
 
 func NewAnimation(t uint8) *animation {
 	c := new(animation)
-	c.lastUpdate = time.Now().UnixNano()
-	c.intervall = 2e8
 
 	switch t {
+	case WhiteBomberman:
+		*c = *bm
+	case BlackBomberman:
+		*c = *bm
+		c.spos.Y = bm.spos.Y - 24
+		c.upos.Y = bm.upos.Y - 24
+		c.dpos.Y = bm.dpos.Y - 24
+		c.lpos.Y = bm.lpos.Y - 24
+		c.rpos.Y = bm.rpos.Y - 24
+		c.kpos.Y = bm.kpos.Y - 24
+	case BlueBomberman:
+		*c = *bm
+		c.spos.Y = bm.spos.Y - 24*2
+		c.upos.Y = bm.upos.Y - 24*2
+		c.dpos.Y = bm.dpos.Y - 24*2
+		c.lpos.Y = bm.lpos.Y - 24*2
+		c.rpos.Y = bm.rpos.Y - 24*2
+		c.kpos.Y = bm.kpos.Y - 24*2
+	case RedBomberman:
+		*c = *bm
+		c.spos.Y = bm.spos.Y - 24*3
+		c.upos.Y = bm.upos.Y - 24*3
+		c.dpos.Y = bm.dpos.Y - 24*3
+		c.lpos.Y = bm.lpos.Y - 24*3
+		c.rpos.Y = bm.rpos.Y - 24*3
+		c.kpos.Y = bm.kpos.Y - 24*3
 	case Balloon:
 		*c = *en
 	case Teddy:
@@ -167,6 +191,9 @@ func NewAnimation(t uint8) *animation {
 		c.kpos.X = 336 + 2*16
 		c.kpos.Y = 224
 	}
+	c.lastUpdate = time.Now().UnixNano()
+	c.intervall = 2e8
+	c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
 	return c
 }
 
@@ -309,6 +336,8 @@ func init() {
 	characterImage = pixel.PictureDataFromImage(img)
 
 	bm = new(animation)
+	bm.lastUpdate = time.Now().UnixNano()
+	bm.intervall = 2e8
 	bm.visible = true
 	bm.pos.X = 19
 	bm.pos.Y = 19
