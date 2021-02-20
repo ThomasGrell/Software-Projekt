@@ -32,8 +32,9 @@ type animation struct {
 	delta  int8      // entweder -1 oder 1 für Animationsreihenfolge vor und zurück
 	seesaw bool      // Bei true geht die Animation hin und her (delta=+1/-1). Bei false werden
 	// die Sprites immer in derselben Reihenfolge durchlaufen (delta=1)
-	hasIntro bool // True, wenn das Monster eine Animation zum Erscheinen hat.
-	visible  bool // Sichtbarer Sprite?
+	hasIntro      bool // True, wenn das Monster eine Animation zum Erscheinen hat.
+	introFinished bool
+	visible       bool // Sichtbarer Sprite?
 
 	direction uint8 // Bewegungsrichtung (siehe oben definierte Konstanten)
 	dn        uint8 // Anzahl der Sprites für Abwärtsbewegung
@@ -62,9 +63,9 @@ func NewAnimation(t uint8) *animation {
 	c := new(animation)
 
 	switch t {
-	case WhiteBomberman:
+	case WhiteBomberman, WhiteBattleman:
 		*c = *bm
-	case BlackBomberman:
+	case BlackBomberman, BlackBattleman:
 		*c = *bm
 		c.spos.Y = bm.spos.Y - 24
 		c.upos.Y = bm.upos.Y - 24
@@ -72,7 +73,7 @@ func NewAnimation(t uint8) *animation {
 		c.lpos.Y = bm.lpos.Y - 24
 		c.rpos.Y = bm.rpos.Y - 24
 		c.kpos.Y = bm.kpos.Y - 24
-	case BlueBomberman:
+	case BlueBomberman, BlueBattleman:
 		*c = *bm
 		c.spos.Y = bm.spos.Y - 24*2
 		c.upos.Y = bm.upos.Y - 24*2
@@ -80,7 +81,7 @@ func NewAnimation(t uint8) *animation {
 		c.lpos.Y = bm.lpos.Y - 24*2
 		c.rpos.Y = bm.rpos.Y - 24*2
 		c.kpos.Y = bm.kpos.Y - 24*2
-	case RedBomberman:
+	case RedBomberman, RedBattleman:
 		*c = *bm
 		c.spos.Y = bm.spos.Y - 24*3
 		c.upos.Y = bm.upos.Y - 24*3
@@ -190,6 +191,195 @@ func NewAnimation(t uint8) *animation {
 		c.rn = 2
 		c.kpos.X = 336 + 2*16
 		c.kpos.Y = 224
+	case YellowBubble:
+		*c = *en
+		c.spos.Y = 7 * 16
+		c.upos.Y = 7 * 16
+		c.dpos.Y = 7 * 16
+		c.lpos.Y = 7 * 16
+		c.rpos.Y = 7 * 16
+		c.kpos.Y = 7 * 16
+	case PinkPopEye:
+		*c = *en
+		c.spos.Y = 6 * 16
+		c.upos.Y = 6 * 16
+		c.dpos.Y = 6 * 16
+		c.lpos.Y = 6 * 16
+		c.rpos.Y = 6 * 16
+		c.kpos.Y = 6 * 16
+	case Fire:
+		*c = *en
+		c.spos.Y = 5 * 16
+		c.upos.Y = 5 * 16
+		c.dpos.Y = 5 * 16
+		c.lpos.Y = 5 * 16
+		c.rpos.Y = 5 * 16
+		c.kpos.Y = 5 * 16
+	case Crocodile:
+		*c = *en
+		c.spos.Y = 4 * 16
+		c.upos.Y = 4 * 16
+		c.dpos.Y = 4 * 16
+		c.lpos.Y = 4 * 16
+		c.rpos.Y = 4 * 16
+		c.kpos.Y = 4 * 16
+		c.kn = 9
+	case Coin:
+		*c = *en
+		c.seesaw = false
+		c.spos.X -= 16
+		c.upos.X -= 16
+		c.dpos.X -= 16
+		c.lpos.X -= 16
+		c.rpos.X -= 16
+		c.spos.Y = 3 * 16
+		c.upos.Y = 3 * 16
+		c.dpos.Y = 3 * 16
+		c.lpos.Y = 3 * 16
+		c.rpos.Y = 3 * 16
+		c.kpos.Y = 3 * 16
+	case Puddle:
+		*c = *en
+		c.spos.Y = 2 * 16
+		c.upos.Y = 2 * 16
+		c.dpos.Y = 2 * 16
+		c.lpos.Y = 2 * 16
+		c.rpos.Y = 2 * 16
+		c.kpos.Y = 2 * 16
+		c.kn = 6
+	case PinkDevil:
+		*c = *en
+		c.spos.X = 0
+		c.dpos.X = 0
+		c.lpos.X = 3 * 16
+		c.upos.X = 6 * 16
+		c.rpos.X = 9 * 16
+		c.kpos.X = 12 * 16
+		c.spos.Y = 17 * 16
+		c.upos.Y = 17 * 16
+		c.dpos.Y = 17 * 16
+		c.lpos.Y = 17 * 16
+		c.rpos.Y = 17 * 16
+		c.kpos.Y = 17 * 16
+	case Penguin:
+		*c = *en
+		c.spos.X = 16
+		c.dpos.X = 0
+		c.lpos.X = 6 * 16
+		c.upos.X = 3 * 16
+		c.rpos.X = 9 * 16
+		c.kpos.X = 12 * 16
+		c.spos.Y = 16 * 16
+		c.upos.Y = 16 * 16
+		c.dpos.Y = 16 * 16
+		c.lpos.Y = 16 * 16
+		c.rpos.Y = 16 * 16
+		c.kpos.Y = 16 * 16
+	case PinkCyclops:
+		*c = *en
+		c.spos.X = 0
+		c.dpos.X = 0
+		c.lpos.X = 0
+		c.upos.X = 0
+		c.rpos.X = 0
+		c.kpos.X = 6 * 16
+		c.spos.Y = 15 * 16
+		c.upos.Y = 15 * 16
+		c.dpos.Y = 15 * 16
+		c.lpos.Y = 15 * 16
+		c.rpos.Y = 15 * 16
+		c.kpos.Y = 15 * 16
+	case RedCyclops:
+		*c = *en
+		c.spos.X = 3 * 16
+		c.dpos.X = 3 * 16
+		c.lpos.X = 3 * 16
+		c.upos.X = 3 * 16
+		c.rpos.X = 3 * 16
+		c.kpos.X = 6 * 16
+		c.spos.Y = 15 * 16
+		c.upos.Y = 15 * 16
+		c.dpos.Y = 15 * 16
+		c.lpos.Y = 15 * 16
+		c.rpos.Y = 15 * 16
+		c.kpos.Y = 15 * 16
+	case BlueRabbit:
+		*c = *en
+		c.spos.X = 0
+		c.dpos.X = 0
+		c.lpos.X = 0
+		c.upos.X = 0
+		c.rpos.X = 0
+		c.kpos.X = 4 * 16
+		c.sn = 4
+		c.un = 4
+		c.dn = 4
+		c.ln = 4
+		c.rn = 4
+		c.kn = 8
+		c.seesaw = false
+		c.spos.Y = 13 * 16
+		c.upos.Y = 13 * 16
+		c.dpos.Y = 13 * 16
+		c.lpos.Y = 13 * 16
+		c.rpos.Y = 13 * 16
+		c.kpos.Y = 13 * 16
+	case PinkFlower:
+		*c = *en
+		c.direction = Intro
+		c.introFinished = false
+		c.hasIntro = true
+		c.ipos.X = 0
+		c.in = 6
+		c.spos.X = 6 * 16
+		c.dpos.X = 6 * 16
+		c.lpos.X = 6 * 16
+		c.upos.X = 6 * 16
+		c.rpos.X = 6 * 16
+		c.kpos.X = 9 * 16
+		c.kn = 12
+		c.seesaw = false
+		c.spos.Y = 12 * 16
+		c.upos.Y = 12 * 16
+		c.dpos.Y = 12 * 16
+		c.lpos.Y = 12 * 16
+		c.rpos.Y = 12 * 16
+		c.kpos.Y = 12 * 16
+		c.ipos.Y = 12 * 16
+	case BlueCyclops:
+		*c = *en
+		c.spos.X = 0
+		c.dpos.X = 0
+		c.lpos.X = 3 * 16
+		c.upos.X = 6 * 16
+		c.rpos.X = 9 * 16
+		c.kpos.X = 0
+		c.kn = 14
+		c.spos.Y = 10 * 16
+		c.upos.Y = 10 * 16
+		c.dpos.Y = 10 * 16
+		c.lpos.Y = 10 * 16
+		c.rpos.Y = 10 * 16
+		c.kpos.Y = 8 * 16
+		c.width = pixel.V(16, 32)
+		c.kwidth = pixel.V(32, 32)
+	case Fireball:
+		*c = *en
+		c.direction = Intro
+		c.introFinished = false
+		c.hasIntro = true
+		c.ipos = pixel.V(0, 0)
+		c.spos = pixel.V(9*16, 0)
+		c.upos = pixel.V(9*16, 0)
+		c.dpos = pixel.V(9*16, 0)
+		c.lpos = pixel.V(9*16, 0)
+		c.rpos = pixel.V(9*16, 0)
+		c.kpos = pixel.V(12*16, 0)
+		c.in = 9
+		c.kn = 8
+		c.width = pixel.V(16, 24)
+		c.iwidth = pixel.V(16, 24)
+		c.kwidth = pixel.V(16, 24)
 	}
 	c.lastUpdate = time.Now().UnixNano()
 	c.intervall = 2e8
@@ -219,6 +409,7 @@ func (c *animation) GetSprite() *pixel.Sprite {
 func (c *animation) GetSpriteCoords() pixel.Rect {
 	var v pixel.Vec
 	var n uint8
+	var width pixel.Vec
 
 	// Wenn die Figur ruht, wird stets derselbe Sprite in Blickrichtung der Figur ausgegeben.
 	// Bewegt sie sich, so wird die Animation durchlaufen.
@@ -258,6 +449,10 @@ func (c *animation) GetSpriteCoords() pixel.Rect {
 			if uint8(c.count) == n { // rechts angekommen in der Bildfolge --> Rückwärtsgang
 				if c.direction == Dead {
 					c.visible = false
+				} else if c.direction == Intro {
+					c.introFinished = true
+					c.direction = Stay
+					c.count = 0
 				} else if c.seesaw {
 					c.count--
 					c.delta = -1
@@ -274,15 +469,19 @@ func (c *animation) GetSpriteCoords() pixel.Rect {
 		switch c.direction {
 		case Dead:
 			v.X += c.kwidth.X * float64(c.count-1)
+			width = c.kwidth
 		case Intro:
 			v.X += c.iwidth.X * float64(c.count-1)
+			width = c.iwidth
 		default:
 			v.X += c.cwidth.X * float64(c.count-1)
+			width = c.width
 		}
 	}
 
-	return pixel.R(v.X, v.Y, v.X+c.cwidth.X, v.Y+c.cwidth.Y)
+	return pixel.R(v.X, v.Y, v.X+width.X, v.Y+width.Y)
 }
+func (c *animation) IntroFinished() bool { return c.introFinished }
 func (c *animation) IsVisible() bool {
 	return c.visible
 }
@@ -336,8 +535,6 @@ func init() {
 	characterImage = pixel.PictureDataFromImage(img)
 
 	bm = new(animation)
-	bm.lastUpdate = time.Now().UnixNano()
-	bm.intervall = 2e8
 	bm.visible = true
 	bm.pos.X = 19
 	bm.pos.Y = 19
@@ -371,8 +568,6 @@ func init() {
 
 	// Monster Prototyp
 	en = new(animation)
-	en.lastUpdate = time.Now().UnixNano()
-	en.intervall = 2e8
 	en.visible = true
 	en.width.X = 10
 	en.width.Y = 10

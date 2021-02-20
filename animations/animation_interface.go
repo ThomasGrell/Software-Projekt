@@ -12,7 +12,8 @@ type Animation interface {
 	GetOffset() pixel.Vec    // liefert Verschiebevektor zwischen Sprite und Kollisionsbox
 	GetSprite() *pixel.Sprite
 	GetSpriteCoords() pixel.Rect // Rechteckkoordinaten des Sprites im Spriteimage
-	IsVisible() bool
+	IntroFinished() bool         //
+	IsVisible() bool             // Gestorbene Charaktere werden unsichtbar gesetzt.
 	SetDirection(uint8)
 	SetIntervall(int64)
 	SetMinPos(pixel.Vec) // Platziert den Sprite auf dem Spielfeld

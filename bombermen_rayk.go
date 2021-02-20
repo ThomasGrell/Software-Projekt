@@ -92,7 +92,7 @@ func fadeOut(win *pixelgl.Window) {
 	}
 }
 
-func die(win *pixelgl.Window, wB characters.Player) {
+func die(win *pixelgl.Window, wB characters.Enemy) {
 	var t int
 	wB.DecLife()
 	wB.DecLife()
@@ -113,7 +113,7 @@ func die(win *pixelgl.Window, wB characters.Player) {
 	}
 }
 
-func walkIn(win *pixelgl.Window, wB characters.Player) {
+func walkIn(win *pixelgl.Window, wB characters.Enemy) {
 
 	//Figur kommt Betrachter entgegen und wird größer
 	for i := 0.1; i <= 3; i += 0.02 {
@@ -132,7 +132,7 @@ func walkIn(win *pixelgl.Window, wB characters.Player) {
 	}
 }
 
-func stay(win *pixelgl.Window, wB characters.Player) {
+func stay(win *pixelgl.Window, wB characters.Enemy) {
 
 	// Figur steht still da
 	wB.Ani().SetDirection(Stay)
@@ -154,7 +154,7 @@ func stay(win *pixelgl.Window, wB characters.Player) {
 
 }
 
-func walkAway(win *pixelgl.Window, wB characters.Player) {
+func walkAway(win *pixelgl.Window, wB characters.Enemy) {
 	var t int
 
 	// Figur läuft nach links
@@ -163,7 +163,7 @@ func walkAway(win *pixelgl.Window, wB characters.Player) {
 	var dt float64
 	last := time.Now()
 	dt = time.Since(last).Seconds()
-	for time.Now().Second()-t < 5 {
+	for time.Now().Second()-t < 4 {
 		if win.Closed() {
 			break
 		}
@@ -216,7 +216,7 @@ func run() {
 
 	showIntro(win)
 
-	wB := characters.NewPlayer(RedBomberman)
+	wB := characters.NewEnemy(Fireball)
 
 	time.Sleep(3 * time.Second)
 

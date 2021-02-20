@@ -21,6 +21,22 @@ const (
 	Spinner        = 17
 	YellowPopEye   = 18
 	Snowy          = 19
+	YellowBubble   = 20
+	PinkPopEye     = 21
+	Fire           = 22
+	Crocodile      = 23
+	Coin           = 24
+	Puddle         = 25
+	PinkDevil      = 26
+	Penguin        = 27
+	PinkCyclops    = 28
+	RedCyclops     = 29
+	BlueRabbit     = 30
+	PinkFlower     = 31
+	BlueCyclops    = 32
+	Fireball       = 33
+	Dragon         = 34
+	BlueDevil      = 35
 )
 
 const (

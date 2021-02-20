@@ -61,32 +61,22 @@ func NewPlayer(t uint8) *player {
 }
 func NewEnemy(t uint8) *enemy {
 	c := new(enemy)
+	*c = *en
 	c.ani = animations.NewAnimation(t)
 	switch t {
 	case Balloon:
-		*c = *en
 	case Teddy:
-		*c = *en
 		c.follow = true
 	case Ghost:
-		*c = *en
 		c.wallghost = true
 	case Drop:
-		*c = *en
 	case Pinky:
-		*c = *en
 	case BluePopEye:
-		*c = *en
 	case Jellyfish:
-		*c = *en
 	case Snake:
-		*c = *en
 	case Spinner:
-		*c = *en
 	case YellowPopEye:
-		*c = *en
 	case Snowy:
-		*c = *en
 	}
 	return c
 }
