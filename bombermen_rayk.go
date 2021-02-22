@@ -3,6 +3,7 @@ package main
 import (
 	"./characters"
 	. "./constants"
+	"./sounds"
 	"github.com/faiface/beep"
 	"github.com/faiface/beep/speaker"
 	"github.com/faiface/beep/vorbis"
@@ -212,7 +213,10 @@ func run() {
 	}
 	win.SetMatrix(pixel.IM.Moved(win.Bounds().Center()))
 
-	go playSound("sounds/through space.ogg")
+	//go playSound("soundeffects/through space.ogg")
+
+	s1 := sounds.NewSound(ThroughSpace)
+	go s1.PlaySound()
 
 	showIntro(win)
 
@@ -222,10 +226,11 @@ func run() {
 
 	fadeOut(win)
 	win.SetSmooth(false)
-
 	walkIn(win, wB)
 	stay(win, wB)
 	walkAway(win, wB)
+	s2 := sounds.NewSound(Deathflash)
+	go s2.PlaySound()
 	die(win, wB)
 
 }

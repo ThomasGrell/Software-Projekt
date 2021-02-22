@@ -48,3 +48,9 @@ const (
 	Dead  = 5
 	Intro = 6
 )
+
+const (
+	ThroughSpace = 1
+
+	Deathflash = 100
+)
