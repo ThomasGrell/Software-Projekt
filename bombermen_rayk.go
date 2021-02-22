@@ -4,42 +4,14 @@ import (
 	"./characters"
 	. "./constants"
 	"./sounds"
-	"github.com/faiface/beep"
-	"github.com/faiface/beep/speaker"
-	"github.com/faiface/beep/vorbis"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/imdraw"
 	"github.com/faiface/pixel/pixelgl"
 	"golang.org/x/image/colornames"
 	"image/png"
-	"log"
 	"os"
 	"time"
 )
-
-func playSound(path string) {
-	f, err := os.Open(path)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	streamer, format, err := vorbis.Decode(f)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer streamer.Close()
-
-	err = speaker.Init(format.SampleRate, format.SampleRate.N(time.Second/10))
-	if err != nil {
-		return
-	}
-
-	done := make(chan bool)
-	speaker.Play(beep.Seq(streamer, beep.Callback(func() {
-		done <- true
-	})))
-	<-done
-}
 
 func loadPic(path string) (pixel.Picture, error) {
 	file, err := os.Open(path)
@@ -232,7 +204,6 @@ func run() {
 	s2 := sounds.NewSound(Deathflash)
 	go s2.PlaySound()
 	die(win, wB)
-
 }
 
 func main() {

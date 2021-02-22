@@ -43,16 +43,11 @@ func (s *sound) PlaySound() {
 		log.Fatal(err)
 	}
 
-	streamer, format, err := vorbis.Decode(f)
+	streamer, _, err := vorbis.Decode(f)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer streamer.Close()
-
-	err = speaker.Init(format.SampleRate, format.SampleRate.N(time.Second/10))
-	if err != nil {
-		return
-	}
 
 	speaker.Play(beep.Seq(streamer, beep.Callback(func() {
 		s.done <- true
@@ -68,4 +63,12 @@ func (s *sound) PlaySound() {
 
 func (s *sound) StopMusic() {
 	s.quit <- true
+}
+
+func init() {
+	sr := beep.SampleRate(44100)
+	err := speaker.Init(sr, sr.N(time.Second/10))
+	if err != nil {
+		return
+	}
 }
