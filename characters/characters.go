@@ -9,6 +9,7 @@ import (
 	//"time"
 	"../animations"
 	. "../constants"
+	"github.com/faiface/pixel"
 	//	"github.com/faiface/pixel/pixelgl"
 	//	"golang.org/x/image/colornames"
 )
@@ -37,11 +38,13 @@ type enemy struct {
 	follow bool // Folgt einem Spieler
 }
 type character struct {
-	bombghost bool   // kann durch Bomben laufen
-	mortal    bool   // Sterblichkeit
-	wallghost bool   // kann durch Wände laufen
-	life      uint8  // verbleibende Anzahl der Leben
-	points    uint32 // Punkte
+	minPos    pixel.Vec // Kollisionsbox unten links
+	width     pixel.Vec // Kollisionsbox Breite/Höhe
+	bombghost bool      // kann durch Bomben laufen
+	mortal    bool      // Sterblichkeit
+	wallghost bool      // kann durch Wände laufen
+	life      uint8     // verbleibende Anzahl der Leben
+	points    uint32    // Punkte
 	speed     float64
 	ani       animations.Animation
 }
@@ -55,28 +58,40 @@ func NewPlayer(t uint8) *player {
 		*c = *bm
 		c.life = 1
 	}
-	c.ani = animations.NewAnimation(t)
+	c.ani = animations.NewEnhancedAnimation(t)
 
 	return c
 }
 func NewEnemy(t uint8) *enemy {
 	c := new(enemy)
 	*c = *en
-	c.ani = animations.NewAnimation(t)
 	switch t {
 	case Balloon:
+		c.ani = animations.NewBasicAnimation(t)
 	case Teddy:
+		c.ani = animations.NewBasicAnimation(t)
 		c.follow = true
 	case Ghost:
+		c.ani = animations.NewBasicAnimation(t)
 		c.wallghost = true
 	case Drop:
+		c.ani = animations.NewBasicAnimation(t)
 	case Pinky:
+		c.ani = animations.NewBasicAnimation(t)
 	case BluePopEye:
+		c.ani = animations.NewBasicAnimation(t)
 	case Jellyfish:
+		c.ani = animations.NewBasicAnimation(t)
 	case Snake:
+		c.ani = animations.NewBasicAnimation(t)
 	case Spinner:
+		c.ani = animations.NewBasicAnimation(t)
 	case YellowPopEye:
+		c.ani = animations.NewBasicAnimation(t)
 	case Snowy:
+		c.ani = animations.NewEnhancedAnimation(t)
+	case BlueRabbit:
+		c.ani = animations.NewBasicAnimation(t)
 	}
 	return c
 }
@@ -119,8 +134,15 @@ func (c *character) DecSpeed() {
 	}
 }
 func (c *character) GetPoints() uint32 { return c.points }
+func (c *character) GetPos() pixel.Vec { return c.minPos }
+func (c *character) GetMovedPos() pixel.Vec {
+	return c.minPos.Add(pixel.V(c.width.X, c.ani.GetWidth().Y).Scaled(0.5))
+}
 func (c *character) GetSpeed() float64 { return c.speed }
-func (c *character) IncSpeed()         { c.speed += 10 }
+func (c *character) GetWidth() pixel.Vec {
+	return c.width
+}
+func (c *character) IncSpeed() { c.speed += 10 }
 func (c *character) IsAlife() bool {
 	return c.life > 0
 }
@@ -130,6 +152,9 @@ func (c *character) IsMortal() bool {
 }
 func (c *character) IsWallghost() bool   { return c.wallghost }
 func (c *character) SetBombghost(b bool) { c.bombghost = b }
+func (c *character) SetPos(pos pixel.Vec) {
+	c.minPos = pos
+}
 
 // init() wird beim Import dieses Packets automatisch ausgeführt.
 func init() {

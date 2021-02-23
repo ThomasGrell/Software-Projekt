@@ -1,6 +1,9 @@
 package characters
 
-import "../animations"
+import (
+	"../animations"
+	"github.com/faiface/pixel"
+)
 
 type Enemy interface {
 	// Alle Methoden eines Monsters
@@ -30,6 +33,9 @@ type Character interface {
 	DecLife()
 	DecSpeed()
 	GetPoints() uint32
+	GetPos() pixel.Vec
+	GetMovedPos() pixel.Vec
+	GetWidth() pixel.Vec
 	GetSpeed() float64
 	IncSpeed()
 	IsAlife() bool
@@ -37,4 +43,5 @@ type Character interface {
 	IsMortal() bool
 	IsWallghost() bool
 	SetBombghost(bool)
+	SetPos(pixel.Vec)
 }

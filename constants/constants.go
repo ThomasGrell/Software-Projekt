@@ -37,6 +37,20 @@ const (
 	Fireball       = 33
 	Dragon         = 34
 	BlueDevil      = 35
+
+	//Items:
+	Bomb            = 100
+	PowerItem       = 101
+	BombItem        = 102
+	PunchItem       = 103
+	HeartItem       = 104
+	RollerbladeItem = 105
+	SkullItem       = 106
+	WallghostItem   = 107
+	BombghostItem   = 108
+	LifeItem        = 109
+	Exit            = 110
+	KickItem        = 111
 )
 
 const (

@@ -2,21 +2,30 @@ package animations
 
 import "github.com/faiface/pixel"
 
-// Definition der Bewegungsrichtungen
+/*
+Vor.: Die Nummer der Animation wird als uint8 übergeben.
+Eff.: Ein Animationsobjekt wird geliefert, dessen Aussehen nicht bewegungsrichtungsabhängig ist. Gut geeignet für
+	  einfache Monster und Items.
+	  *basicAnimation erfüllt das Interface Animation
+NewBasicAnimation() *basicAnimation
+
+Vor.: Die Nummer der Animation wird als uint8 übergeben.
+Eff.: Ein Animationsobjekt wird geliefert, dessen Aussehen bewegungsrichtungsabhängig ist. Gut geeignet für
+	  komplexe Monster und Bomberman.
+	  *enhancedAnimation erfüllt das Interface Animation
+NewEnhancedAnimation() *enhancedAnimation
+*/
 
 type Animation interface {
 	Die()
-	GetCenterPos() pixel.Vec // Koordinaten der Mitte der Kollisionsbox im Spielfeld
-	GetMaxPos() pixel.Vec    // rechte obere Ecke der Kollisionsbox im Spielfeld
-	GetMinPos() pixel.Vec    // linke untere Ecke der Kollisionsbox im Spielfeld
-	GetOffset() pixel.Vec    // liefert Verschiebevektor zwischen Sprite und Kollisionsbox
+	GetCenter() pixel.Vec // Koordinaten der Mitte der Kollisionsbox im Spielfeld
+	GetWidth() pixel.Vec  // rechte obere Ecke der Kollisionsbox im Spielfeld
 	GetSprite() *pixel.Sprite
 	GetSpriteCoords() pixel.Rect // Rechteckkoordinaten des Sprites im Spriteimage
 	IntroFinished() bool         //
 	IsVisible() bool             // Gestorbene Charaktere werden unsichtbar gesetzt.
 	SetDirection(uint8)
 	SetIntervall(int64)
-	SetMinPos(pixel.Vec) // Platziert den Sprite auf dem Spielfeld
 	SetVisible(bool)
 	Update()
 }

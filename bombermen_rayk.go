@@ -81,7 +81,7 @@ func die(win *pixelgl.Window, wB characters.Enemy) {
 		}
 		win.Clear(colornames.Black)
 		wB.Ani().Update()
-		wB.Ani().GetSprite().Draw(win, pixel.IM.Moved(wB.Ani().GetMinPos()))
+		wB.Ani().GetSprite().Draw(win, pixel.IM.Moved(wB.GetMovedPos()))
 		win.Update()
 	}
 }
@@ -99,7 +99,7 @@ func walkIn(win *pixelgl.Window, wB characters.Enemy) {
 		}
 		win.Clear(colornames.Black)
 		wB.Ani().Update()
-		wB.Ani().GetSprite().Draw(win, pixel.IM)
+		wB.Ani().GetSprite().Draw(win, pixel.IM.Moved(wB.GetMovedPos()))
 		win.SetMatrix(pixel.IM.Scaled(pixel.ZV, i*i).Moved(win.Bounds().Center()))
 		win.Update()
 	}
@@ -111,8 +111,8 @@ func stay(win *pixelgl.Window, wB characters.Enemy) {
 	wB.Ani().SetDirection(Stay)
 	wB.Ani().Update()
 	win.Clear(colornames.Black)
-	wB.Ani().SetMinPos(pixel.V(0, 0))
-	wB.Ani().GetSprite().Draw(win, pixel.IM)
+	wB.SetPos(pixel.V(0, 0))
+	wB.Ani().GetSprite().Draw(win, pixel.IM.Moved(wB.GetMovedPos()))
 	win.Update()
 	for !win.Pressed(pixelgl.KeyEnter) {
 		if win.Closed() {
@@ -146,11 +146,11 @@ func walkAway(win *pixelgl.Window, wB characters.Enemy) {
 		}
 		wB.Ani().Update()
 		win.Clear(colornames.Black)
-		v := wB.Ani().GetMinPos()
+		v := wB.GetPos()
 		dt = time.Since(last).Seconds()
 		last = time.Now()
-		wB.Ani().SetMinPos(v.Sub(pixel.V(wB.GetSpeed()*dt, 0)))
-		wB.Ani().GetSprite().Draw(win, pixel.IM.Moved(wB.Ani().GetMinPos()))
+		wB.SetPos(v.Sub(pixel.V(wB.GetSpeed()*dt, 0)))
+		wB.Ani().GetSprite().Draw(win, pixel.IM.Moved(wB.GetMovedPos()))
 		win.Update()
 	}
 	/*
@@ -185,14 +185,12 @@ func run() {
 	}
 	win.SetMatrix(pixel.IM.Moved(win.Bounds().Center()))
 
-	//go playSound("soundeffects/through space.ogg")
-
 	s1 := sounds.NewSound(ThroughSpace)
 	go s1.PlaySound()
 
 	showIntro(win)
 
-	wB := characters.NewEnemy(Fireball)
+	wB := characters.NewEnemy(Spinner)
 
 	time.Sleep(3 * time.Second)
 
