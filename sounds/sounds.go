@@ -61,7 +61,7 @@ func (s *sound) PlaySound() {
 	}
 }
 
-func (s *sound) StopMusic() {
+func (s *sound) StopSound() {
 	s.quit <- true
 }
 
