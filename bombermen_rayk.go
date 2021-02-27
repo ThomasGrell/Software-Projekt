@@ -1,6 +1,7 @@
 package main
 
 import (
+	"./animations"
 	"./characters"
 	. "./constants"
 	"./sounds"
@@ -71,6 +72,8 @@ func die(win *pixelgl.Window, wB characters.Enemy) {
 	wB.DecLife()
 	wB.DecLife()
 	t = time.Now().Second()
+	test := animations.NewExplosion(2, 2, 2, 2)
+
 	for time.Now().Second()-t < 5 {
 		if win.Closed() {
 			break
@@ -81,6 +84,9 @@ func die(win *pixelgl.Window, wB characters.Enemy) {
 		}
 		win.Clear(colornames.Black)
 		wB.Ani().Update()
+		test.Update()
+		test.GetSprite().Draw(win, pixel.IM.Moved(test.ToCenter()).Moved(wB.GetMovedPos()))
+
 		wB.Ani().GetSprite().Draw(win, pixel.IM.Moved(wB.GetMovedPos()))
 		win.Update()
 	}
@@ -89,7 +95,7 @@ func die(win *pixelgl.Window, wB characters.Enemy) {
 func walkIn(win *pixelgl.Window, wB characters.Enemy) {
 
 	//Figur kommt Betrachter entgegen und wird größer
-	for i := 0.1; i <= 3; i += 0.02 {
+	for i := 0.1; i <= 2; i += 0.01 {
 		if win.Closed() {
 			break
 		}
@@ -187,14 +193,18 @@ func run() {
 
 	s1 := sounds.NewSound(ThroughSpace)
 	go s1.PlaySound()
+	/*
+		win.Update()
+		time.Sleep(10 * time.Second)
+		showIntro(win)
 
-	showIntro(win)
 
-	wB := characters.NewEnemy(Spinner)
+		time.Sleep(3 * time.Second)
 
-	time.Sleep(3 * time.Second)
+		fadeOut(win)
+	*/
+	wB := characters.NewEnemy(BlueCyclops)
 
-	fadeOut(win)
 	win.SetSmooth(false)
 	walkIn(win, wB)
 	stay(win, wB)

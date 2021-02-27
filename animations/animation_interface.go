@@ -18,12 +18,12 @@ NewEnhancedAnimation() *enhancedAnimation
 
 type Animation interface {
 	Die()
-	GetCenter() pixel.Vec // Koordinaten der Mitte der Kollisionsbox im Spielfeld
-	GetWidth() pixel.Vec  // rechte obere Ecke der Kollisionsbox im Spielfeld
+	ToCenter() pixel.Vec   // Koordinaten der Mitte der Animation im Spielfeld. Bei Explosionen ist dies das Zentrum der Explosion.
+	ToBaseline() pixel.Vec // Vektor zur Verschiebung des Sprites auf die Mitte der Grundlinie der Animation. Bei Explosionen ist dies die Mitte der Grundlinie des Explosionszentrums.
+	GetSize() pixel.Vec    // rechte obere Ecke der Kollisionsbox im Spielfeld
 	GetSprite() *pixel.Sprite
-	GetSpriteCoords() pixel.Rect // Rechteckkoordinaten des Sprites im Spriteimage
-	IntroFinished() bool         //
-	IsVisible() bool             // Gestorbene Charaktere werden unsichtbar gesetzt.
+	IntroFinished() bool //
+	IsVisible() bool     // Gestorbene Charaktere werden unsichtbar gesetzt.
 	SetDirection(uint8)
 	SetIntervall(int64)
 	SetVisible(bool)

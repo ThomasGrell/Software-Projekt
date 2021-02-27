@@ -88,10 +88,37 @@ func NewEnemy(t uint8) *enemy {
 		c.ani = animations.NewBasicAnimation(t)
 	case YellowPopEye:
 		c.ani = animations.NewBasicAnimation(t)
+	case YellowBubble:
+		c.ani = animations.NewBasicAnimation(t)
+	case PinkPopEye:
+		c.ani = animations.NewBasicAnimation(t)
+	case Fire:
+		c.ani = animations.NewBasicAnimation(t)
+	case Crocodile:
+		c.ani = animations.NewBasicAnimation(t)
+	case Coin:
+		c.ani = animations.NewBasicAnimation(t)
+	case Puddle:
+		c.ani = animations.NewBasicAnimation(t)
+	case PinkCyclops:
+		c.ani = animations.NewBasicAnimation(t)
+	case RedCyclops:
+		c.ani = animations.NewBasicAnimation(t)
+	case PinkFlower:
+		c.ani = animations.NewBasicAnimation(t)
+	case Fireball:
+		c.ani = animations.NewBasicAnimation(t)
 	case Snowy:
 		c.ani = animations.NewEnhancedAnimation(t)
 	case BlueRabbit:
 		c.ani = animations.NewBasicAnimation(t)
+	case PinkDevil:
+		c.ani = animations.NewEnhancedAnimation(t)
+	case Penguin:
+		c.ani = animations.NewEnhancedAnimation(t)
+	case BlueCyclops:
+		c.ani = animations.NewEnhancedAnimation(t)
+
 	}
 	return c
 }
@@ -136,7 +163,7 @@ func (c *character) DecSpeed() {
 func (c *character) GetPoints() uint32 { return c.points }
 func (c *character) GetPos() pixel.Vec { return c.minPos }
 func (c *character) GetMovedPos() pixel.Vec {
-	return c.minPos.Add(pixel.V(c.width.X, c.ani.GetWidth().Y).Scaled(0.5))
+	return c.minPos.Add(pixel.V(c.width.X, c.ani.GetSize().Y).Scaled(0.5))
 }
 func (c *character) GetSpeed() float64 { return c.speed }
 func (c *character) GetWidth() pixel.Vec {

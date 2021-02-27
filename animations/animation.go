@@ -3,6 +3,8 @@ package animations
 import (
 	. "../constants"
 	"github.com/faiface/pixel"
+	"github.com/faiface/pixel/pixelgl"
+	"image/color"
 	"image/png"
 	"log"
 	"os"
@@ -87,6 +89,28 @@ type enhancedAnimation struct {
 	iwidth pixel.Vec // Spritegröße für Introanimation
 	kwidth pixel.Vec // Spritegröße für Todesanimation
 }
+type bombAnimation struct {
+
+	// Beim Zünden der Bombe hat sie in die 4 Richtungen ggf. unterschiedliche Ausdehnungen
+	lPower uint8
+	rPower uint8
+	uPower uint8
+	dPower uint8
+
+	canvas *pixelgl.Canvas
+	batch  *pixel.Batch
+	sprite *pixel.Sprite // Zugehöriger Sprite
+
+	lastUpdate int64 // time.Now().UnixNano() des letzten Spritewechsels
+	intervall  int64 // Dauer in Nanosekunden bis zum nächsten Spritewechsel
+
+	count  int8 // Nummer des zuletzt gezeichneten Sprites der Animationssequenz beginnend bei 0
+	delta  int8
+	// die Sprites immer in derselben Reihenfolge durchlaufen (delta=1)
+	visible       bool // Sichtbarer Sprite?
+
+	n         uint8 // Anzahl der Sprites
+}
 
 func NewBasicAnimation(t uint8) *basicAnimation {
 	c := new(basicAnimation)
@@ -143,8 +167,8 @@ func NewBasicAnimation(t uint8) *basicAnimation {
 		*c = *be
 		c.intervall = 2e8
 		c.seesaw = false
-		c.pos.X = 20 * 16
 		c.pos.Y = 15 * 16
+		c.n = 4
 		c.kpos.X = 304 + 4*16
 		c.kpos.Y = 15 * 16
 		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
@@ -395,16 +419,135 @@ func NewEnhancedAnimation(t uint8) *enhancedAnimation {
 	c.intervall = 2e8
 	return c
 }
+func NewExplosion(l,r,u,d uint8) *bombAnimation {
+	b := new(bombAnimation)
+	b.lPower = l
+	b.rPower = r
+	b.uPower = u
+	b.dPower = d
+	b.canvas = pixelgl.NewCanvas(pixel.R(0,0,float64(16*(r+l+1)),float64(16*(u+d+1))))
+	b.sprite = pixel.NewSprite(b.canvas,b.canvas.Bounds())
+	b.batch  = pixel.NewBatch(&pixel.TrianglesData{},itemImage)
+	b.delta = 1
+	b.count = 0
+	b.drawCanvas()
+	b.lastUpdate=time.Now().UnixNano()
+	b.intervall = 2e7
+	b.n = 4
+	b.visible = true
+	return b
+}
+
+func (c *bombAnimation) getSpriteCenter(n uint8) pixel.Vec {
+	return pixel.V(2*16+float64(n)*5*16,8*16)
+}
+func (c *bombAnimation) Die() {
+}
+func (c *bombAnimation) ToCenter() pixel.Vec {
+	return c.canvas.Bounds().Center().Sub(pixel.V(float64(c.lPower)*16+8,float64(c.dPower)*16+8))
+}
+func (c *bombAnimation) ToBaseline() pixel.Vec {
+	return c.ToCenter().Add(pixel.V(0,8))
+}
+func (c *bombAnimation) GetSize() (v pixel.Vec) {
+	return c.canvas.Bounds().Size()
+}
+func (c *bombAnimation) GetSprite() *pixel.Sprite {
+	// GetSprite() liefert den aktuell zu zeichnenden Sprite.
+	return c.sprite
+}
+func (c *bombAnimation) IntroFinished() bool { return true }
+func (c *bombAnimation) IsVisible() bool {return c.visible}
+func (c *bombAnimation) SetDirection(uint8) {}
+func (c *bombAnimation) SetIntervall(i int64) { c.intervall = i }
+func (c *bombAnimation) SetVisible(b bool)    { c.visible = b }
+func (c *bombAnimation) drawCanvas() {
+	c.batch.Clear()
+	c.canvas.Clear(color.Transparent)
+
+	if !c.visible {return}
+
+	w := 16*float64(c.lPower+c.rPower+1)
+	h := 16*float64(c.uPower+c.dPower+1)
+
+	// Zeichne linke Flammenspitze
+	s := pixel.NewSprite(itemImage,pixel.R(float64(c.count)*5*16,8*16,float64(c.count)*5*16+16,9*16))
+	s.Draw(c.batch,pixel.IM.Moved(pixel.V(8,float64(c.dPower)*16+8)))
+
+	// Zeichne untere Flammenspitze
+	s.Set(itemImage,pixel.R(2*16+float64(c.count)*5*16,6*16,2*16+float64(c.count)*5*16+16,7*16))
+	s.Draw(c.batch,pixel.IM.Moved(pixel.V(float64(c.lPower)*16+8,8)))
+
+	// Zeichne obere Flammenspitze
+	s.Set(itemImage,pixel.R(2*16+float64(c.count)*5*16,10*16,3*16+float64(c.count)*5*16,16*11))
+	s.Draw(c.batch,pixel.IM.Moved(pixel.V(float64(c.lPower)*16+8,h-8)))
+
+	// Zeichne rechte Flammenspitze
+	s.Set(itemImage,pixel.R(4*16+float64(c.count)*5*16,8*16,5*16+float64(c.count)*5*16,9*16))
+	s.Draw(c.batch,pixel.IM.Moved(pixel.V(w-8,float64(c.dPower)*16+8)))
+
+	// Zeichne Mitte der Flamme
+	s.Set(itemImage,pixel.R(2*16+float64(c.count)*5*16,8*16,3*16+float64(c.count)*5*16,9*16))
+	s.Draw(c.batch,pixel.IM.Moved(pixel.V(float64(c.lPower*16+8),float64(c.dPower)*16+8)))
+
+	// Zeichne linken Explosionsast
+	for i:=uint8(1); i < c.lPower; i++ {
+		s.Set(itemImage,pixel.R(1*16+float64(c.count)*5*16,8*16,2*16+float64(c.count)*5*16,9*16))
+		s.Draw(c.batch,pixel.IM.Moved(pixel.V(float64(i*16+8),float64(c.dPower)*16+8)))
+	}
+
+	// Zeichne rechten Explosionsast
+	for i:=uint8(1); i < c.rPower; i++ {
+		s.Set(itemImage,pixel.R(3*16+float64(c.count)*5*16,8*16,4*16+float64(c.count)*5*16,9*16))
+		s.Draw(c.batch,pixel.IM.Moved(pixel.V(float64((c.lPower+i)*16+8),float64(c.dPower)*16+8)))
+	}
+
+	// Zeichne unteren Explosionsast
+	for i:=uint8(1); i < c.dPower; i++ {
+		s.Set(itemImage,pixel.R(2*16+float64(c.count)*5*16,7*16,3*16+float64(c.count)*5*16,8*16))
+		s.Draw(c.batch,pixel.IM.Moved(pixel.V(float64(c.lPower*16+8),float64(i*16+8))))
+	}
+
+	// Zeichne oberen Explosionsast
+	for i:=uint8(1); i < c.uPower; i++ {
+		s.Set(itemImage,pixel.R(2*16+float64(c.count)*5*16,9*16,3*16+float64(c.count)*5*16,10*16))
+		s.Draw(c.batch,pixel.IM.Moved(pixel.V(float64(c.lPower*16+8),float64((i+c.dPower)*16+8))))
+	}
+
+	c.batch.Draw(c.canvas)
+}
+func (c *bombAnimation) Update() {
+
+	// Es wird geprüft, ob das nächste Sprite der Animation gezeigt werden muss, falls es eines gibt.
+	timenow := time.Now().UnixNano()
+	if timenow-c.lastUpdate > c.intervall {
+		c.lastUpdate = timenow
+		if c.count == int8(c.n) { // rechts angekommen in der Bildfolge
+			c.delta = -1
+			c.count+=c.delta
+		} else if c.count == 0 && c.delta == -1 {
+			c.visible = false
+		} else {
+			c.count += c.delta
+		}
+	}
+
+	c.drawCanvas()
+	c.sprite.Set(c.canvas, c.canvas.Bounds())
+}
 
 func (c *basicAnimation) Die() {
 	c.count = 1
 	c.delta = 1
 	c.direction = Dead
 }
-func (c *basicAnimation) GetCenter() (v pixel.Vec) {
-	return c.GetWidth().Scaled(0.5)
+func (c *basicAnimation) ToCenter() pixel.Vec {
+	return c.GetSize().Scaled(0.5)
 }
-func (c *basicAnimation) GetWidth() (v pixel.Vec) {
+func (c *basicAnimation) ToBaseline() pixel.Vec {
+	return pixel.V(0,c.GetSize().Y/2)
+}
+func (c *basicAnimation) GetSize() (v pixel.Vec) {
 	switch c.direction {
 	case Dead:
 		return c.kwidth
@@ -418,7 +561,7 @@ func (c *basicAnimation) GetSprite() *pixel.Sprite {
 	// GetSprite() liefert den aktuell zu zeichnenden Sprite.
 	return c.sprite
 }
-func (c *basicAnimation) GetSpriteCoords() pixel.Rect {
+func (c *basicAnimation) getSpriteCoords() pixel.Rect {
 	var v pixel.Vec
 	var n uint8
 	var width pixel.Vec
@@ -494,9 +637,9 @@ func (c *basicAnimation) SetIntervall(i int64) { c.intervall = i }
 func (c *basicAnimation) SetVisible(b bool)    { c.visible = b }
 func (c *basicAnimation) Update() {
 	if c.whatAmI >= Bomb {
-		c.sprite.Set(itemImage, c.GetSpriteCoords())
+		c.sprite.Set(itemImage, c.getSpriteCoords())
 	} else {
-		c.sprite.Set(characterImage, c.GetSpriteCoords())
+		c.sprite.Set(characterImage, c.getSpriteCoords())
 	}
 }
 
@@ -505,10 +648,11 @@ func (c *enhancedAnimation) Die() {
 	c.delta = 1
 	c.direction = Dead
 }
-func (c *enhancedAnimation) GetCenter() (v pixel.Vec) {
-	return c.GetWidth().Scaled(0.5)
+func (c *enhancedAnimation) ToBaseline() pixel.Vec {return pixel.V(0,c.GetSize().Y/2)}
+func (c *enhancedAnimation) ToCenter() pixel.Vec {
+	return c.GetSize().Scaled(0.5)
 }
-func (c *enhancedAnimation) GetWidth() (v pixel.Vec) {
+func (c *enhancedAnimation) GetSize() pixel.Vec {
 	switch c.direction {
 	case Dead:
 		return c.kwidth
@@ -522,7 +666,7 @@ func (c *enhancedAnimation) GetSprite() *pixel.Sprite {
 	// GetSprite() liefert den aktuell zu zeichnenden Sprite.
 	return c.sprite
 }
-func (c *enhancedAnimation) GetSpriteCoords() pixel.Rect {
+func (c *enhancedAnimation) getSpriteCoords() pixel.Rect {
 	var v pixel.Vec
 	var n uint8
 	var width pixel.Vec
@@ -634,8 +778,9 @@ func (c *enhancedAnimation) SetMinPos(v pixel.Vec) {
 func (c *enhancedAnimation) SetIntervall(i int64) { c.intervall = i }
 func (c *enhancedAnimation) SetVisible(b bool)    { c.visible = b }
 func (c *enhancedAnimation) Update() {
-	c.sprite.Set(characterImage, c.GetSpriteCoords())
+	c.sprite.Set(characterImage, c.getSpriteCoords())
 }
+
 func init() {
 	file, err := os.Open("graphics/characters.png")
 	if err != nil {
