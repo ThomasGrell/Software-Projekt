@@ -114,7 +114,7 @@ func walkIn(win *pixelgl.Window, wB characters.Enemy) {
 func stay(win *pixelgl.Window, wB characters.Enemy) {
 
 	// Figur steht still da
-	wB.Ani().SetDirection(Stay)
+	wB.Ani().SetView(Stay)
 	wB.Ani().Update()
 	win.Clear(colornames.Black)
 	wB.SetPos(pixel.V(0, 0))
@@ -138,7 +138,7 @@ func walkAway(win *pixelgl.Window, wB characters.Enemy) {
 
 	// Figur läuft nach links
 	t = time.Now().Second()
-	wB.Ani().SetDirection(Left)
+	wB.Ani().SetView(Left)
 	var dt float64
 	last := time.Now()
 	dt = time.Since(last).Seconds()

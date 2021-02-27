@@ -24,7 +24,7 @@ type Animation interface {
 	GetSprite() *pixel.Sprite
 	IntroFinished() bool //
 	IsVisible() bool     // Gestorbene Charaktere werden unsichtbar gesetzt.
-	SetDirection(uint8)
+	SetView(uint8)
 	SetIntervall(int64)
 	SetVisible(bool)
 	Update()
