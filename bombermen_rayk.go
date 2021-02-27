@@ -85,7 +85,7 @@ func die(win *pixelgl.Window, wB characters.Enemy) {
 		win.Clear(colornames.Black)
 		wB.Ani().Update()
 		test.Update()
-		test.GetSprite().Draw(win, pixel.IM.Moved(test.ToCenter()).Moved(wB.GetMovedPos()))
+		test.GetSprite().Draw(win, pixel.IM.Moved(wB.GetBaselineCenter()).Moved(test.ToBaseline()))
 
 		wB.Ani().GetSprite().Draw(win, pixel.IM.Moved(wB.GetMovedPos()))
 		win.Update()

@@ -39,7 +39,7 @@ type enemy struct {
 }
 type character struct {
 	minPos    pixel.Vec // Kollisionsbox unten links
-	width     pixel.Vec // Kollisionsbox Breite/Höhe
+	size      pixel.Vec // Kollisionsbox Breite/Höhe
 	bombghost bool      // kann durch Bomben laufen
 	mortal    bool      // Sterblichkeit
 	wallghost bool      // kann durch Wände laufen
@@ -160,14 +160,17 @@ func (c *character) DecSpeed() {
 		c.speed -= 10
 	}
 }
+func (c *character) GetBaselineCenter() pixel.Vec {
+	return c.minPos.Add(pixel.V(c.size.X/2, 0))
+}
 func (c *character) GetPoints() uint32 { return c.points }
 func (c *character) GetPos() pixel.Vec { return c.minPos }
 func (c *character) GetMovedPos() pixel.Vec {
-	return c.minPos.Add(pixel.V(c.width.X, c.ani.GetSize().Y).Scaled(0.5))
+	return c.minPos.Add(c.ani.ToBaseline()).Add(pixel.V(c.size.X/2, 0))
 }
 func (c *character) GetSpeed() float64 { return c.speed }
-func (c *character) GetWidth() pixel.Vec {
-	return c.width
+func (c *character) GetSize() pixel.Vec {
+	return c.size
 }
 func (c *character) IncSpeed() { c.speed += 10 }
 func (c *character) IsAlife() bool {

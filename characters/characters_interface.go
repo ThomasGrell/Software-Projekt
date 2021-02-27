@@ -32,10 +32,11 @@ type Character interface {
 	Ani() animations.Animation
 	DecLife()
 	DecSpeed()
+	GetBaselineCenter() pixel.Vec
 	GetPoints() uint32
 	GetPos() pixel.Vec
 	GetMovedPos() pixel.Vec
-	GetWidth() pixel.Vec
+	GetSize() pixel.Vec
 	GetSpeed() float64
 	IncSpeed()
 	IsAlife() bool
