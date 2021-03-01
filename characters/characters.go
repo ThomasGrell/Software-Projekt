@@ -57,6 +57,8 @@ func NewPlayer(t uint8) *player {
 	case WhiteBattleman, BlackBattleman, BlueBattleman, RedBattleman:
 		*c = *bm
 		c.life = 1
+	default:
+		panic("Unknown Player")
 	}
 	c.ani = animations.NewAnimation(t)
 
@@ -96,6 +98,8 @@ func NewEnemy(t uint8) *enemy {
 	case PinkDevil:
 	case Penguin:
 	case BlueCyclops:
+	default:
+		panic ("Unknown Enemy")
 	}
 	return c
 }

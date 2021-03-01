@@ -202,7 +202,7 @@ func run() {
 
 		fadeOut(win)
 	*/
-	wB := characters.NewEnemy(Fireball)
+	wB := characters.NewEnemy(PinkDevil)
 	wB.Ani().SetView(Intro)
 	wB.Ani().Show()
 

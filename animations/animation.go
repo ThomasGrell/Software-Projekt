@@ -62,7 +62,7 @@ type enhancedAnimation struct {
 	rpos pixel.Vec // Pixelgenaue Position des Sprites innerhalb des png für nach rechts bewegenden Charakter
 	upos pixel.Vec // Pixelgenaue Position des Sprites innerhalb des png für nach oben bewegenden Charakter
 }
-type bombAnimation struct {
+type explosionAnimation struct {
 
 	// Beim Zünden der Bombe hat sie in die 4 Richtungen ggf. unterschiedliche Ausdehnungen
 	lPower uint8
@@ -501,14 +501,14 @@ func NewAnimation(t uint8) Animation {
 		c.intervall = 2e8
 		return c
 	default:
-		panic("Unknown BasicAnimation")
+		panic("Unknown Animation")
 	}
 
 	// This line is never reached.
 	return &basicAnimation{}
 }
 func NewExplosion(l, r, u, d uint8) Animation {
-	b := new(bombAnimation)
+	b := new(explosionAnimation)
 	b.lPower = l
 	b.rPower = r
 	b.uPower = u
@@ -526,34 +526,34 @@ func NewExplosion(l, r, u, d uint8) Animation {
 	return b
 }
 
-func (c *bombAnimation) getSpriteCenter(n uint8) pixel.Vec {
+func (c *explosionAnimation) getSpriteCenter(n uint8) pixel.Vec {
 	return pixel.V(2*16+float64(n)*5*16, 8*16)
 }
-func (c *bombAnimation) Die() {
+func (c *explosionAnimation) Die() {
 }
-func (c *bombAnimation) ToCenter() pixel.Vec {
+func (c *explosionAnimation) ToCenter() pixel.Vec {
 	return c.canvas.Bounds().Center().Sub(pixel.V(float64(c.lPower)*16+8, float64(c.dPower)*16+8))
 }
-func (c *bombAnimation) ToBaseline() pixel.Vec {
+func (c *explosionAnimation) ToBaseline() pixel.Vec {
 	return c.ToCenter().Add(pixel.V(0, 8))
 }
-func (c *bombAnimation) GetSize() (v pixel.Vec) {
+func (c *explosionAnimation) GetSize() (v pixel.Vec) {
 	return c.canvas.Bounds().Size()
 }
-func (c *bombAnimation) GetSprite() *pixel.Sprite {
+func (c *explosionAnimation) GetSprite() *pixel.Sprite {
 	// GetSprite() liefert den aktuell zu zeichnenden Sprite.
 	return c.sprite
 }
-func (c *bombAnimation) IntroFinished() bool  { return true }
-func (c *bombAnimation) IsVisible() bool      { return c.visible }
-func (c *bombAnimation) SetView(uint8)        {}
-func (c *bombAnimation) SetIntervall(i int64) { c.intervall = i }
-func (c *bombAnimation) SetVisible(b bool)    { c.visible = b }
-func (c *bombAnimation) Show() {
+func (c *explosionAnimation) IntroFinished() bool  { return true }
+func (c *explosionAnimation) IsVisible() bool      { return c.visible }
+func (c *explosionAnimation) SetView(uint8)        {}
+func (c *explosionAnimation) SetIntervall(i int64) { c.intervall = i }
+func (c *explosionAnimation) SetVisible(b bool)    { c.visible = b }
+func (c *explosionAnimation) Show() {
 	c.visible = true
 	c.lastUpdate = time.Now().UnixNano()
 }
-func (c *bombAnimation) drawCanvas() {
+func (c *explosionAnimation) drawCanvas() {
 	c.batch.Clear()
 	c.canvas.Clear(color.Transparent)
 
@@ -610,7 +610,7 @@ func (c *bombAnimation) drawCanvas() {
 
 	c.batch.Draw(c.canvas)
 }
-func (c *bombAnimation) Update() {
+func (c *explosionAnimation) Update() {
 	if !c.visible {
 		return
 	}
