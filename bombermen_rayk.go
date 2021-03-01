@@ -202,8 +202,8 @@ func run() {
 
 		fadeOut(win)
 	*/
-	wB := characters.NewEnemy(BlueCyclops)
-	wB.Ani().SetView(Down)
+	wB := characters.NewEnemy(Fireball)
+	wB.Ani().SetView(Intro)
 	wB.Ani().Show()
 
 	win.SetSmooth(false)

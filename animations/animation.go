@@ -32,6 +32,7 @@ type basicAnimation struct {
 	delta  int8 // entweder -1 oder 1 für Animationsreihenfolge vor und zurück
 	seesaw bool // Bei true geht die Animation hin und her (delta=+1/-1). Bei false werden
 	// die Sprites immer in derselben Reihenfolge durchlaufen (delta=1)
+	hasIntro      bool
 	introFinished bool
 	visible       bool // Sichtbarer Sprite?
 
@@ -297,15 +298,14 @@ func NewAnimation(t uint8) Animation {
 		*c = *be
 		c.view = Intro
 		c.introFinished = false
-		c.ipos.X = 0
+		c.hasIntro = true
+		c.pos = pixel.V(6*16, 12*16)
+		c.ipos = pixel.V(0, 12*16)
+		c.kpos = pixel.V(9*16, 12*16)
+		c.iwidth = pixel.V(16, 16)
 		c.in = 6
-		c.pos.X = 6 * 16
-		c.kpos.X = 9 * 16
 		c.kn = 12
-		c.seesaw = false
-		c.pos.Y = 12 * 16
-		c.kpos.Y = 12 * 16
-		c.ipos.Y = 12 * 16
+		c.seesaw = true
 		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
 		c.intervall = 2e8
 		c.lastUpdate = time.Now().UnixNano()
@@ -316,6 +316,7 @@ func NewAnimation(t uint8) Animation {
 		*c = *be
 		c.view = Intro
 		c.introFinished = false
+		c.hasIntro = true
 		c.ipos = pixel.V(0, 0)
 		c.pos = pixel.V(9*16, 0)
 		c.kpos = pixel.V(12*16, 0)
@@ -667,12 +668,15 @@ func (c *basicAnimation) getSpriteCoords() pixel.Rect {
 	case Dead:
 		v = c.kpos
 		n = c.kn
+		width = c.kwidth
 	case Intro:
 		v = c.ipos
 		n = c.in
+		width = c.iwidth
 	default:
 		v = c.pos
 		n = c.n
+		width = c.width
 	}
 	// Es wird geprüft, ob das nächste Sprite der Animation gezeigt werden muss, falls es eines gibt.
 	if n > 1 {
@@ -685,7 +689,10 @@ func (c *basicAnimation) getSpriteCoords() pixel.Rect {
 				} else if c.view == Intro {
 					c.introFinished = true
 					c.view = Stay
-					c.count = 0
+					c.count = 1
+					v = c.pos
+					n = c.n
+					width = c.width
 				} else if c.seesaw {
 					c.count--
 					c.delta = -1
@@ -699,17 +706,7 @@ func (c *basicAnimation) getSpriteCoords() pixel.Rect {
 				c.count += c.delta
 			}
 		}
-		switch c.view {
-		case Dead:
-			v.X += c.kwidth.X * float64(c.count-1)
-			width = c.kwidth
-		case Intro:
-			v.X += c.iwidth.X * float64(c.count-1)
-			width = c.iwidth
-		default:
-			v.X += c.width.X * float64(c.count-1)
-			width = c.width
-		}
+		v.X += width.X * float64(c.count-1)
 	}
 
 	return pixel.R(v.X, v.Y, v.X+width.X, v.Y+width.Y)
@@ -721,7 +718,16 @@ func (c *basicAnimation) IsVisible() bool {
 func (c *basicAnimation) SetView(view uint8) {
 	// SetView() setzt den View neu.
 	// Mögliche Eingabewerte sind Stay, Left, Right, Up, Down, Dead, Intro.
+	if view == Intro {
+		if c.hasIntro {
+			c.introFinished = false
+		} else {
+			c.introFinished = true
+			view = Stay
+		}
+	}
 	c.view = view
+	c.count = 1
 }
 func (c *basicAnimation) SetIntervall(i int64) { c.intervall = i }
 func (c *basicAnimation) SetVisible(b bool)    { c.visible = b }
@@ -834,6 +840,14 @@ func (c *enhancedAnimation) SetView(view uint8) {
 			}
 		}
 	}
+	if view == Intro {
+		if c.hasIntro {
+			c.introFinished = false
+		} else {
+			c.introFinished = true
+			view = Stay
+		}
+	}
 	c.view = view
 	c.count = 1
 }
@@ -918,6 +932,7 @@ func init() {
 	en.count = 2
 	en.delta = 1
 	en.seesaw = true
+	en.hasIntro = false
 	en.introFinished = true
 	en.pos.X = 304
 	en.pos.Y = 368
@@ -941,16 +956,17 @@ func init() {
 	// Monster Prototyp
 
 	be = new(basicAnimation)
-	be.visible = false
-	be.view = Stay
-	be.width = pixel.V(16, 16)
-	be.count = 2
+	be.count = 1
 	be.delta = 1
 	be.seesaw = true
+	be.visible = false
+	be.hasIntro = false
 	be.introFinished = true
+	be.view = Stay
+	be.width = pixel.V(16, 16)
+	be.kwidth = pixel.V(16, 16)
 	be.pos = pixel.V(304, 23*16)
-	be.n = 3
 	be.kpos = pixel.V(304+3*16, 23*16)
+	be.n = 3
 	be.kn = 7
-	be.kwidth = be.width
 }
