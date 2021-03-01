@@ -9,4 +9,6 @@
 - soundeffects: Soundeffekte und Musik im OGG-Format mit Samplerate von 41 kHz
 - constants: Definition von allgemeinen Konstanten zur Identifizierung von Enemies, Bombermen, Items etc.
 
+
+
 bomberman_rayk.go:  Testfile für Grafik, Sound etc.
