@@ -67,19 +67,19 @@ func fadeOut(win *pixelgl.Window) {
 }
 
 func die(win *pixelgl.Window, wB characters.Enemy) {
-	var t int
-	wB.DecLife()
-	wB.DecLife()
-	wB.DecLife()
-	t = time.Now().Second()
-	test := animations.NewExplosion(2, 2, 2, 2)
 
-	for time.Now().Second()-t < 5 {
+	wB.DecLife()
+	wB.DecLife()
+	wB.DecLife()
+	last := time.Now()
+	test := animations.NewExplosion(4, 4, 4, 4)
+	test.Show()
+
+	for time.Since(last).Seconds() < 5 {
 		if win.Closed() {
 			break
 		}
 		if win.Pressed(pixelgl.KeyEscape) {
-			win.Destroy()
 			break
 		}
 		win.Clear(colornames.Black)
@@ -113,7 +113,6 @@ func walkIn(win *pixelgl.Window, wB characters.Enemy) {
 
 func stay(win *pixelgl.Window, wB characters.Enemy) {
 
-	// Figur steht still da
 	wB.Ani().SetView(Stay)
 	wB.Ani().Update()
 	win.Clear(colornames.Black)
@@ -204,6 +203,8 @@ func run() {
 		fadeOut(win)
 	*/
 	wB := characters.NewEnemy(BlueCyclops)
+	wB.Ani().SetView(Down)
+	wB.Ani().Show()
 
 	win.SetSmooth(false)
 	walkIn(win, wB)
@@ -212,6 +213,7 @@ func run() {
 	s2 := sounds.NewSound(Deathflash)
 	go s2.PlaySound()
 	die(win, wB)
+	win.Destroy()
 }
 
 func main() {

@@ -27,5 +27,6 @@ type Animation interface {
 	SetView(uint8)
 	SetIntervall(int64)
 	SetVisible(bool)
+	Show()
 	Update()
 }

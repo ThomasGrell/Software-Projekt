@@ -58,67 +58,44 @@ func NewPlayer(t uint8) *player {
 		*c = *bm
 		c.life = 1
 	}
-	c.ani = animations.NewEnhancedAnimation(t)
+	c.ani = animations.NewAnimation(t)
 
 	return c
 }
 func NewEnemy(t uint8) *enemy {
 	c := new(enemy)
 	*c = *en
+	c.ani = animations.NewAnimation(t)
+
 	switch t {
 	case Balloon:
-		c.ani = animations.NewBasicAnimation(t)
 	case Teddy:
-		c.ani = animations.NewBasicAnimation(t)
 		c.follow = true
 	case Ghost:
-		c.ani = animations.NewBasicAnimation(t)
 		c.wallghost = true
 	case Drop:
-		c.ani = animations.NewBasicAnimation(t)
 	case Pinky:
-		c.ani = animations.NewBasicAnimation(t)
 	case BluePopEye:
-		c.ani = animations.NewBasicAnimation(t)
 	case Jellyfish:
-		c.ani = animations.NewBasicAnimation(t)
 	case Snake:
-		c.ani = animations.NewBasicAnimation(t)
 	case Spinner:
-		c.ani = animations.NewBasicAnimation(t)
 	case YellowPopEye:
-		c.ani = animations.NewBasicAnimation(t)
 	case YellowBubble:
-		c.ani = animations.NewBasicAnimation(t)
 	case PinkPopEye:
-		c.ani = animations.NewBasicAnimation(t)
 	case Fire:
-		c.ani = animations.NewBasicAnimation(t)
 	case Crocodile:
-		c.ani = animations.NewBasicAnimation(t)
 	case Coin:
-		c.ani = animations.NewBasicAnimation(t)
 	case Puddle:
-		c.ani = animations.NewBasicAnimation(t)
 	case PinkCyclops:
-		c.ani = animations.NewBasicAnimation(t)
 	case RedCyclops:
-		c.ani = animations.NewBasicAnimation(t)
 	case PinkFlower:
-		c.ani = animations.NewBasicAnimation(t)
 	case Fireball:
-		c.ani = animations.NewBasicAnimation(t)
+		c.ani.SetView(Intro)
 	case Snowy:
-		c.ani = animations.NewEnhancedAnimation(t)
 	case BlueRabbit:
-		c.ani = animations.NewBasicAnimation(t)
 	case PinkDevil:
-		c.ani = animations.NewEnhancedAnimation(t)
 	case Penguin:
-		c.ani = animations.NewEnhancedAnimation(t)
 	case BlueCyclops:
-		c.ani = animations.NewEnhancedAnimation(t)
-
 	}
 	return c
 }
