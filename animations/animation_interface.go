@@ -4,16 +4,14 @@ import "github.com/faiface/pixel"
 
 /*
 Vor.: Die Nummer der Animation wird als uint8 übergeben.
-Eff.: Ein Animationsobjekt wird geliefert, dessen Aussehen nicht bewegungsrichtungsabhängig ist. Gut geeignet für
-	  einfache Monster und Items.
-	  *basicAnimation erfüllt das Interface Animation
-NewBasicAnimation() *basicAnimation
+Eff.: Ein Animationsobjekt wird geliefert.
+NewAnimation() Animation
 
-Vor.: Die Nummer der Animation wird als uint8 übergeben.
-Eff.: Ein Animationsobjekt wird geliefert, dessen Aussehen bewegungsrichtungsabhängig ist. Gut geeignet für
-	  komplexe Monster und Bomberman.
-	  *enhancedAnimation erfüllt das Interface Animation
-NewEnhancedAnimation() *enhancedAnimation
+Vor.: Die Ausdehnung der Explosion in 4 Richtungen wird übergeben.
+Eff.: Ein Explosionsobjekt wird geliefert. Die Views Up, Down etc. sind irrelevant. Ebenso die Methoden Die() und SetView().
+	  Eine Explosion wird mit Show() gestartet.
+NewExplosion(l, r, u, d uint8) Animation
+
 */
 
 type Animation interface {
