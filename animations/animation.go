@@ -87,6 +87,141 @@ type explosionAnimation struct {
 
 func NewAnimation(t uint8) Animation {
 	switch t {
+	case WhiteBomberman, WhiteBattleman:
+		c := new(enhancedAnimation)
+		c.whatAmI = t
+		*c = *bm
+		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.lastUpdate = time.Now().UnixNano()
+		c.intervall = 2e8
+		return c
+	case BlackBomberman, BlackBattleman:
+		c := new(enhancedAnimation)
+		c.whatAmI = t
+		*c = *bm
+		c.pos.Y = bm.pos.Y - 24
+		c.upos.Y = bm.upos.Y - 24
+		c.dpos.Y = bm.dpos.Y - 24
+		c.lpos.Y = bm.lpos.Y - 24
+		c.rpos.Y = bm.rpos.Y - 24
+		c.kpos.Y = bm.kpos.Y - 24
+		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.lastUpdate = time.Now().UnixNano()
+		c.intervall = 2e8
+		return c
+	case BlueBomberman, BlueBattleman:
+		c := new(enhancedAnimation)
+		c.whatAmI = t
+		*c = *bm
+		c.pos.Y = bm.pos.Y - 24*2
+		c.upos.Y = bm.upos.Y - 24*2
+		c.dpos.Y = bm.dpos.Y - 24*2
+		c.lpos.Y = bm.lpos.Y - 24*2
+		c.rpos.Y = bm.rpos.Y - 24*2
+		c.kpos.Y = bm.kpos.Y - 24*2
+		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.lastUpdate = time.Now().UnixNano()
+		c.intervall = 2e8
+		return c
+	case RedBomberman, RedBattleman:
+		c := new(enhancedAnimation)
+		c.whatAmI = t
+		*c = *bm
+		c.pos.Y = bm.pos.Y - 24*3
+		c.upos.Y = bm.upos.Y - 24*3
+		c.dpos.Y = bm.dpos.Y - 24*3
+		c.lpos.Y = bm.lpos.Y - 24*3
+		c.rpos.Y = bm.rpos.Y - 24*3
+		c.kpos.Y = bm.kpos.Y - 24*3
+		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.lastUpdate = time.Now().UnixNano()
+		c.intervall = 2e8
+		return c
+	case Snowy:
+		c := new(enhancedAnimation)
+		c.whatAmI = t
+		*c = *en
+		c.pos.X = 208 + 16
+		c.pos.Y = 224
+		c.upos.X = 256
+		c.upos.Y = 224
+		c.dpos.X = 208
+		c.dpos.Y = 224
+		c.lpos.X = 304
+		c.lpos.Y = 224
+		c.ln = 2
+		c.rpos.X = 336
+		c.rpos.Y = 224
+		c.rn = 2
+		c.kpos.X = 336 + 2*16
+		c.kpos.Y = 224
+		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.lastUpdate = time.Now().UnixNano()
+		c.intervall = 2e8
+		return c
+	case PinkDevil:
+		c := new(enhancedAnimation)
+		c.whatAmI = t
+		*c = *en
+		c.pos.X = 0
+		c.dpos.X = 0
+		c.lpos.X = 3 * 16
+		c.upos.X = 6 * 16
+		c.rpos.X = 9 * 16
+		c.kpos.X = 12 * 16
+		c.pos.Y = 17 * 16
+		c.upos.Y = 17 * 16
+		c.dpos.Y = 17 * 16
+		c.lpos.Y = 17 * 16
+		c.rpos.Y = 17 * 16
+		c.kpos.Y = 17 * 16
+		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.lastUpdate = time.Now().UnixNano()
+		c.intervall = 2e8
+		return c
+	case Penguin:
+		c := new(enhancedAnimation)
+		c.whatAmI = t
+		*c = *en
+		c.pos.X = 16
+		c.dpos.X = 0
+		c.lpos.X = 6 * 16
+		c.upos.X = 3 * 16
+		c.rpos.X = 9 * 16
+		c.kpos.X = 12 * 16
+		c.pos.Y = 16 * 16
+		c.upos.Y = 16 * 16
+		c.dpos.Y = 16 * 16
+		c.lpos.Y = 16 * 16
+		c.rpos.Y = 16 * 16
+		c.kpos.Y = 16 * 16
+		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.lastUpdate = time.Now().UnixNano()
+		c.intervall = 2e8
+		return c
+	case BlueCyclops:
+		c := new(enhancedAnimation)
+		c.whatAmI = t
+		*c = *en
+		c.pos.X = 0
+		c.dpos.X = 0
+		c.lpos.X = 3 * 16
+		c.upos.X = 6 * 16
+		c.rpos.X = 9 * 16
+		c.kpos.X = 0
+		c.kn = 14
+		c.pos.Y = 10 * 16
+		c.upos.Y = 10 * 16
+		c.dpos.Y = 10 * 16
+		c.lpos.Y = 10 * 16
+		c.rpos.Y = 10 * 16
+		c.kpos.Y = 8 * 16
+		c.width = pixel.V(16, 32)
+		c.kwidth = pixel.V(32, 32)
+		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.lastUpdate = time.Now().UnixNano()
+		c.intervall = 2e8
+		return c
 	case Balloon:
 		c := new(basicAnimation)
 		c.whatAmI = t
@@ -365,140 +500,185 @@ func NewAnimation(t uint8) Animation {
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
-	case WhiteBomberman, WhiteBattleman:
-		c := new(enhancedAnimation)
+	case PunchItem:
+		c := new(basicAnimation)
 		c.whatAmI = t
-		*c = *bm
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
-		c.lastUpdate = time.Now().UnixNano()
-		c.intervall = 2e8
-		return c
-	case BlackBomberman, BlackBattleman:
-		c := new(enhancedAnimation)
-		c.whatAmI = t
-		*c = *bm
-		c.pos.Y = bm.pos.Y - 24
-		c.upos.Y = bm.upos.Y - 24
-		c.dpos.Y = bm.dpos.Y - 24
-		c.lpos.Y = bm.lpos.Y - 24
-		c.rpos.Y = bm.rpos.Y - 24
-		c.kpos.Y = bm.kpos.Y - 24
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
-		c.lastUpdate = time.Now().UnixNano()
-		c.intervall = 2e8
-		return c
-	case BlueBomberman, BlueBattleman:
-		c := new(enhancedAnimation)
-		c.whatAmI = t
-		*c = *bm
-		c.pos.Y = bm.pos.Y - 24*2
-		c.upos.Y = bm.upos.Y - 24*2
-		c.dpos.Y = bm.dpos.Y - 24*2
-		c.lpos.Y = bm.lpos.Y - 24*2
-		c.rpos.Y = bm.rpos.Y - 24*2
-		c.kpos.Y = bm.kpos.Y - 24*2
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
-		c.lastUpdate = time.Now().UnixNano()
-		c.intervall = 2e8
-		return c
-	case RedBomberman, RedBattleman:
-		c := new(enhancedAnimation)
-		c.whatAmI = t
-		*c = *bm
-		c.pos.Y = bm.pos.Y - 24*3
-		c.upos.Y = bm.upos.Y - 24*3
-		c.dpos.Y = bm.dpos.Y - 24*3
-		c.lpos.Y = bm.lpos.Y - 24*3
-		c.rpos.Y = bm.rpos.Y - 24*3
-		c.kpos.Y = bm.kpos.Y - 24*3
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
-		c.lastUpdate = time.Now().UnixNano()
-		c.intervall = 2e8
-		return c
-	case Snowy:
-		c := new(enhancedAnimation)
-		c.whatAmI = t
-		*c = *en
-		c.pos.X = 208 + 16
-		c.pos.Y = 224
-		c.upos.X = 256
-		c.upos.Y = 224
-		c.dpos.X = 208
-		c.dpos.Y = 224
-		c.lpos.X = 304
-		c.lpos.Y = 224
-		c.ln = 2
-		c.rpos.X = 336
-		c.rpos.Y = 224
-		c.rn = 2
-		c.kpos.X = 336 + 2*16
-		c.kpos.Y = 224
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
-		c.lastUpdate = time.Now().UnixNano()
-		c.intervall = 2e8
-		return c
-	case PinkDevil:
-		c := new(enhancedAnimation)
-		c.whatAmI = t
-		*c = *en
-		c.pos.X = 0
-		c.dpos.X = 0
-		c.lpos.X = 3 * 16
-		c.upos.X = 6 * 16
-		c.rpos.X = 9 * 16
-		c.kpos.X = 12 * 16
-		c.pos.Y = 17 * 16
-		c.upos.Y = 17 * 16
-		c.dpos.Y = 17 * 16
-		c.lpos.Y = 17 * 16
-		c.rpos.Y = 17 * 16
-		c.kpos.Y = 17 * 16
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
-		c.lastUpdate = time.Now().UnixNano()
-		c.intervall = 2e8
-		return c
-	case Penguin:
-		c := new(enhancedAnimation)
-		c.whatAmI = t
-		*c = *en
-		c.pos.X = 16
-		c.dpos.X = 0
-		c.lpos.X = 6 * 16
-		c.upos.X = 3 * 16
-		c.rpos.X = 9 * 16
-		c.kpos.X = 12 * 16
-		c.pos.Y = 16 * 16
-		c.upos.Y = 16 * 16
-		c.dpos.Y = 16 * 16
-		c.lpos.Y = 16 * 16
-		c.rpos.Y = 16 * 16
-		c.kpos.Y = 16 * 16
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
-		c.lastUpdate = time.Now().UnixNano()
-		c.intervall = 2e8
-		return c
-	case BlueCyclops:
-		c := new(enhancedAnimation)
-		c.whatAmI = t
-		*c = *en
-		c.pos.X = 0
-		c.dpos.X = 0
-		c.lpos.X = 3 * 16
-		c.upos.X = 6 * 16
-		c.rpos.X = 9 * 16
-		c.kpos.X = 0
-		c.kn = 14
-		c.pos.Y = 10 * 16
-		c.upos.Y = 10 * 16
-		c.dpos.Y = 10 * 16
-		c.lpos.Y = 10 * 16
-		c.rpos.Y = 10 * 16
-		c.kpos.Y = 8 * 16
-		c.width = pixel.V(16, 32)
+		c.view = Stay
+		c.intervall = 1e8
+		c.visible = true
+		c.count = 1
+		c.delta = 1
+		c.pos = pixel.V(15*16, 4*16)
+		c.kpos = pixel.V(0, 4*16)
+		c.n = 2
+		c.kn = 7
+		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(itemImage, characterImage.Bounds())
+		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
-		c.intervall = 2e8
+		return c
+	case HeartItem:
+		c := new(basicAnimation)
+		c.whatAmI = t
+		c.view = Stay
+		c.intervall = 1e8
+		c.visible = true
+		c.count = 1
+		c.delta = 1
+		c.pos = pixel.V(17*16, 3*16)
+		c.kpos = pixel.V(0, 4*16)
+		c.n = 2
+		c.kn = 7
+		c.width = pixel.V(16, 16)
+		c.kwidth = pixel.V(32, 32)
+		c.sprite = pixel.NewSprite(itemImage, characterImage.Bounds())
+		c.seesaw = true
+		c.lastUpdate = time.Now().UnixNano()
+		return c
+	case RollerbladeItem:
+		c := new(basicAnimation)
+		c.whatAmI = t
+		c.view = Stay
+		c.intervall = 1e8
+		c.visible = true
+		c.count = 1
+		c.delta = 1
+		c.pos = pixel.V(17*16, 2*16)
+		c.kpos = pixel.V(0, 4*16)
+		c.n = 2
+		c.kn = 7
+		c.width = pixel.V(16, 16)
+		c.kwidth = pixel.V(32, 32)
+		c.sprite = pixel.NewSprite(itemImage, characterImage.Bounds())
+		c.seesaw = true
+		c.lastUpdate = time.Now().UnixNano()
+		return c
+	case SkullItem:
+		c := new(basicAnimation)
+		c.whatAmI = t
+		c.view = Stay
+		c.intervall = 1e8
+		c.visible = true
+		c.count = 1
+		c.delta = 1
+		c.pos = pixel.V(19*16, 4*16)
+		c.kpos = pixel.V(0, 4*16)
+		c.n = 2
+		c.kn = 7
+		c.width = pixel.V(16, 16)
+		c.kwidth = pixel.V(32, 32)
+		c.sprite = pixel.NewSprite(itemImage, characterImage.Bounds())
+		c.seesaw = true
+		c.lastUpdate = time.Now().UnixNano()
+		return c
+	case WallghostItem:
+		c := new(basicAnimation)
+		c.whatAmI = t
+		c.view = Stay
+		c.intervall = 1e8
+		c.visible = true
+		c.count = 1
+		c.delta = 1
+		c.pos = pixel.V(19*16, 3*16)
+		c.kpos = pixel.V(0, 4*16)
+		c.n = 2
+		c.kn = 7
+		c.width = pixel.V(16, 16)
+		c.kwidth = pixel.V(32, 32)
+		c.sprite = pixel.NewSprite(itemImage, characterImage.Bounds())
+		c.seesaw = true
+		c.lastUpdate = time.Now().UnixNano()
+		return c
+	case BombghostItem:
+		c := new(basicAnimation)
+		c.whatAmI = t
+		c.view = Stay
+		c.intervall = 1e8
+		c.visible = true
+		c.count = 1
+		c.delta = 1
+		c.pos = pixel.V(19*16, 2*16)
+		c.kpos = pixel.V(0, 4*16)
+		c.n = 2
+		c.kn = 7
+		c.width = pixel.V(16, 16)
+		c.kwidth = pixel.V(32, 32)
+		c.sprite = pixel.NewSprite(itemImage, characterImage.Bounds())
+		c.seesaw = true
+		c.lastUpdate = time.Now().UnixNano()
+		return c
+	case LifeItem:
+		c := new(basicAnimation)
+		c.whatAmI = t
+		c.view = Stay
+		c.intervall = 1e8
+		c.visible = true
+		c.count = 1
+		c.delta = 1
+		c.pos = pixel.V(21*16, 3*16)
+		c.kpos = pixel.V(0, 4*16)
+		c.n = 2
+		c.kn = 7
+		c.width = pixel.V(16, 16)
+		c.kwidth = pixel.V(32, 32)
+		c.sprite = pixel.NewSprite(itemImage, characterImage.Bounds())
+		c.seesaw = true
+		c.lastUpdate = time.Now().UnixNano()
+		return c
+	case Exit:
+		c := new(basicAnimation)
+		c.whatAmI = t
+		c.view = Stay
+		c.intervall = 1e8
+		c.visible = true
+		c.count = 1
+		c.delta = 1
+		c.pos = pixel.V(21*16, 2*16)
+		c.kpos = pixel.V(0, 4*16)
+		c.n = 2
+		c.kn = 7
+		c.width = pixel.V(16, 16)
+		c.kwidth = pixel.V(32, 32)
+		c.sprite = pixel.NewSprite(itemImage, characterImage.Bounds())
+		c.seesaw = true
+		c.lastUpdate = time.Now().UnixNano()
+		return c
+	case KickItem:
+		c := new(basicAnimation)
+		c.whatAmI = t
+		c.view = Stay
+		c.intervall = 1e8
+		c.visible = true
+		c.count = 1
+		c.delta = 1
+		c.pos = pixel.V(23*16, 4*16)
+		c.kpos = pixel.V(0, 4*16)
+		c.n = 2
+		c.kn = 7
+		c.width = pixel.V(16, 16)
+		c.kwidth = pixel.V(32, 32)
+		c.sprite = pixel.NewSprite(itemImage, characterImage.Bounds())
+		c.seesaw = true
+		c.lastUpdate = time.Now().UnixNano()
+		return c
+	case Bomb:
+		c := new(basicAnimation)
+		c.whatAmI = t
+		c.view = Stay
+		c.intervall = 1e8
+		c.visible = true
+		c.count = 1
+		c.delta = 1
+		c.pos = pixel.V(9*16, 17*16)
+		c.kpos = pixel.V(0, 4*16)
+		c.n = 3
+		c.kn = 7
+		c.width = pixel.V(16, 16)
+		c.kwidth = pixel.V(32, 32)
+		c.sprite = pixel.NewSprite(itemImage, characterImage.Bounds())
+		c.seesaw = true
+		c.lastUpdate = time.Now().UnixNano()
 		return c
 	default:
 		panic("Unknown Animation")
@@ -633,6 +813,9 @@ func (c *explosionAnimation) Update() {
 }
 
 func (c *basicAnimation) Die() {
+	if c.whatAmI == Bomb {
+		c.visible = false
+	} // Explosion einer Bombe benötigt eine spezielle Explosionsroutine, keine Standard-Todessequenz
 	c.count = 1
 	c.delta = 1
 	c.view = Dead
