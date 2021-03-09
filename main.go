@@ -1,12 +1,14 @@
 package main
 
 import (
-	"./arena"
+	"github.com/ThomasGrell/Software-Projekt/arena"
+	"github.com/ThomasGrell/Software-Projekt/characters"
+	. "github.com/ThomasGrell/Software-Projekt/constants"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	"golang.org/x/image/colornames"
 	"image"
-	_ "image/png"
+	//"image/png"
 	"os"
 )
 
@@ -37,44 +39,41 @@ func fun() {
 	if err != nil {
 		panic(err)
 	}
-	charactersPic, err := loadPicture("graphics/characters.png")
-	if err != nil {
-		panic(err)
-	}
-	whiteBomberman := pixel.NewSprite(charactersPic, pixel.R(0, 361, 16, 385))
+	/*	charactersPic, err := loadPicture("graphics/characters.png")
+		if err != nil {
+			panic(err)
+		}
+	*/whiteBomberman := characters.NewPlayer(WhiteBomberman)
+	whiteBomberman.Ani().Show()
 	mat := pixel.IM
 	mat = mat.Moved(pixel.V(winSizeX/2, winSizeY/2))
 	mat = mat.ScaledXY(win.Bounds().Center(), pixel.V(3.3, 3.3))
 
 	win.Clear(colornames.Whitesmoke)
 	arena.Draw(win)
-	whiteBomberman.Draw(win, mat)
+	whiteBomberman.Ani().Update()
 
 	for !win.Closed() && !win.Pressed(pixelgl.KeyEscape) {
 		if win.Pressed(pixelgl.KeyRight) {
 			mat = mat.Moved(pixel.V(tileSize, 0))
-			win.Clear(colornames.Whitesmoke)
-			arena.Draw(win)
-			whiteBomberman.Draw(win, mat)
+			whiteBomberman.Ani().SetView(Right)
 		}
 		if win.Pressed(pixelgl.KeyLeft) {
 			mat = mat.Moved(pixel.V(-tileSize, 0))
-			win.Clear(colornames.Whitesmoke)
-			arena.Draw(win)
-			whiteBomberman.Draw(win, mat)
+			whiteBomberman.Ani().SetView(Left)
 		}
 		if win.Pressed(pixelgl.KeyUp) {
 			mat = mat.Moved(pixel.V(0, tileSize))
-			win.Clear(colornames.Whitesmoke)
-			arena.Draw(win)
-			whiteBomberman.Draw(win, mat)
+			whiteBomberman.Ani().SetView(Up)
 		}
 		if win.Pressed(pixelgl.KeyDown) {
 			mat = mat.Moved(pixel.V(0, -tileSize))
-			win.Clear(colornames.Whitesmoke)
-			arena.Draw(win)
-			whiteBomberman.Draw(win, mat)
+			whiteBomberman.Ani().SetView(Down)
 		}
+		win.Clear(colornames.Whitesmoke)
+		arena.Draw(win)
+		whiteBomberman.Ani().Update()
+		whiteBomberman.Ani().GetSprite().Draw(win, mat)
 		win.Update()
 	}
 }
