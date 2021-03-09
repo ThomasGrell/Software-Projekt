@@ -11,7 +11,6 @@ Vor.: Die Ausdehnung der Explosion in 4 Richtungen wird übergeben.
 Eff.: Ein Explosionsobjekt wird geliefert. Die Views Up, Down etc. sind irrelevant. Ebenso die Methoden Die() und SetView().
 	  Eine Explosion wird mit Show() gestartet.
 NewExplosion(l, r, u, d uint8) Animation
-
 */
 
 type Animation interface {

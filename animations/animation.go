@@ -956,8 +956,8 @@ func (c *enhancedAnimation) getSpriteCoords() pixel.Rect {
 		n = c.ln
 		width = c.width
 	case Right:
-		v = c.lpos
-		n = c.ln
+		v = c.rpos
+		n = c.rn
 		width = c.width
 	case Dead:
 		v = c.kpos
@@ -1031,8 +1031,10 @@ func (c *enhancedAnimation) SetView(view uint8) {
 			view = Stay
 		}
 	}
-	c.view = view
-	c.count = 1
+	if c.view != view {
+		c.view = view
+		c.count = 1
+	}
 }
 func (c *enhancedAnimation) Update() {
 	r := c.getSpriteCoords()

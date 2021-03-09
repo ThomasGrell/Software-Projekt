@@ -99,7 +99,7 @@ func NewEnemy(t uint8) *enemy {
 	case Penguin:
 	case BlueCyclops:
 	default:
-		panic ("Unknown Enemy")
+		panic("Unknown Enemy")
 	}
 	return c
 }
