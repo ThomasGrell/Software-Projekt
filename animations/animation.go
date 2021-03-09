@@ -1,7 +1,7 @@
 package animations
 
 import (
-	. "../constants"
+	. "github.com/ThomasGrell/Software-Projekt/constants"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	"image/color"

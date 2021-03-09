@@ -1,7 +1,7 @@
 package characters
 
 import (
-	"../animations"
+	"github.com/ThomasGrell/Software-Projekt/animations"
 	"github.com/faiface/pixel"
 )
 

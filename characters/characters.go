@@ -7,8 +7,8 @@ import (
 	//"log"
 	//"os"
 	//"time"
-	"../animations"
-	. "../constants"
+	"github.com/ThomasGrell/Software-Projekt/animations"
+	. "github.com/ThomasGrell/Software-Projekt/constants"
 	"github.com/faiface/pixel"
 	//	"github.com/faiface/pixel/pixelgl"
 	//	"golang.org/x/image/colornames"
@@ -99,7 +99,7 @@ func NewEnemy(t uint8) *enemy {
 	case Penguin:
 	case BlueCyclops:
 	default:
-		panic ("Unknown Enemy")
+		panic("Unknown Enemy")
 	}
 	return c
 }
