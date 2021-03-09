@@ -3,6 +3,7 @@ package items
 
 import (
 	"../animations"
+	"../characters"
 )
 
 
@@ -41,9 +42,13 @@ type Item interface{
 	 */
 	IsDestroyable () bool
 	
+	SetVisible(b bool)
+	
+	IsVisible() bool
+	
 }
 
-type bombe interface {
+type Bombe interface {
 	
 	/*	Vor.: -
 	 * 	Eff.: Falls das Objekt keinen Besitzer hat ist das Tupel false,nil geliefert.

@@ -21,28 +21,25 @@ type data struct {
 
 type bombe struct {
 	data
-	owner *characters.Player	// Bombenbesitzer
+	owner characters.Player	// Bombenbesitzer
 	power float64				// Wirkungsradius der Bomben
 }
 
 func NewItem (t uint8) *data {
 	var item = new(data)
-	(*item).ani = NewAnimation(t)		
+	(*item).ani = animations.NewAnimation(t)		
 	((*item).ani).Show()				
-	((*item).ani).SetVisible(false)			// Zu Anfang unsichtbar
 	return item
 }
 
-func NewBomb (p *characters.Player) *bombe {
+func NewBomb (p characters.Player) *bombe {
 	var bomb = new(bombe)
 	(*bomb).owner = p
-	(*bomb).power = p.GetPower()
-	(*bomb).ani = NewAnimation(Bomb)
-	((*bomb).ani).Show()					// Sofort sichtbar
+	(*bomb).power = float64(p.GetPower())
+	(*bomb).ani = animations.NewAnimation(Bomb)
+	((*bomb).ani).Show()
 	return bomb
 }
-
-func (item *data) Sichtbar 
 
 func (item *data) SetDestroyable (b bool) {
 	(*item).destroyable = b
@@ -56,14 +53,22 @@ func (item *data) Ani() animations.Animation {
 	return (*item).ani
 }
 
+func (item *data) SetVisible(b bool) {
+	((*item).ani).SetVisible(b)
+}
+
+func (item *data) IsVisible() bool {
+	return ((*item).ani).IsVisible()
+}
+
 
 //------------------ Funktionen für Bomben -----------------------------
 
-func (item *bombe) Owner () (bool,*characters.Player) {
+func (item *bombe) Owner () (bool,characters.Player) {
 	return (*item).owner!=nil,(*item).owner
 }
 
-func (item *bombe) SetOwner (player *characters.Player) {
+func (item *bombe) SetOwner (player characters.Player) {
 	(*item).owner = player
 }
 
