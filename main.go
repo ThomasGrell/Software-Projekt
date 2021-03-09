@@ -30,7 +30,7 @@ func fun() {
 	var winSizeX float64 = 816
 	var winSizeY float64 = 720
 	var tileSize float64 = 8
-	var item items.Bombe
+	var slice []items.Bombe
 
 	wincfg := pixelgl.WindowConfig{
 		Title:  "Bomberman 2021",
@@ -79,20 +79,21 @@ func fun() {
 			whiteBomberman.Ani().SetView(Down)
 		}
 		if win.Pressed(pixelgl.KeyB) {
-			println("hier!!!!")
+			var item items.Bombe
 			item = items.NewBomb(characters.Player(whiteBomberman))
+			slice=append(slice,item)
 		}
-		if item!=nil {
-			item.Draw(win)
-		}
+		
 		win.Clear(colornames.Whitesmoke)
 		arena.Draw(win)
 		//whiteBomberman.Ani().Update()
 		//whiteBomberman.Ani().GetSprite().Draw(win, mat)
-		whiteBomberman.Draw(win)
-		if item!=nil {
-			item.Draw(win)
+		for _,item :=range(slice) {
+				item.(items.Bombe).Draw(win)
 		}
+		whiteBomberman.Draw(win)
+		
+
 		win.Update()
 	}
 }
