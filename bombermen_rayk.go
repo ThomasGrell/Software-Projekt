@@ -14,6 +14,8 @@ import (
 	"time"
 )
 
+//Push-Test
+
 func loadPic(path string) (pixel.Picture, error) {
 	file, err := os.Open(path)
 	if err != nil {
