@@ -1031,8 +1031,10 @@ func (c *enhancedAnimation) SetView(view uint8) {
 			view = Stay
 		}
 	}
-	c.view = view
-	c.count = 1
+	if c.view != view {
+		c.view = view
+		c.count = 1
+	}
 }
 func (c *enhancedAnimation) Update() {
 	r := c.getSpriteCoords()
