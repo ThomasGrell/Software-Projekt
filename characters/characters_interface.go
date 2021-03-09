@@ -16,6 +16,7 @@ type Player interface {
 	Character
 	AddPoints(uint32)
 	GetMaxBombs() uint8
+	GetPower () uint8
 	GetWins() uint8
 	IncLife()
 	IncMaxBombs()
