@@ -732,6 +732,7 @@ func (c *explosionAnimation) SetVisible(b bool)    { c.visible = b }
 func (c *explosionAnimation) Show() {
 	c.visible = true
 	c.lastUpdate = time.Now().UnixNano()
+	c.Update()
 }
 func (c *explosionAnimation) drawCanvas() {
 	c.batch.Clear()
@@ -917,6 +918,7 @@ func (c *basicAnimation) SetVisible(b bool)    { c.visible = b }
 func (c *basicAnimation) Show() {
 	c.visible = true
 	c.lastUpdate = time.Now().UnixNano()
+	c.Update()
 }
 func (c *basicAnimation) Update() {
 	r := c.getSpriteCoords()

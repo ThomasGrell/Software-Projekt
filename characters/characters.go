@@ -112,6 +112,7 @@ func (c *player) AddPoints(p uint32) {
 	c.points += p
 }
 func (c *player) GetMaxBombs() uint8 { return c.maxBombs }
+func (c *player) GetPower() uint8    { return c.power }
 func (c *player) GetWins() uint8     { return c.wins }
 func (c *player) IncLife() {
 	c.life++
