@@ -1,16 +1,15 @@
 package main
 
 import (
-	"./arena"
-	"./characters"
-	. "./constants"
+	"github.com/ThomasGrell/Software-Projekt/arena"
+	"github.com/ThomasGrell/Software-Projekt/characters"
+	. "github.com/ThomasGrell/Software-Projekt/constants"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	"golang.org/x/image/colornames"
 	"image"
 	//"image/png"
 	"os"
-	"./items"
 )
 
 func loadPicture(path string) (pixel.Picture, error) {
@@ -30,7 +29,6 @@ func fun() {
 	var winSizeX float64 = 816
 	var winSizeY float64 = 720
 	var tileSize float64 = 8
-	var item items.Bombe
 
 	wincfg := pixelgl.WindowConfig{
 		Title:  "Bomberman 2021",
@@ -45,54 +43,37 @@ func fun() {
 		if err != nil {
 			panic(err)
 		}
-	*/
-	//var whiteBomberman characters.Player 
-	//var whiteBomberman characters.Player 
-	whiteBomberman := characters.NewPlayer(WhiteBomberman)
+	*/whiteBomberman := characters.NewPlayer(WhiteBomberman)
 	whiteBomberman.Ani().Show()
 	mat := pixel.IM
 	mat = mat.Moved(pixel.V(winSizeX/2, winSizeY/2))
 	mat = mat.ScaledXY(win.Bounds().Center(), pixel.V(3.3, 3.3))
-	whiteBomberman.MoveTo(pixel.V(winSizeX/2, winSizeY/2))
-	whiteBomberman.SetScale(3.3)
 
 	win.Clear(colornames.Whitesmoke)
 	arena.Draw(win)
-	//whiteBomberman.Ani().Update()
+	whiteBomberman.Ani().Update()
 
 	for !win.Closed() && !win.Pressed(pixelgl.KeyEscape) {
 		if win.Pressed(pixelgl.KeyRight) {
-			//mat = mat.Moved(pixel.V(tileSize, 0))
-			whiteBomberman.MoveTo(pixel.V(tileSize,0))
+			mat = mat.Moved(pixel.V(tileSize, 0))
 			whiteBomberman.Ani().SetView(Right)
 		}
 		if win.Pressed(pixelgl.KeyLeft) {
-			whiteBomberman.MoveTo(pixel.V(-tileSize,0))
+			mat = mat.Moved(pixel.V(-tileSize, 0))
 			whiteBomberman.Ani().SetView(Left)
 		}
 		if win.Pressed(pixelgl.KeyUp) {
-			whiteBomberman.MoveTo(pixel.V(0,tileSize))
+			mat = mat.Moved(pixel.V(0, tileSize))
 			whiteBomberman.Ani().SetView(Up)
 		}
 		if win.Pressed(pixelgl.KeyDown) {
-			whiteBomberman.MoveTo(pixel.V(0,-tileSize))
+			mat = mat.Moved(pixel.V(0, -tileSize))
 			whiteBomberman.Ani().SetView(Down)
-		}
-		if win.Pressed(pixelgl.KeyB) {
-			println("hier!!!!")
-			item = items.NewBomb(characters.Player(whiteBomberman))
-		}
-		if item!=nil {
-			item.Draw(win)
 		}
 		win.Clear(colornames.Whitesmoke)
 		arena.Draw(win)
-		//whiteBomberman.Ani().Update()
-		//whiteBomberman.Ani().GetSprite().Draw(win, mat)
-		whiteBomberman.Draw(win)
-		if item!=nil {
-			item.Draw(win)
-		}
+		whiteBomberman.Ani().Update()
+		whiteBomberman.Ani().GetSprite().Draw(win, mat)
 		win.Update()
 	}
 }

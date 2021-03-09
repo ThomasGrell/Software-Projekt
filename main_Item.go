@@ -31,7 +31,7 @@ func loadPicture(path string) (pixel.Picture, error) {
 func fun() {
 	var winSizeX float64 = 816
 	var winSizeY float64 = 720
-	var tileSize float64 = 8
+	//var tileSize float64 = 8
 
 	wincfg := pixelgl.WindowConfig{
 		Title:  "Bomberman 2021",
@@ -47,45 +47,29 @@ func fun() {
 		panic(err)
 	}
 	
-	var item = items.NewItem(PowerItem)
+	whiteBomberman := characters.NewPlayer(WhiteBomberman)
 	
-	itemSprite := (item.Ani()).GetSprite()
+	var item = items.NewItem(PowerItem,pixel.V(winSizeX/2, winSizeY/2))
+	
+	//itemSprite := (item.Ani()).GetSprite()
 	
 	//whiteBomberman := pixel.NewSprite(charactersPic, pixel.R(0, 361, 16, 385))
-	mat := pixel.IM
-	mat = mat.Moved(pixel.V(winSizeX/2, winSizeY/2))
-	mat = mat.ScaledXY(win.Bounds().Center(), pixel.V(3.3, 3.3))
+	//mat := pixel.IM
+	//mat = mat.Moved(pixel.V(winSizeX/2, winSizeY/2))
+	//mat = mat.ScaledXY(win.Bounds().Center(), pixel.V(3.3, 3.3))
 
 	win.Clear(colornames.Whitesmoke)
 	arena.Draw(win)
-	itemSprite.Draw(win, mat)
-
+	//item.Ani().Update()
+	
+	//arena.Draw(win)
+	//item.Ani().Update()
+	//item.Ani().GetSprite().Draw(win, mat)
+	//win.Update()
+	item.Draw(win)
 
 	for !win.Closed() && !win.Pressed(pixelgl.KeyEscape) {
-		if win.Pressed(pixelgl.KeyRight) {
-			mat = mat.Moved(pixel.V(tileSize, 0))
-			win.Clear(colornames.Whitesmoke)
-			arena.Draw(win)
-			itemSprite.Draw(win, mat)
-		}
-		if win.Pressed(pixelgl.KeyLeft) {
-			mat = mat.Moved(pixel.V(-tileSize, 0))
-			win.Clear(colornames.Whitesmoke)
-			arena.Draw(win)
-			itemSprite.Draw(win, mat)
-		}
-		if win.Pressed(pixelgl.KeyUp) {
-			mat = mat.Moved(pixel.V(0, tileSize))
-			win.Clear(colornames.Whitesmoke)
-			arena.Draw(win)
-			itemSprite.Draw(win, mat)
-		}
-		if win.Pressed(pixelgl.KeyDown) {
-			mat = mat.Moved(pixel.V(0, -tileSize))
-			win.Clear(colornames.Whitesmoke)
-			arena.Draw(win)
-			itemSprite.Draw(win, mat)
-		}
+		
 		win.Update()
 	}
 	

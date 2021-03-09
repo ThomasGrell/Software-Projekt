@@ -10,7 +10,7 @@ import (
 	"../animations"
 	. "../constants"
 	"github.com/faiface/pixel"
-	"github.com/faiface/pixel/pixelgl"
+	//	"github.com/faiface/pixel/pixelgl"
 	//	"golang.org/x/image/colornames"
 )
 
@@ -47,8 +47,6 @@ type character struct {
 	points    uint32    // Punkte
 	speed     float64
 	ani       animations.Animation
-	matrix	  pixel.Matrix
-	scale	  float64
 }
 
 func NewPlayer(t uint8) *player {
@@ -63,8 +61,7 @@ func NewPlayer(t uint8) *player {
 		panic("Unknown Player")
 	}
 	c.ani = animations.NewAnimation(t)
-	(*c).matrix = pixel.IM
-	(*c).scale = 1.0
+
 	return c
 }
 func NewEnemy(t uint8) *enemy {
@@ -116,7 +113,6 @@ func (c *player) AddPoints(p uint32) {
 }
 func (c *player) GetMaxBombs() uint8 { return c.maxBombs }
 func (c *player) GetWins() uint8     { return c.wins }
-func (c *player) GetPower () uint8 { return c.power }
 func (c *player) IncLife() {
 	c.life++
 }
@@ -127,10 +123,6 @@ func (c *player) SetLife(l uint8)     { c.life = l }
 func (c *player) SetMaxBombs(b uint8) { c.maxBombs = b }
 func (c *player) SetMortal(b bool)    { c.mortal = b }
 func (c *player) SetWallghost(w bool) { c.wallghost = w }
-func (c *player) SetScale (s float64) { 
-	(*c).scale = s 
-	(*c).matrix = ((*c).matrix).ScaledXY((*c).minPos, pixel.V(s,s))
-}
 
 func (c *character) Ani() animations.Animation { return c.ani }
 func (c *character) DecLife() {
@@ -149,12 +141,6 @@ func (c *character) DecSpeed() {
 		c.speed -= 10
 	}
 }
-
-func (c *character) Draw (win *pixelgl.Window) {
-	((*c).ani).Update()
-	(((*c).ani).GetSprite()).Draw(win,(*c).matrix)
-}
-
 func (c *character) GetBaselineCenter() pixel.Vec {
 	return c.minPos.Add(pixel.V(c.size.X/2, 0))
 }
@@ -177,11 +163,9 @@ func (c *character) IsMortal() bool {
 }
 func (c *character) IsWallghost() bool   { return c.wallghost }
 func (c *character) SetBombghost(b bool) { c.bombghost = b }
-func (c *character) MoveTo(pos pixel.Vec) {
-	c.minPos = ((*c).minPos).Add(pos)
-	(*c).matrix = ((*c).matrix).Moved(pos)							// NEU NEU NEU
+func (c *character) SetPos(pos pixel.Vec) {
+	c.minPos = pos
 }
-
 
 // init() wird beim Import dieses Packets automatisch ausgeführt.
 func init() {
