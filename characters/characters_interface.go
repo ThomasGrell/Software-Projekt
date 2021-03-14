@@ -2,8 +2,8 @@ package characters
 
 import (
 	"../animations"
-	"github.com/faiface/pixel/pixelgl"
 	"github.com/faiface/pixel"
+	"github.com/faiface/pixel/pixelgl"
 )
 
 type Enemy interface {
@@ -13,10 +13,10 @@ type Enemy interface {
 }
 
 type Player interface {
-	Character							// Alle Methoden eines Spielers
+	Character // Alle Methoden eines Spielers
 	AddPoints(uint32)
 	GetMaxBombs() uint8
-	GetPower() uint8					//NEU NEU NEU
+	GetPower() uint8 //NEU NEU NEU
 	GetWins() uint8
 	IncLife()
 	IncMaxBombs()
@@ -33,9 +33,10 @@ type Character interface {
 	Ani() animations.Animation
 	DecLife()
 	DecSpeed()
-	Draw (win *pixelgl.Window)								//NEU NEU NEU
+	Draw(win *pixelgl.Window) //NEU NEU NEU
 	GetBaselineCenter() pixel.Vec
 	GetPoints() uint32
+	GetPosBox() pixel.Rect
 	GetPos() pixel.Vec
 	GetMovedPos() pixel.Vec
 	GetSize() pixel.Vec
@@ -47,5 +48,5 @@ type Character interface {
 	IsWallghost() bool
 	SetBombghost(bool)
 	MoveTo(pixel.Vec)
-	SetScale (s float64)
+	SetScale(s float64)
 }

@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/ThomasGrell/Software-Projekt/arena"
-	"github.com/ThomasGrell/Software-Projekt/characters"
-	. "github.com/ThomasGrell/Software-Projekt/constants"
+	"./arena"
+	"./characters"
+	. "./constants"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	"golang.org/x/image/colornames"
