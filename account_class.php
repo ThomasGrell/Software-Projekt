@@ -4,7 +4,7 @@ try {
   $pdo = new PDO ('pgsql:host=localhost; dbname=ag_manager',"ag_admin",'kq9Ba8kf61;6]f');
   $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
-  echo "Fehler: Verbindung mit der Datenbank schlug fehl.";
+  echo "Fehler: Verbindung mit der Datenbank schlug fehl.\n";
   echo "Fehlermeldung: " . htmlspecialchars ($e->getMessage ());
 }
 
@@ -280,6 +280,8 @@ class Account
     	{
     		$query = 'DELETE FROM sessions WHERE (session_id = :sid)';
     		$values = array(':sid' => session_id());
+        session_unset();
+        session_destroy();
     		try
     		{
     			$res = $pdo->prepare($query);
@@ -287,7 +289,8 @@ class Account
     		}
     		catch (PDOException $e)
     		{
-    		   throw new Exception('Denbankfehler beim Logout');
+    		   echo 'Datenbankfehler beim Logout';
+           die();
     		}
     	}
     }
