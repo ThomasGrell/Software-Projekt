@@ -57,7 +57,7 @@ func NewPlayer(t uint8) *player {
 	switch t {
 	case WhiteBomberman, BlackBomberman, BlueBomberman, RedBomberman:
 		*c = *bm
-		c.size = pixel.V(15, 23) // mit Bounds ????????????????????????????????????????????
+		c.size = pixel.V(16, 24) // mit Bounds ????????????????????????????????????????????
 		c.minPos = pixel.V(c.size.X/40, c.size.Y/1.35)
 	case WhiteBattleman, BlackBattleman, BlueBattleman, RedBattleman:
 		*c = *bm
@@ -167,14 +167,14 @@ func (c *character) GetPoints() uint32 { return c.points }
 func (c *character) GetPosBox() pixel.Rect {
 	//fmt.Println(c.size.X)
 	return pixel.R(
-		math.Round(c.GetPos().X+6),
-		math.Round(c.GetPos().Y+6),
-		math.Round(c.GetPos().X+38),
-		math.Round(c.GetPos().Y+38))
+		math.Round(c.GetPos().X+6-96),
+		math.Round(c.GetPos().Y+6-113),
+		math.Round(c.GetPos().X+38-96),
+		math.Round(c.GetPos().Y+38-113))
 }
 
 func (c *character) GetPos() pixel.Vec {
-	return pixel.V(math.Round(c.minPos.X)-96, math.Round(c.minPos.Y)-113) // WARUM  ???????????
+	return pixel.V(math.Round(c.minPos.X), math.Round(c.minPos.Y)) // WARUM  ???????????
 }
 
 func (c *character) GetMovedPos() pixel.Vec {
