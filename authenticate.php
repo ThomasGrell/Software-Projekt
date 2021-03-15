@@ -28,7 +28,7 @@ if ( isset($_POST['user'], $_POST['pwd']) ) {
       ?>
 
        <div class="login">
-       <h1>AG-Manager (Anmeldung)</h1>
+       <h1>AG-Manager (Anmeldung) </h1>
 
        <form method="post" action="<?php echo htmlentities($_SERVER['PHP_SELF']); ?>" >
          <label for="username">
