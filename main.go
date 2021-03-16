@@ -13,7 +13,7 @@ import (
 func fun() {
 	var winSizeX float64 = 768
 	var winSizeY float64 = 672
-	var stepSize float64 = 3
+	var stepSize float64 = 1
 	var slice []items.Bombe
 	var turfNtreesArena *arena.Arena
 
@@ -30,13 +30,14 @@ func fun() {
 	turfNtreesArena = arena.NewArena(0, winSizeX, winSizeY)
 
 	whiteBomberman := characters.NewPlayer(WhiteBomberman)
-	whiteBomberman.SetScale(3.3)
+	whiteBomberman.SetScale(1)
 	whiteBomberman.Ani().Show()
+
 A:
 	for i := 0; i < 15; i++ {
 		for j := 0; j < 17; j++ {
 			if turfNtreesArena.GetPassableTiles()[i][j] {
-				whiteBomberman.MoveTo(pixel.V(float64(j)*arena.GetScale()*arena.GetTileSize(), float64(i)*arena.GetScale()*arena.GetTileSize())) // Hier bekommt die Animation ihren Ort.
+				whiteBomberman.MoveTo(pixel.V(float64(j)*arena.GetTileSize(), float64(i)*arena.GetTileSize()-14)) // Hier bekommt die Animation ihren Ort.
 				//fmt.Println(i,j)
 				break A
 			}
@@ -47,10 +48,11 @@ A:
 	win.Clear(colornames.Whitesmoke)
 	turfNtreesArena.GetCanvas().Draw(win, turfNtreesArena.GetMatrix())
 	whiteBomberman.Ani().Update()
+	win.SetMatrix(pixel.IM.Scaled(pixel.V(0, 0), 3))
 	win.Update()
 
 	for !win.Closed() && !win.Pressed(pixelgl.KeyEscape) {
-		grDir := turfNtreesArena.GrantedDirection(whiteBomberman.GetPosBox()) // [4]bool left-right-up-down granted?
+		grDir := turfNtreesArena.GrantedDirection(whiteBomberman.GetPosBox(), whiteBomberman.GetPos()) // [4]bool left-right-up-down granted?
 
 		if win.Pressed(pixelgl.KeyLeft) && grDir[0] {
 			whiteBomberman.MoveTo(pixel.V(-stepSize, 0))

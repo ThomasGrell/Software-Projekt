@@ -58,7 +58,6 @@ func NewPlayer(t uint8) *player {
 	case WhiteBomberman, BlackBomberman, BlueBomberman, RedBomberman:
 		*c = *bm
 		c.size = pixel.V(16, 24) // mit Bounds ????????????????????????????????????????????
-		c.minPos = pixel.V(c.size.X/40, c.size.Y/1.35)
 	case WhiteBattleman, BlackBattleman, BlueBattleman, RedBattleman:
 		*c = *bm
 		c.life = 1
@@ -167,10 +166,10 @@ func (c *character) GetPoints() uint32 { return c.points }
 func (c *character) GetPosBox() pixel.Rect {
 	//fmt.Println(c.size.X)
 	return pixel.R(
-		math.Round(c.GetPos().X+6-96),
-		math.Round(c.GetPos().Y+6-113),
-		math.Round(c.GetPos().X+38-96),
-		math.Round(c.GetPos().Y+38-113))
+		math.Round(c.GetPos().X-3),  // -32 = - 24 (Mauerdicke) - 8 (Entfernung zwischen Mitte des Charakters und seinem Rand)
+		math.Round(c.GetPos().Y-12), // Warum 28? Eigentlich: -18 = - 6 (untere Mauer Dicke) - 12 (Entf. zw. Mitte des Char. und Rand in Y-Richtung)
+		math.Round(c.GetPos().X+3),
+		math.Round(c.GetPos().Y-6))
 }
 
 func (c *character) GetPos() pixel.Vec {
