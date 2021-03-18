@@ -166,10 +166,10 @@ func (c *character) GetPoints() uint32 { return c.points }
 func (c *character) GetPosBox() pixel.Rect {
 	//fmt.Println(c.size.X)
 	return pixel.R(
-		math.Round(c.GetPos().X-3),  // -32 = - 24 (Mauerdicke) - 8 (Entfernung zwischen Mitte des Charakters und seinem Rand)
+		math.Round(c.GetPos().X-6),  // -32 = - 24 (Mauerdicke) - 8 (Entfernung zwischen Mitte des Charakters und seinem Rand)
 		math.Round(c.GetPos().Y-12), // Warum 28? Eigentlich: -18 = - 6 (untere Mauer Dicke) - 12 (Entf. zw. Mitte des Char. und Rand in Y-Richtung)
-		math.Round(c.GetPos().X+3),
-		math.Round(c.GetPos().Y-6))
+		math.Round(c.GetPos().X+6),
+		math.Round(c.GetPos().Y-0))
 }
 
 func (c *character) GetPos() pixel.Vec {

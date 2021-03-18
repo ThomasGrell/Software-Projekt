@@ -4,7 +4,6 @@ import (
 	"../animations"
 	"../characters"
 	. "../constants"
-	"fmt"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 )
@@ -47,7 +46,7 @@ func NewBomb(p characters.Player) *bombe {
 	((*bomb).ani).Show()
 	mat := pixel.IM
 	mat = mat.Moved(pixel.V(p.GetPos().X, p.GetPos().Y))
-	fmt.Println(p.GetPos())
+	//fmt.Println(p.GetPos())
 	(*bomb).matrix = mat
 	(*bomb).pos = p.GetPos()
 	return bomb

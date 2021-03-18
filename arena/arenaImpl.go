@@ -1,27 +1,155 @@
 package arena
 
 import (
-	"fmt"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	"image"
 	_ "image/png"
 	"math"
+	"math/rand"
 	"os"
+	"time"
 )
 
 const tileSize float64 = 16
 
 type Arena struct {
-	w, h            float64
-	nr              int // Nr. der Arena ( falls man mehrere hat)
-	tiles           [11][13]int
-	unpassableTiles [2][36]int
-	passableTiles   [15][17]bool // [Zeilen][Spalten]
-	bottomLeftPitch pixel.Vec    // linke untere Spielfeldecke
-	karte           [15][17]pixel.Rect
-	mat             pixel.Matrix
-	canvas          *pixelgl.Canvas
+	canvas           *pixelgl.Canvas
+	destroyableTiles [2][35]int
+	matrix           pixel.Matrix
+	kollisionsKarte  [15][17]pixel.Rect
+	permTiles        [2][36]int
+	//tiles           [11][13]int
+	untenLinks     pixel.Vec    // linke untere Spielfeldecke
+	wahrheitsKarte [15][17]bool // [Zeilen][Spalten]
+	w, h           float64
+}
+
+func NewArena(width, heigth float64) *Arena {
+	var a *Arena = new(Arena)
+	a.w = width
+	a.h = heigth
+	a.permTiles = setCabins()
+	for i := 2; i < 13; i++ {
+		for j := 2; j < 15; j++ {
+			a.wahrheitsKarte[i][j] = true
+		}
+	}
+	for i := 0; i < 36; i++ {
+		a.wahrheitsKarte[a.permTiles[1][i]][a.permTiles[0][i]] = false
+	}
+	a.destroyableTiles = setStub()
+	for i := 0; i < 35; i++ {
+		a.wahrheitsKarte[a.destroyableTiles[1][i]][a.destroyableTiles[0][i]] = false
+	}
+	//for i := 14; i >= 0; i-- {
+	//	fmt.Println(a.wahrheitsKarte[i])
+	//}
+	a.untenLinks = pixel.V(24, 6)
+	a.matrix = pixel.IM
+	a.matrix = a.matrix.Moved(pixel.V(width/2, heigth/2))
+	a.canvas = pixelgl.NewCanvas(pixel.R(0, 0, width, heigth))
+	drawWallsNturf(a.canvas)
+	drawCabin(a.canvas, a)
+	a.drawStub(a.canvas)
+	putWallsOnMap(a) // schreibt Rechtecke in die virtuelle Karte für Kollisionen
+	//for i := 14; i >= 0; i-- {
+	//fmt.Println(a.kollisionsKarte[i])
+	//}
+	return a
+}
+
+func (a *Arena) GetBoolMap() [15][17]bool {
+	return a.wahrheitsKarte
+}
+func (a *Arena) GetCanvas() *pixelgl.Canvas {
+	return a.canvas
+}
+func (a *Arena) GetFieldCoord(v pixel.Vec) (x, y int) {
+	var columns int = 13
+	var rows int = 11
+	x = int(math.Trunc((v.X-a.untenLinks.X)/tileSize))%(columns+1) + 2
+	y = int(math.Trunc((v.Y-a.untenLinks.Y)/tileSize))%(rows+1) + 2
+	return
+}
+func (a *Arena) GetMatrix() pixel.Matrix {
+	return a.matrix
+}
+func GetTileSize() float64 {
+	return tileSize
+}
+func (a *Arena) GrantedDirections(posBox pixel.Rect) [4]bool { // {links,rechts,oben,unten}
+	var grDir [4]bool
+	var x1, x2, y1, y2 int
+	var columns int = 13
+	var rows int = 11
+	//fmt.Println(posVec)
+	x1 = int(math.Trunc((posBox.Min.X-a.untenLinks.X)/tileSize))%(columns+1) + 2
+	y1 = int(math.Trunc((posBox.Min.Y-a.untenLinks.Y)/tileSize))%(rows+1) + 2 // Eintritt in nächste Kachel oben erst 2 Pixel später (ist schicker)
+	x2 = int(math.Trunc((posBox.Max.X-a.untenLinks.X)/tileSize))%(columns+1) + 2
+	y2 = int(math.Trunc((posBox.Max.Y-a.untenLinks.Y)/tileSize))%(rows+1) + 2
+	//fmt.Println("Collison Box", posBox)
+	//fmt.Println("", a.kollisionsKarte[y2][x2-1], "\n", a.kollisionsKarte[y1][x2-1])
+	if !pixel.R(posBox.Min.X-1, posBox.Min.Y, posBox.Max.X, posBox.Max.Y).Intersects(a.kollisionsKarte[y1][x2-1]) &&
+		!pixel.R(posBox.Min.X-1, posBox.Min.Y, posBox.Max.X, posBox.Max.Y).Intersects(a.kollisionsKarte[y2][x2-1]) { // Left
+		grDir[0] = true
+	} else {
+		grDir[0] = false
+	}
+	if !pixel.R(posBox.Min.X, posBox.Min.Y, posBox.Max.X+1, posBox.Max.Y+1).Intersects(a.kollisionsKarte[y1][x1+1]) &&
+		!pixel.R(posBox.Min.X, posBox.Min.Y, posBox.Max.X+1, posBox.Max.Y+1).Intersects(a.kollisionsKarte[y2][x1+1]) { // Right
+		grDir[1] = true
+	} else {
+		grDir[1] = false
+	}
+	if !pixel.R(posBox.Min.X, posBox.Min.Y, posBox.Max.X, posBox.Max.Y+1).Intersects(a.kollisionsKarte[y1+1][x1]) &&
+		!pixel.R(posBox.Min.X, posBox.Min.Y, posBox.Max.X, posBox.Max.Y+1).Intersects(a.kollisionsKarte[y1+1][x2]) { // Up
+		grDir[2] = true
+	} else {
+		grDir[2] = false
+	}
+	if !pixel.R(posBox.Min.X, posBox.Min.Y-1, posBox.Max.X, posBox.Max.Y).Intersects(a.kollisionsKarte[y2-1][x1]) &&
+		!pixel.R(posBox.Min.X, posBox.Min.Y-1, posBox.Max.X, posBox.Max.Y).Intersects(a.kollisionsKarte[y2-1][x2]) { // Down
+		grDir[3] = true
+	} else {
+		grDir[3] = false
+	}
+	return grDir
+	//return [4]bool{grDir[0],grDir[1],true,true}
+}
+func (a *Arena) RemoveTile(x, y int) {
+	//for i := 14; i >= 0; i-- {
+	//	fmt.Println(a.wahrheitsKarte[i])
+	//}
+	//fmt.Println("")
+	k := checkCoordsOfDestroyables(x, y, a.destroyableTiles)
+	if k != 42 { // 42 als Fehlerfall: diese Koordinaten wurden nicht gefunden
+		a.destroyableTiles[0][k] = 0
+		a.destroyableTiles[1][k] = 0
+		a.kollisionsKarte[y][x] = pixel.R(0, 0, 0, 0)
+		a.wahrheitsKarte[y][x] = true
+		//for i := 14; i >= 0; i-- {
+		//	fmt.Println(a.wahrheitsKarte[i])
+		//}
+		drawWallsNturf(a.canvas)
+		drawCabin(a.canvas, a)
+		a.drawStub(a.canvas)
+	}
+}
+
+//------------------------- Hilfsfunktionen ---------------------------------
+
+func checkCoordsOfDestroyables(x, y int, locations [2][35]int) int {
+	var j int
+	for i := 0; i < 35; i++ {
+		if locations[0][i] == x && locations[1][i] == y {
+			j = i
+			return j
+			//fmt.Println(j)
+		}
+	}
+	j = 42
+	return j
 }
 
 func loadPicture(path string) (pixel.Picture, error) {
@@ -37,95 +165,22 @@ func loadPicture(path string) (pixel.Picture, error) {
 	return pixel.PictureDataFromImage(img), nil
 }
 
-func NewArena(nr int, width, heigth float64) *Arena {
-	var arena *Arena = new(Arena)
-	arena.nr = nr
-	arena.w = width
-	arena.h = heigth
-	arena.unpassableTiles = setCabins()
-	for i := 2; i < 13; i++ {
-		for j := 2; j < 15; j++ {
-			arena.passableTiles[i][j] = true
+func checkFreeTiles(x, y int, locations [2][35]int) (u int, v int, w bool) {
+	var cabinTiles [2][36]int = setCabins()
+	w = true
+	u = x
+	v = y
+	for i := 0; i < 36; i++ {
+		if cabinTiles[0][i] == x && cabinTiles[1][i] == y {
+			w = false
 		}
 	}
-	for i := 0; i < 36; i++ {
-		arena.passableTiles[arena.unpassableTiles[1][i]][arena.unpassableTiles[0][i]] = false
+	for i := 0; i < 35; i++ {
+		if locations[0][i] == x && locations[1][i] == y {
+			w = false
+		}
 	}
-	for i := 14; i >= 0; i-- {
-		//fmt.Println(arena.passableTiles[i])
-	}
-	arena.bottomLeftPitch = pixel.V(24, 6)
-	arena.mat = pixel.IM
-	arena.mat = arena.mat.Moved(pixel.V(width/2, heigth/2))
-	arena.canvas = pixelgl.NewCanvas(pixel.R(0, 0, width, heigth))
-	drawWallsNturf(arena.canvas)
-	drawCabin(arena.canvas, arena)
-	putWallsOnMap(arena)
-	for i := 14; i >= 0; i-- {
-		fmt.Println(arena.karte[i])
-	}
-	return arena
-}
-
-func (a *Arena) GetUnpassableTiles() [2][36]int {
-	return a.unpassableTiles
-}
-
-func (a *Arena) GetPassableTiles() [15][17]bool {
-	return a.passableTiles
-}
-
-func GetTileSize() float64 {
-	return tileSize
-}
-
-func (a *Arena) GetMatrix() pixel.Matrix {
-	return a.mat
-}
-
-func (a *Arena) GetCanvas() *pixelgl.Canvas {
-	return a.canvas
-}
-
-func (a *Arena) GrantedDirection(posBox pixel.Rect, posVec pixel.Vec) [4]bool { // {links,rechts,oben,unten}
-	var grDir [4]bool
-	var x1, x2, y1, y2 int
-	var columns int = 13
-	var rows int = 11
-	//fmt.Println(posVec)
-	x1 = int(math.Trunc((posBox.Min.X-a.bottomLeftPitch.X)/tileSize))%(columns+1) + 2
-	y1 = int(math.Trunc((posBox.Min.Y-a.bottomLeftPitch.Y)/tileSize))%(rows+1) + 2 // Eintritt in nächste Kachel oben erst 2 Pixel später (ist schicker)
-	x2 = int(math.Trunc((posBox.Max.X-a.bottomLeftPitch.X)/tileSize))%(columns+1) + 2
-	y2 = int(math.Trunc((posBox.Max.Y-a.bottomLeftPitch.Y)/tileSize))%(rows+1) + 2
-
-	fmt.Println("Collison Box", posBox)
-	fmt.Println("", a.karte[y2][x2-1], "\n", a.karte[y1][x2-1])
-
-	if !pixel.R(posBox.Min.X-1, posBox.Min.Y, posBox.Max.X, posBox.Max.Y).Intersects(a.karte[y1][x2-1]) && !posBox.Intersects(a.karte[y2][x2-1]) { // Left
-		grDir[0] = true
-	} else {
-		grDir[0] = false
-	}
-	if !pixel.R(posBox.Min.X, posBox.Min.Y, posBox.Max.X+1, posBox.Max.Y+1).Intersects(a.karte[y1][x1+1]) && !posBox.Intersects(a.karte[y2][x1+1]) { // Right
-		grDir[1] = true
-	} else {
-		grDir[1] = false
-	}
-	if !pixel.R(posBox.Min.X, posBox.Min.Y, posBox.Max.X, posBox.Max.Y+1).Intersects(a.karte[y1+1][x1]) &&
-		!posBox.Intersects(a.karte[y1+1][x2]) { // Up
-		grDir[2] = true
-	} else {
-		grDir[2] = false
-	}
-	if !pixel.R(posBox.Min.X, posBox.Min.Y-1, posBox.Max.X, posBox.Max.Y).Intersects(a.karte[y2-1][x1]) &&
-		!posBox.Intersects(a.karte[y2-1][x2]) { // Down
-		grDir[3] = true
-	} else {
-		grDir[3] = false
-	}
-
-	return grDir
-	//return [4]bool{grDir[0],grDir[1],true,true}
+	return
 }
 
 // Erzeugt x-y-Koordinaten der Häuser für eine Spielfeldmatrix (13x11 Matrix)
@@ -211,11 +266,80 @@ func setCabins() [2][36]int {
 	return locations
 }
 
-func drawCabin(can *pixelgl.Canvas, a *Arena) { // and SetCabins on karte !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// Erzeugt x-y-Koordinaten der Baumstümpfe für eine Spielfeldmatrix (13x11 Matrix)
+func setStub() [2][35]int {
+	var locations [2][35]int
+	rand.Seed(time.Now().UnixNano())
+	for i := 0; i < 35; i++ {
+		for {
+			x, y, w := checkFreeTiles(rand.Intn(13)+2, rand.Intn(11)+2, locations)
+			if w {
+				locations[0][i] = x
+				locations[1][i] = y
+				break
+			}
+		}
+	}
+	return locations
+}
+
+func putWallsOnMap(a *Arena) { // setzt die Kollisionsboxen in die kollisionKarte
+	for i := 1; i < 14; i++ {
+		for j := 1; j < 16; j++ {
+			if i < 2 || i > 12 { // first and last row
+				a.kollisionsKarte[i][j] = pixel.R(
+					tileSize*float64(j-2)+24,
+					tileSize*float64(i-2)+6,
+					tileSize*float64(j-1)+24,
+					tileSize*float64(i-1)+6)
+			}
+			if j < 2 || j > 14 {
+				a.kollisionsKarte[i][j] = pixel.R(
+					tileSize*float64(j-2)+24,
+					tileSize*float64(i-2)+6,
+					tileSize*float64(j-1)+24,
+					tileSize*float64(i-1)+6)
+			}
+		}
+	}
+}
+
+func (a *Arena) drawStub(can *pixelgl.Canvas) { // and SetStubs on kollisionsKarte !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	const numbOfCabs = 35
+	var stubRow [numbOfCabs]int
+	var stubColumn [numbOfCabs]int
+	stubCoord := a.destroyableTiles
+	stubRow = stubCoord[1]
+	stubColumn = stubCoord[0]
+
+	tilesPic, err := loadPicture("graphics/tiles.png")
+	if err != nil {
+		panic(err)
+	}
+	stub := pixel.NewSprite(tilesPic, pixel.R(80, 304, 96, 288))
+	stubMat := pixel.IM
+	stubMat = stubMat.Moved(pixel.V(tileSize/2, tileSize/2).Add(a.untenLinks))
+
+	for i := 0; i < 35; i++ {
+		if stubColumn[i] != 0 {
+			stubMat = stubMat.Moved(pixel.V(float64(stubColumn[i]-2)*tileSize, float64(stubRow[i]-2)*tileSize))
+			stub.Draw(can, stubMat)
+			a.kollisionsKarte[stubRow[i]][stubColumn[i]] = pixel.R(
+				tileSize*float64(stubColumn[i]-2)+a.untenLinks.X,
+				tileSize*float64(stubRow[i]-2)+a.untenLinks.Y,
+				tileSize*float64(stubColumn[i]-1)+a.untenLinks.X-1,
+				tileSize*float64(stubRow[i]-1)+a.untenLinks.Y-1)
+
+			stubMat = stubMat.Moved(pixel.V(-float64(stubColumn[i]-2)*tileSize, -float64(stubRow[i]-2)*tileSize))
+		}
+	}
+}
+
+func drawCabin(can *pixelgl.Canvas, a *Arena) { // and SetCabins on kollisionsKarte !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	const numbOfCabs = 36
 	var cabinRow [numbOfCabs]int
 	var cabinColumn [numbOfCabs]int
-	cabinCoord := a.unpassableTiles
+	cabinCoord := a.permTiles
 	cabinRow = cabinCoord[1]
 	cabinColumn = cabinCoord[0]
 
@@ -225,40 +349,19 @@ func drawCabin(can *pixelgl.Canvas, a *Arena) { // and SetCabins on karte !!!!!!
 	}
 	cabin := pixel.NewSprite(tilesPic, pixel.R(64, 304, 80, 288))
 	cabinMat := pixel.IM
-	//cabinMat = cabinMat.ScaledXY(pixel.V(0, 0), pixel.V(zoomFactor, zoomFactor))
-	cabinMat = cabinMat.Moved(pixel.V(tileSize/2, tileSize/2).Add(a.bottomLeftPitch))
+	cabinMat = cabinMat.Moved(pixel.V(tileSize/2, tileSize/2).Add(a.untenLinks))
 
 	for i := range cabinRow {
 		cabinMat = cabinMat.Moved(pixel.V(float64(cabinColumn[i]-2)*tileSize, float64(cabinRow[i]-2)*tileSize))
 		cabin.Draw(can, cabinMat)
-		a.karte[cabinRow[i]][cabinColumn[i]] = pixel.R(
+		a.kollisionsKarte[cabinRow[i]][cabinColumn[i]] = pixel.R(
 			tileSize*float64(cabinColumn[i]-2)+24,
 			tileSize*float64(cabinRow[i]-2)+6,
 			tileSize*float64(cabinColumn[i]-1)+24-1,
 			tileSize*float64(cabinRow[i]-1)+6-1)
+
 		cabinMat = cabinMat.Moved(pixel.V(-float64(cabinColumn[i]-2)*tileSize, -float64(cabinRow[i]-2)*tileSize))
 
-	}
-}
-
-func putWallsOnMap(a *Arena) {
-	for i := 1; i < 14; i++ {
-		for j := 1; j < 16; j++ {
-			if i < 2 || i > 12 { // first and last row
-				a.karte[i][j] = pixel.R(
-					tileSize*float64(j-2)+24,
-					tileSize*float64(i-2)+6,
-					tileSize*float64(j-1)+24,
-					tileSize*float64(i-1)+6)
-			}
-			if j < 2 || j > 14 {
-				a.karte[i][j] = pixel.R(
-					tileSize*float64(j-2)+24,
-					tileSize*float64(i-2)+6,
-					tileSize*float64(j-1)+24,
-					tileSize*float64(i-1)+6)
-			}
-		}
 	}
 }
 
@@ -322,19 +425,19 @@ func drawWallsNturf(can *pixelgl.Canvas) { // zeichnet die Umrandung und die Wie
 	hiWallMat = hiWallMat.Moved(pixel.V(2*edgeHiLeftCenterX+hiWallCenterX, 2*edgeLowLeftCenterY+
 		2*wallRightCenterY*float64(shortSideWallParts)+2*edgeHiLeftCenterY-hiWallCenterY+1))
 	edgeHiRightMat := pixel.IM
-	edgeHiRightMat = edgeHiRightMat.Moved(pixel.V((2*edgeHiLeftCenterX + 2*hiWallCenterX*float64(longSideWallParts+1) +
-		edgeHiRightCenterX), (2*edgeLowRightCenterY + 2*wallRightCenterY*float64(shortSideWallParts) +
-		edgeHiRightCenterY + 1)))
+	edgeHiRightMat = edgeHiRightMat.Moved(pixel.V(2*edgeHiLeftCenterX+2*hiWallCenterX*float64(longSideWallParts+1)+
+		edgeHiRightCenterX, 2*edgeLowRightCenterY+2*wallRightCenterY*float64(shortSideWallParts)+
+		edgeHiRightCenterY+1))
 	wallRightMat := pixel.IM
-	wallRightMat = wallRightMat.Moved(pixel.V((2*edgeLowLeftCenterX + 2*loWallCenterX*float64(longSideWallParts+1) +
-		wallRightCenterX), (2*edgeLowRightCenterY + wallRightCenterY)))
+	wallRightMat = wallRightMat.Moved(pixel.V(2*edgeLowLeftCenterX+2*loWallCenterX*float64(longSideWallParts+1)+
+		wallRightCenterX, 2*edgeLowRightCenterY+wallRightCenterY))
 	edgeLowRightMat := pixel.IM
-	edgeLowRightMat = edgeLowRightMat.Moved(pixel.V((2*edgeLowLeftCenterX + 2*loWallCenterX*float64(longSideWallParts+1) +
-		edgeLowRightCenterX), (edgeLowRightCenterY + 2)))
+	edgeLowRightMat = edgeLowRightMat.Moved(pixel.V(2*edgeLowLeftCenterX+2*loWallCenterX*float64(longSideWallParts+1)+
+		edgeLowRightCenterX, edgeLowRightCenterY+2))
 	loWallMat := pixel.IM
-	loWallMat = loWallMat.Moved(pixel.V((2*edgeLowLeftCenterX + loWallCenterX), loWallCenterY))
+	loWallMat = loWallMat.Moved(pixel.V(2*edgeLowLeftCenterX+loWallCenterX, loWallCenterY))
 	turfMat := pixel.IM
-	turfMat = turfMat.Moved(pixel.V((2*wallLeftCenterX + turfCenterX), (2*loWallCenterY + turfCenterY)))
+	turfMat = turfMat.Moved(pixel.V(2*wallLeftCenterX+turfCenterX, 2*loWallCenterY+turfCenterY))
 
 	edgeLowLeft.Draw(can, edgeLowLeftMat)
 	wallLeft.Draw(can, wallLeftMat)

@@ -10,7 +10,7 @@ import (
 	"golang.org/x/image/colornames"
 )
 
-func fun() {
+func sun() {
 	var winSizeX float64 = 768
 	var winSizeY float64 = 672
 	var stepSize float64 = 1
@@ -27,16 +27,15 @@ func fun() {
 		panic(err)
 	}
 
-	turfNtreesArena = arena.NewArena(0, winSizeX, winSizeY)
+	turfNtreesArena = arena.NewArena(winSizeX, winSizeY)
 
 	whiteBomberman := characters.NewPlayer(WhiteBomberman)
-	whiteBomberman.SetScale(1)
 	whiteBomberman.Ani().Show()
 
 A:
 	for i := 0; i < 15; i++ {
 		for j := 0; j < 17; j++ {
-			if turfNtreesArena.GetPassableTiles()[i][j] {
+			if turfNtreesArena.GetBoolMap()[i][j] {
 				whiteBomberman.MoveTo(pixel.V(float64(j)*arena.GetTileSize(), float64(i)*arena.GetTileSize()-14)) // Hier bekommt die Animation ihren Ort.
 				//fmt.Println(i,j)
 				break A
@@ -52,7 +51,7 @@ A:
 	win.Update()
 
 	for !win.Closed() && !win.Pressed(pixelgl.KeyEscape) {
-		grDir := turfNtreesArena.GrantedDirection(whiteBomberman.GetPosBox(), whiteBomberman.GetPos()) // [4]bool left-right-up-down granted?
+		grDir := turfNtreesArena.GrantedDirections(whiteBomberman.GetPosBox()) // [4]bool left-right-up-down granted?
 
 		if win.Pressed(pixelgl.KeyLeft) && grDir[0] {
 			whiteBomberman.MoveTo(pixel.V(-stepSize, 0))
@@ -71,6 +70,20 @@ A:
 			var item items.Bombe
 			item = items.NewBomb(characters.Player(whiteBomberman))
 			slice = append(slice, item)
+			x, y := turfNtreesArena.GetFieldCoord(whiteBomberman.GetPos())
+			if x > 2 {
+				turfNtreesArena.RemoveTile(x-1, y)
+			}
+			if x < 14 {
+				turfNtreesArena.RemoveTile(x+1, y)
+			}
+			if y < 12 {
+				turfNtreesArena.RemoveTile(x, y+1)
+			}
+			if y > 2 {
+				turfNtreesArena.RemoveTile(x, y-1)
+			}
+			turfNtreesArena.GetCanvas().Draw(win, turfNtreesArena.GetMatrix())
 		}
 
 		//fmt.Println(whiteBomberman.GetPosBox(),"Size",whiteBomberman.GetSize())
@@ -86,5 +99,5 @@ A:
 }
 
 func main() {
-	pixelgl.Run(fun)
+	pixelgl.Run(sun)
 }
