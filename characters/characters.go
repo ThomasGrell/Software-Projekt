@@ -11,6 +11,7 @@ import (
 	. "../constants"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
+	"math"
 	//	"golang.org/x/image/colornames"
 )
 
@@ -47,8 +48,8 @@ type character struct {
 	points    uint32    // Punkte
 	speed     float64
 	ani       animations.Animation
-	matrix	  pixel.Matrix
-	scale	  float64
+	matrix    pixel.Matrix
+	scale     float64
 }
 
 func NewPlayer(t uint8) *player {
@@ -56,6 +57,7 @@ func NewPlayer(t uint8) *player {
 	switch t {
 	case WhiteBomberman, BlackBomberman, BlueBomberman, RedBomberman:
 		*c = *bm
+		c.size = pixel.V(16, 24) // mit Bounds ????????????????????????????????????????????
 	case WhiteBattleman, BlackBattleman, BlueBattleman, RedBattleman:
 		*c = *bm
 		c.life = 1
@@ -116,7 +118,7 @@ func (c *player) AddPoints(p uint32) {
 }
 func (c *player) GetMaxBombs() uint8 { return c.maxBombs }
 func (c *player) GetWins() uint8     { return c.wins }
-func (c *player) GetPower () uint8 { return c.power }
+func (c *player) GetPower() uint8    { return c.power }
 func (c *player) IncLife() {
 	c.life++
 }
@@ -127,9 +129,11 @@ func (c *player) SetLife(l uint8)     { c.life = l }
 func (c *player) SetMaxBombs(b uint8) { c.maxBombs = b }
 func (c *player) SetMortal(b bool)    { c.mortal = b }
 func (c *player) SetWallghost(w bool) { c.wallghost = w }
-func (c *player) SetScale (s float64) { 
-	(*c).scale = s 
-	(*c).matrix = ((*c).matrix).ScaledXY((*c).minPos, pixel.V(s,s))
+func (c *player) SetScale(s float64) {
+	(*c).scale = s
+	(*c).matrix = ((*c).matrix).ScaledXY((*c).minPos, pixel.V(s, s))
+	(*c).size = c.size.Scaled(s)
+	//(*c).minPos = pixel.V(math.Round(c.minPos.X - (s-1) * c.size.X/2), math.Round(c.minPos.Y - (s-1) * c.size.Y/2))
 }
 
 func (c *character) Ani() animations.Animation { return c.ani }
@@ -150,16 +154,28 @@ func (c *character) DecSpeed() {
 	}
 }
 
-func (c *character) Draw (win *pixelgl.Window) {
+func (c *character) Draw(win *pixelgl.Window) {
 	((*c).ani).Update()
-	(((*c).ani).GetSprite()).Draw(win,(*c).matrix)
+	(((*c).ani).GetSprite()).Draw(win, (*c).matrix)
 }
 
 func (c *character) GetBaselineCenter() pixel.Vec {
 	return c.minPos.Add(pixel.V(c.size.X/2, 0))
 }
 func (c *character) GetPoints() uint32 { return c.points }
-func (c *character) GetPos() pixel.Vec { return c.minPos }
+func (c *character) GetPosBox() pixel.Rect {
+	//fmt.Println(c.size.X)
+	return pixel.R(
+		math.Round(c.GetPos().X-6),  // -32 = - 24 (Mauerdicke) - 8 (Entfernung zwischen Mitte des Charakters und seinem Rand)
+		math.Round(c.GetPos().Y-12), // Warum 28? Eigentlich: -18 = - 6 (untere Mauer Dicke) - 12 (Entf. zw. Mitte des Char. und Rand in Y-Richtung)
+		math.Round(c.GetPos().X+6),
+		math.Round(c.GetPos().Y-0))
+}
+
+func (c *character) GetPos() pixel.Vec {
+	return pixel.V(math.Round(c.minPos.X), math.Round(c.minPos.Y)) // WARUM  ???????????
+}
+
 func (c *character) GetMovedPos() pixel.Vec {
 	return c.minPos.Add(c.ani.ToBaseline()).Add(pixel.V(c.size.X/2, 0))
 }
@@ -179,9 +195,8 @@ func (c *character) IsWallghost() bool   { return c.wallghost }
 func (c *character) SetBombghost(b bool) { c.bombghost = b }
 func (c *character) MoveTo(pos pixel.Vec) {
 	c.minPos = ((*c).minPos).Add(pos)
-	(*c).matrix = ((*c).matrix).Moved(pos)							// NEU NEU NEU
+	(*c).matrix = ((*c).matrix).Moved(pos) // NEU NEU NEU
 }
-
 
 // init() wird beim Import dieses Packets automatisch ausgeführt.
 func init() {
