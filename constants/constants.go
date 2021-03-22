@@ -51,6 +51,27 @@ const (
 	LifeItem        = 109
 	Exit            = 110
 	KickItem        = 111
+
+	//Wände bzw. Hindernisse zum Wegsprengen:
+	Stub           = 120
+	Brushwood      = 121
+	Greenwall      = 122
+	Greywall       = 123
+	Brownwall      = 124
+	Darkbrownwall  = 125
+	Evergreen      = 126
+	Tree           = 127
+	Palmtree       = 128
+	Perl           = 129
+	Snowrock       = 130
+	Greenrock      = 131
+	House          = 132
+	Christmastree  = 133
+	Perl1          = 134
+	Perl2          = 135
+	Perl3          = 136
+	Perl4          = 137
+	Littlesnowrock = 138
 )
 
 const (
