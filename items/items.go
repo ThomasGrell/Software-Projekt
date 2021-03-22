@@ -20,6 +20,7 @@ type data struct {
 	ani animations.Animation
 	matrix pixel.Matrix
 	pos pixel.Vec
+	t uint8
 }
 
 type bombe struct {
@@ -36,7 +37,8 @@ func NewItem (t uint8, pos pixel.Vec) *data {
 	mat = mat.Moved(pos)
 	mat = mat.ScaledXY(pos, pixel.V(3.3, 3.3))
 	(*item).matrix = mat
-	(*item).pos = pos			
+	(*item).pos = pos	
+	(*item).t = t		
 	return item
 }
 
@@ -48,7 +50,6 @@ func NewBomb (p characters.Player) *bombe {
 	((*bomb).ani).Show()
 	mat := pixel.IM
 	mat = mat.Moved(p.GetPos())
-	fmt.Println(p.GetPos())
 	mat = mat.ScaledXY(p.GetPos(), pixel.V(3.3, 3.3))
 	(*bomb).matrix = mat	
 	(*bomb).pos = p.GetPos()
@@ -90,6 +91,35 @@ func (item *data) GetPos () pixel.Vec {
 	return (*item).pos
 }
 
+func (item *data) Use (p characters.Player) {
+	switch (*item).t {
+		case Bomb:
+			fmt.Println("Bomben sind nicht zum verzehren da.")
+		case PowerItem:
+			// p.IncBombPower wäre gut
+		case BombItem:
+			p.IncMaxBombs()
+		case PunchItem:
+			// keine Ahnung -.-
+		case HeartItem:
+			// p.IncLife() ?
+		case RollerbladeItem:
+			// p.IncSpeed() ?
+		case SkullItem:
+			// p.DecLife() ?
+		case WallghostItem:
+			p.SetWallghost(true)			// timer nötig?
+		case BombghostItem:
+			p.SetBombghost(true)			// timer nötig?
+		case LifeItem:
+			p.IncLife()
+		case KickItem:
+			// keine Ahnung -.-
+		default:
+			fmt.Println("Hier kst was schiefgelaufen: ",(*item).t," ist kein Gültiger Item-Wert!")
+	}
+}
+
 
 //------------------ Funktionen für Bomben -----------------------------
 
@@ -105,5 +135,4 @@ func (item *bombe) SetPower (newPower float64) {
 	(*item).power = newPower
 	(*item).matrix = ((*item).matrix).ScaledXY((*item).pos, pixel.V(newPower*3.3, newPower*3.3))
 }
-
 

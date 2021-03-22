@@ -50,9 +50,9 @@ func fun() {
 	//var whiteBomberman characters.Player 
 	whiteBomberman := characters.NewPlayer(WhiteBomberman)
 	whiteBomberman.Ani().Show()
-	mat := pixel.IM
-	mat = mat.Moved(pixel.V(winSizeX/2, winSizeY/2))
-	mat = mat.ScaledXY(win.Bounds().Center(), pixel.V(3.3, 3.3))
+	//mat := pixel.IM
+	//mat = mat.Moved(pixel.V(winSizeX/2, winSizeY/2))
+	//mat = mat.ScaledXY(win.Bounds().Center(), pixel.V(3.3, 3.3))
 	whiteBomberman.MoveTo(pixel.V(winSizeX/2, winSizeY/2))
 	whiteBomberman.SetScale(3.3)
 
