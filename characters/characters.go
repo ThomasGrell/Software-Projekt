@@ -212,7 +212,7 @@ func init() {
 	bm.mortal = true
 	bm.wallghost = false
 	bm.bombghost = false
-	bm.size = pixel.V(14, 14)
+	bm.size = pixel.V(12, 12)
 	bm.collisionbox = pixel.Rect{pixel.Vec{0, 0}, bm.size}
 
 	// Monster Prototyp
@@ -223,6 +223,6 @@ func init() {
 	en.wallghost = false
 	en.bombghost = false
 	en.follow = false
-	en.size = pixel.V(14, 14)
+	en.size = pixel.V(12, 12)
 	en.collisionbox = pixel.Rect{pixel.Vec{0, 0}, en.size}
 }

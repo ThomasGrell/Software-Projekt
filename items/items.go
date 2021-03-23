@@ -54,7 +54,7 @@ func NewBomb(p characters.Player) *bombe {
 	(*bomb).ani = animations.NewAnimation(Bomb)
 	((*bomb).ani).Show()
 	//fmt.Println(p.GetPosBox().Min)
-	(*bomb).pos = pixel.Vec{math.Round(p.GetPosBox().Min.X/16) * 16, math.Round(p.GetPosBox().Min.Y/16) * 16}
+	(*bomb).pos = pixel.Vec{math.Round(p.GetPosBox().Center().X/16) * 16, math.Round(p.GetPosBox().Center().Y/16) * 16}
 	(*bomb).matrix = pixel.IM.Moved(bomb.pos)
 	return bomb
 }
