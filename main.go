@@ -54,23 +54,26 @@ A:
 		grDir := turfNtreesArena.GrantedDirections(whiteBomberman.GetPosBox()) // [4]bool left-right-up-down granted?
 
 		if win.Pressed(pixelgl.KeyLeft) && grDir[0] {
-			whiteBomberman.MoveTo(pixel.V(-stepSize, 0))
+			whiteBomberman.Move(pixel.V(-stepSize, 0))
 			whiteBomberman.Ani().SetView(Left)
-		} else if win.Pressed(pixelgl.KeyRight) && grDir[1] {
-			whiteBomberman.MoveTo(pixel.V(stepSize, 0))
+		}
+		if win.Pressed(pixelgl.KeyRight) && grDir[1] {
+			whiteBomberman.Move(pixel.V(stepSize, 0))
 			whiteBomberman.Ani().SetView(Right)
-		} else if win.Pressed(pixelgl.KeyUp) && grDir[2] {
-			whiteBomberman.MoveTo(pixel.V(0, stepSize))
+		}
+		if win.Pressed(pixelgl.KeyUp) && grDir[2] {
+			whiteBomberman.Move(pixel.V(0, stepSize))
 			whiteBomberman.Ani().SetView(Up)
-		} else if win.Pressed(pixelgl.KeyDown) && grDir[3] {
-			whiteBomberman.MoveTo(pixel.V(0, -stepSize))
+		}
+		if win.Pressed(pixelgl.KeyDown) && grDir[3] {
+			whiteBomberman.Move(pixel.V(0, -stepSize))
 			whiteBomberman.Ani().SetView(Down)
 		}
 		if win.Pressed(pixelgl.KeyB) {
 			var item items.Bombe
 			item = items.NewBomb(characters.Player(whiteBomberman))
 			slice = append(slice, item)
-			x, y := turfNtreesArena.GetFieldCoord(whiteBomberman.GetPos())
+			x, y := turfNtreesArena.GetFieldCoord(whiteBomberman.GetPosBox().Min)
 			if x > 2 {
 				turfNtreesArena.RemoveTile(x-1, y)
 			}

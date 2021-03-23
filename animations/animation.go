@@ -478,7 +478,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -496,7 +496,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -532,7 +532,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -550,7 +550,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -568,7 +568,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -586,7 +586,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -604,7 +604,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -622,7 +622,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -640,7 +640,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -658,7 +658,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -676,7 +676,349 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.seesaw = true
+		c.lastUpdate = time.Now().UnixNano()
+		return c
+	case Stub:
+		c := new(basicAnimation)
+		c.whatAmI = t
+		c.view = Stay
+		c.intervall = 1e8
+		c.visible = true
+		c.count = 1
+		c.delta = 1
+		c.pos = pixel.V(22*16, 4*16)
+		c.kpos = pixel.V(0, 4*16)
+		c.n = 1
+		c.kn = 7
+		c.width = pixel.V(16, 16)
+		c.kwidth = pixel.V(32, 32)
+		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.seesaw = true
+		c.lastUpdate = time.Now().UnixNano()
+		return c
+	case Brushwood:
+		c := new(basicAnimation)
+		c.whatAmI = t
+		c.view = Stay
+		c.intervall = 1e8
+		c.visible = true
+		c.count = 1
+		c.delta = 1
+		c.pos = pixel.V(21*16, 4*16)
+		c.kpos = pixel.V(0, 4*16)
+		c.n = 1
+		c.kn = 7
+		c.width = pixel.V(16, 16)
+		c.kwidth = pixel.V(32, 32)
+		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.seesaw = true
+		c.lastUpdate = time.Now().UnixNano()
+		return c
+	case Greenwall:
+		c := new(basicAnimation)
+		c.whatAmI = t
+		c.view = Stay
+		c.intervall = 1e8
+		c.visible = true
+		c.count = 1
+		c.delta = 1
+		c.pos = pixel.V(25*16, 4*16)
+		c.kpos = pixel.V(0, 4*16)
+		c.n = 1
+		c.kn = 7
+		c.width = pixel.V(16, 16)
+		c.kwidth = pixel.V(32, 32)
+		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.seesaw = true
+		c.lastUpdate = time.Now().UnixNano()
+		return c
+	case Greywall:
+		c := new(basicAnimation)
+		c.whatAmI = t
+		c.view = Stay
+		c.intervall = 1e8
+		c.visible = true
+		c.count = 1
+		c.delta = 1
+		c.pos = pixel.V(26*16, 4*16)
+		c.kpos = pixel.V(0, 4*16)
+		c.n = 1
+		c.kn = 7
+		c.width = pixel.V(16, 16)
+		c.kwidth = pixel.V(32, 32)
+		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.seesaw = true
+		c.lastUpdate = time.Now().UnixNano()
+		return c
+	case Brownwall:
+		c := new(basicAnimation)
+		c.whatAmI = t
+		c.view = Stay
+		c.intervall = 1e8
+		c.visible = true
+		c.count = 1
+		c.delta = 1
+		c.pos = pixel.V(26*16, 2*16)
+		c.kpos = pixel.V(0, 4*16)
+		c.n = 1
+		c.kn = 7
+		c.width = pixel.V(16, 16)
+		c.kwidth = pixel.V(32, 32)
+		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.seesaw = true
+		c.lastUpdate = time.Now().UnixNano()
+		return c
+	case Darkbrownwall:
+		c := new(basicAnimation)
+		c.whatAmI = t
+		c.view = Stay
+		c.intervall = 1e8
+		c.visible = true
+		c.count = 1
+		c.delta = 1
+		c.pos = pixel.V(25*16, 2*16)
+		c.kpos = pixel.V(0, 4*16)
+		c.n = 1
+		c.kn = 7
+		c.width = pixel.V(16, 16)
+		c.kwidth = pixel.V(32, 32)
+		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.seesaw = true
+		c.lastUpdate = time.Now().UnixNano()
+		return c
+	case Evergreen:
+		c := new(basicAnimation)
+		c.whatAmI = t
+		c.view = Stay
+		c.intervall = 1e8
+		c.visible = true
+		c.count = 1
+		c.delta = 1
+		c.pos = pixel.V(25*16, 3*16)
+		c.kpos = pixel.V(0, 4*16)
+		c.n = 1
+		c.kn = 7
+		c.width = pixel.V(16, 16)
+		c.kwidth = pixel.V(32, 32)
+		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.seesaw = true
+		c.lastUpdate = time.Now().UnixNano()
+		return c
+	case Tree:
+		c := new(basicAnimation)
+		c.whatAmI = t
+		c.view = Stay
+		c.intervall = 1e8
+		c.visible = true
+		c.count = 1
+		c.delta = 1
+		c.pos = pixel.V(26*16, 3*16)
+		c.kpos = pixel.V(0, 4*16)
+		c.n = 1
+		c.kn = 7
+		c.width = pixel.V(16, 16)
+		c.kwidth = pixel.V(32, 32)
+		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.seesaw = true
+		c.lastUpdate = time.Now().UnixNano()
+		return c
+	case Palmtree:
+		c := new(basicAnimation)
+		c.whatAmI = t
+		c.view = Stay
+		c.intervall = 1e8
+		c.visible = true
+		c.count = 1
+		c.delta = 1
+		c.pos = pixel.V(27*16, 3*16)
+		c.kpos = pixel.V(0, 4*16)
+		c.n = 1
+		c.kn = 7
+		c.width = pixel.V(16, 16)
+		c.kwidth = pixel.V(32, 32)
+		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.seesaw = true
+		c.lastUpdate = time.Now().UnixNano()
+		return c
+	case Perl:
+		c := new(basicAnimation)
+		c.whatAmI = t
+		c.view = Stay
+		c.intervall = 1e8
+		c.visible = true
+		c.count = 1
+		c.delta = 1
+		c.pos = pixel.V(26*16, 7*16)
+		c.kpos = pixel.V(0, 4*16)
+		c.n = 1
+		c.kn = 7
+		c.width = pixel.V(16, 16)
+		c.kwidth = pixel.V(32, 32)
+		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.seesaw = true
+		c.lastUpdate = time.Now().UnixNano()
+		return c
+	case Snowrock:
+		c := new(basicAnimation)
+		c.whatAmI = t
+		c.view = Stay
+		c.intervall = 1e8
+		c.visible = true
+		c.count = 1
+		c.delta = 1
+		c.pos = pixel.V(27*16, 2*16)
+		c.kpos = pixel.V(0, 4*16)
+		c.n = 1
+		c.kn = 7
+		c.width = pixel.V(16, 16)
+		c.kwidth = pixel.V(32, 32)
+		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.seesaw = true
+		c.lastUpdate = time.Now().UnixNano()
+		return c
+	case Greenrock:
+		c := new(basicAnimation)
+		c.whatAmI = t
+		c.view = Stay
+		c.intervall = 1e8
+		c.visible = true
+		c.count = 1
+		c.delta = 1
+		c.pos = pixel.V(25*16, 6*16)
+		c.kpos = pixel.V(0, 4*16)
+		c.n = 1
+		c.kn = 7
+		c.width = pixel.V(16, 16)
+		c.kwidth = pixel.V(32, 32)
+		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.seesaw = true
+		c.lastUpdate = time.Now().UnixNano()
+		return c
+	case House:
+		c := new(basicAnimation)
+		c.whatAmI = t
+		c.view = Stay
+		c.intervall = 1e8
+		c.visible = true
+		c.count = 1
+		c.delta = 1
+		c.pos = pixel.V(27*16, 6*16)
+		c.kpos = pixel.V(0, 4*16)
+		c.n = 1
+		c.kn = 7
+		c.width = pixel.V(16, 16)
+		c.kwidth = pixel.V(32, 32)
+		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.seesaw = true
+		c.lastUpdate = time.Now().UnixNano()
+		return c
+	case Christmastree:
+		c := new(basicAnimation)
+		c.whatAmI = t
+		c.view = Stay
+		c.intervall = 1e8
+		c.visible = true
+		c.count = 1
+		c.delta = 1
+		c.pos = pixel.V(27*16, 4*16)
+		c.kpos = pixel.V(0, 4*16)
+		c.n = 1
+		c.kn = 7
+		c.width = pixel.V(16, 32)
+		c.kwidth = pixel.V(32, 32)
+		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.seesaw = true
+		c.lastUpdate = time.Now().UnixNano()
+		return c
+	case Perl1:
+		c := new(basicAnimation)
+		c.whatAmI = t
+		c.view = Stay
+		c.intervall = 1e8
+		c.visible = true
+		c.count = 1
+		c.delta = 1
+		c.pos = pixel.V(23*16, 5*16)
+		c.kpos = pixel.V(0, 4*16)
+		c.n = 1
+		c.kn = 7
+		c.width = pixel.V(16, 16)
+		c.kwidth = pixel.V(32, 32)
+		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.seesaw = true
+		c.lastUpdate = time.Now().UnixNano()
+		return c
+	case Perl2:
+		c := new(basicAnimation)
+		c.whatAmI = t
+		c.view = Stay
+		c.intervall = 1e8
+		c.visible = true
+		c.count = 1
+		c.delta = 1
+		c.pos = pixel.V(24*16, 5*16)
+		c.kpos = pixel.V(0, 4*16)
+		c.n = 1
+		c.kn = 7
+		c.width = pixel.V(16, 16)
+		c.kwidth = pixel.V(32, 32)
+		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.seesaw = true
+		c.lastUpdate = time.Now().UnixNano()
+		return c
+	case Perl3:
+		c := new(basicAnimation)
+		c.whatAmI = t
+		c.view = Stay
+		c.intervall = 1e8
+		c.visible = true
+		c.count = 1
+		c.delta = 1
+		c.pos = pixel.V(25*16, 5*16)
+		c.kpos = pixel.V(0, 4*16)
+		c.n = 1
+		c.kn = 7
+		c.width = pixel.V(16, 16)
+		c.kwidth = pixel.V(32, 32)
+		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.seesaw = true
+		c.lastUpdate = time.Now().UnixNano()
+		return c
+	case Perl4:
+		c := new(basicAnimation)
+		c.whatAmI = t
+		c.view = Stay
+		c.intervall = 1e8
+		c.visible = true
+		c.count = 1
+		c.delta = 1
+		c.pos = pixel.V(26*16, 5*16)
+		c.kpos = pixel.V(0, 4*16)
+		c.n = 1
+		c.kn = 7
+		c.width = pixel.V(16, 16)
+		c.kwidth = pixel.V(32, 32)
+		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.seesaw = true
+		c.lastUpdate = time.Now().UnixNano()
+		return c
+	case Littlesnowrock:
+		c := new(basicAnimation)
+		c.whatAmI = t
+		c.view = Stay
+		c.intervall = 1e8
+		c.visible = true
+		c.count = 1
+		c.delta = 1
+		c.pos = pixel.V(24*16, 6*16)
+		c.kpos = pixel.V(0, 4*16)
+		c.n = 1
+		c.kn = 7
+		c.width = pixel.V(16, 16)
+		c.kwidth = pixel.V(32, 32)
+		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c

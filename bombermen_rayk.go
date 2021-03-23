@@ -95,6 +95,7 @@ func die(win *pixelgl.Window, wB characters.Enemy) {
 }
 
 func walkIn(win *pixelgl.Window, wB characters.Enemy) {
+	wB.Ani().SetView(Down)
 
 	//Figur kommt Betrachter entgegen und wird größer
 	for i := 0.1; i <= 2; i += 0.01 {
@@ -107,8 +108,9 @@ func walkIn(win *pixelgl.Window, wB characters.Enemy) {
 		}
 		win.Clear(colornames.Black)
 		wB.Ani().Update()
-		wB.Ani().GetSprite().Draw(win, pixel.IM.Moved(wB.GetMovedPos()))
-		win.SetMatrix(pixel.IM.Scaled(pixel.ZV, i*i).Moved(win.Bounds().Center()))
+		wB.Draw(win)
+		//wB.Ani().GetSprite().Draw(win, pixel.IM.Moved(wB.GetMovedPos()))
+		win.SetMatrix(pixel.IM.Scaled(wB.GetBaselineCenter(), i*i).Moved(win.Bounds().Center()))
 		win.Update()
 	}
 }
@@ -118,13 +120,14 @@ func stay(win *pixelgl.Window, wB characters.Enemy) {
 	wB.Ani().SetView(Stay)
 	wB.Ani().Update()
 	win.Clear(colornames.Black)
-	wB.SetPos(pixel.V(0, 0))
+	wB.MoveTo(pixel.V(0, 0))
 	wB.Ani().GetSprite().Draw(win, pixel.IM.Moved(wB.GetMovedPos()))
 	win.Update()
 	for !win.Pressed(pixelgl.KeyEnter) {
 		if win.Closed() {
 			break
 		}
+
 		if win.Pressed(pixelgl.KeyEscape) {
 			win.Destroy()
 			break
@@ -153,10 +156,9 @@ func walkAway(win *pixelgl.Window, wB characters.Enemy) {
 		}
 		wB.Ani().Update()
 		win.Clear(colornames.Black)
-		v := wB.GetPos()
 		dt = time.Since(last).Seconds()
 		last = time.Now()
-		wB.SetPos(v.Sub(pixel.V(wB.GetSpeed()*dt, 0)))
+		wB.Move(pixel.V(-wB.GetSpeed()*dt, 0))
 		wB.Ani().GetSprite().Draw(win, pixel.IM.Moved(wB.GetMovedPos()))
 		win.Update()
 	}
@@ -194,16 +196,13 @@ func run() {
 
 	s1 := sounds.NewSound(ThroughSpace)
 	go s1.PlaySound()
-	/*
-		win.Update()
-		time.Sleep(10 * time.Second)
-		showIntro(win)
 
+	showIntro(win)
 
-		time.Sleep(3 * time.Second)
+	time.Sleep(3 * time.Second)
 
-		fadeOut(win)
-	*/
+	fadeOut(win)
+
 	wB := characters.NewEnemy(PinkDevil)
 	wB.Ani().SetView(Intro)
 	wB.Ani().Show()

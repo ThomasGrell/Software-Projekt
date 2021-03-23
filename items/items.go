@@ -6,6 +6,7 @@ import (
 	. "../constants"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
+	"math"
 )
 
 /*
@@ -24,16 +25,24 @@ type data struct {
 type bombe struct {
 	data
 	owner characters.Player // Bombenbesitzer
-	power float64           // Wirkungsradius der Bomben
+
+	// Weshalb float64 und nicht uint8 ???
+	power float64 // Wirkungsradius der Bomben
+
+	// Der Bombe fehlt ein Zeitstempel, wann sie gelegt wurde,
+	// damit sie nach Ablauf einer Zeitspanne explodieren kann.
+	// Auch die Zeitspanne sollte man setzen können, um ggf
+	// später eine Fernzündung zu ermöglichen.
+	// Fernzündung -> lange Zeitspanne einstellen
+	// Normalzündung -> mittlere Zeitspanne einstellen
+	// Totenkopf -> kurze Zeitspanne einstellen? (ist nur so ne Idee)
 }
 
 func NewItem(t uint8, pos pixel.Vec) *data {
 	var item = new(data)
 	(*item).ani = animations.NewAnimation(t)
 	((*item).ani).Show()
-	mat := pixel.IM
-	mat = mat.Moved(pos)
-	(*item).matrix = mat
+	(*item).matrix = pixel.IM.Moved(pos)
 	(*item).pos = pos
 	return item
 }
@@ -44,11 +53,9 @@ func NewBomb(p characters.Player) *bombe {
 	(*bomb).power = float64(p.GetPower())
 	(*bomb).ani = animations.NewAnimation(Bomb)
 	((*bomb).ani).Show()
-	mat := pixel.IM
-	mat = mat.Moved(pixel.V(p.GetPos().X, p.GetPos().Y))
-	//fmt.Println(p.GetPos())
-	(*bomb).matrix = mat
-	(*bomb).pos = p.GetPos()
+	//fmt.Println(p.GetPosBox().Min)
+	(*bomb).pos = pixel.Vec{math.Round(p.GetPosBox().Center().X/16) * 16, math.Round(p.GetPosBox().Center().Y/16) * 16}
+	(*bomb).matrix = pixel.IM.Moved(bomb.pos)
 	return bomb
 }
 
