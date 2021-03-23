@@ -11,7 +11,6 @@ import (
 	. "../constants"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
-	"math"
 	//	"golang.org/x/image/colornames"
 )
 
@@ -39,17 +38,17 @@ type enemy struct {
 	follow bool // Folgt einem Spieler
 }
 type character struct {
-	minPos    pixel.Vec // Kollisionsbox unten links
-	size      pixel.Vec // Kollisionsbox Breite/Höhe
-	bombghost bool      // kann durch Bomben laufen
-	mortal    bool      // Sterblichkeit
-	wallghost bool      // kann durch Wände laufen
-	life      uint8     // verbleibende Anzahl der Leben
-	points    uint32    // Punkte
-	speed     float64
-	ani       animations.Animation
-	matrix    pixel.Matrix
-	scale     float64
+	collisionbox pixel.Rect // Kollisionsbox
+	size         pixel.Vec  // Größe der Kollisionsbox
+	bombghost    bool       // kann durch Bomben laufen
+	mortal       bool       // Sterblichkeit
+	wallghost    bool       // kann durch Wände laufen
+	life         uint8      // verbleibende Anzahl der Leben
+	points       uint32     // Punkte
+	speed        float64
+	ani          animations.Animation
+	matrix       pixel.Matrix
+	//	scale     float64
 }
 
 func NewPlayer(t uint8) *player {
@@ -57,7 +56,6 @@ func NewPlayer(t uint8) *player {
 	switch t {
 	case WhiteBomberman, BlackBomberman, BlueBomberman, RedBomberman:
 		*c = *bm
-		c.size = pixel.V(16, 24) // mit Bounds ????????????????????????????????????????????
 	case WhiteBattleman, BlackBattleman, BlueBattleman, RedBattleman:
 		*c = *bm
 		c.life = 1
@@ -65,15 +63,15 @@ func NewPlayer(t uint8) *player {
 		panic("Unknown Player")
 	}
 	c.ani = animations.NewAnimation(t)
-	(*c).matrix = pixel.IM
-	(*c).scale = 1.0
+	c.matrix = pixel.IM.Moved(c.GetMovedPos())
+	//	(*c).scale = 1.0
 	return c
 }
 func NewEnemy(t uint8) *enemy {
 	c := new(enemy)
 	*c = *en
 	c.ani = animations.NewAnimation(t)
-
+	c.matrix = pixel.IM.Moved(c.GetMovedPos())
 	switch t {
 	case Balloon:
 	case Teddy:
@@ -129,12 +127,6 @@ func (c *player) SetLife(l uint8)     { c.life = l }
 func (c *player) SetMaxBombs(b uint8) { c.maxBombs = b }
 func (c *player) SetMortal(b bool)    { c.mortal = b }
 func (c *player) SetWallghost(w bool) { c.wallghost = w }
-func (c *player) SetScale(s float64) {
-	(*c).scale = s
-	(*c).matrix = ((*c).matrix).ScaledXY((*c).minPos, pixel.V(s, s))
-	(*c).size = c.size.Scaled(s)
-	//(*c).minPos = pixel.V(math.Round(c.minPos.X - (s-1) * c.size.X/2), math.Round(c.minPos.Y - (s-1) * c.size.Y/2))
-}
 
 func (c *character) Ani() animations.Animation { return c.ani }
 func (c *character) DecLife() {
@@ -153,31 +145,20 @@ func (c *character) DecSpeed() {
 		c.speed -= 10
 	}
 }
-
 func (c *character) Draw(win *pixelgl.Window) {
-	((*c).ani).Update()
-	(((*c).ani).GetSprite()).Draw(win, (*c).matrix)
+	c.ani.Update()
+	c.ani.GetSprite().Draw(win, c.matrix)
 }
-
 func (c *character) GetBaselineCenter() pixel.Vec {
-	return c.minPos.Add(pixel.V(c.size.X/2, 0))
+	return c.collisionbox.Min.Add(pixel.V(c.size.X/2, 0))
 }
 func (c *character) GetPoints() uint32 { return c.points }
+func (c *character) GetPos() pixel.Vec { return c.collisionbox.Min }
 func (c *character) GetPosBox() pixel.Rect {
-	//fmt.Println(c.size.X)
-	return pixel.R(
-		math.Round(c.GetPos().X-6),  // -32 = - 24 (Mauerdicke) - 8 (Entfernung zwischen Mitte des Charakters und seinem Rand)
-		math.Round(c.GetPos().Y-12), // Warum 28? Eigentlich: -18 = - 6 (untere Mauer Dicke) - 12 (Entf. zw. Mitte des Char. und Rand in Y-Richtung)
-		math.Round(c.GetPos().X+6),
-		math.Round(c.GetPos().Y-0))
+	return c.collisionbox
 }
-
-func (c *character) GetPos() pixel.Vec {
-	return pixel.V(math.Round(c.minPos.X), math.Round(c.minPos.Y)) // WARUM  ???????????
-}
-
 func (c *character) GetMovedPos() pixel.Vec {
-	return c.minPos.Add(c.ani.ToBaseline()).Add(pixel.V(c.size.X/2, 0))
+	return c.GetBaselineCenter().Add(c.ani.ToBaseline())
 }
 func (c *character) GetSpeed() float64 { return c.speed }
 func (c *character) GetSize() pixel.Vec {
@@ -193,9 +174,29 @@ func (c *character) IsMortal() bool {
 }
 func (c *character) IsWallghost() bool   { return c.wallghost }
 func (c *character) SetBombghost(b bool) { c.bombghost = b }
+
+/*
+
+Wofür ist das gut? Skaliert wird das Fenster, nicht die Charaktere.
+
+func (c *character) SetScale(s float64) {
+	(*c).scale = s
+	(*c).matrix = ((*c).matrix).ScaledXY((*c).minPos, pixel.V(s, s))
+
+	(*c).size = c.size.Scaled(s)
+
+
+	//(*c).minPos = pixel.V(math.Round(c.minPos.X - (s-1) * c.size.X/2), math.Round(c.minPos.Y - (s-1) * c.size.Y/2))
+}
+*/
+
+func (c *character) Move(delta pixel.Vec) {
+	c.collisionbox = c.collisionbox.Moved(delta)
+	c.matrix = c.matrix.Moved(delta)
+}
 func (c *character) MoveTo(pos pixel.Vec) {
-	c.minPos = ((*c).minPos).Add(pos)
-	(*c).matrix = ((*c).matrix).Moved(pos) // NEU NEU NEU
+	c.collisionbox = pixel.Rect{pos, pos.Add(c.size)}
+	c.matrix = pixel.IM.Moved(c.GetMovedPos())
 }
 
 // init() wird beim Import dieses Packets automatisch ausgeführt.
@@ -211,6 +212,8 @@ func init() {
 	bm.mortal = true
 	bm.wallghost = false
 	bm.bombghost = false
+	bm.size = pixel.V(14, 14)
+	bm.collisionbox = pixel.Rect{pixel.Vec{0, 0}, bm.size}
 
 	// Monster Prototyp
 	en = new(enemy)
@@ -220,4 +223,6 @@ func init() {
 	en.wallghost = false
 	en.bombghost = false
 	en.follow = false
+	en.size = pixel.V(14, 14)
+	en.collisionbox = pixel.Rect{pixel.Vec{0, 0}, en.size}
 }
