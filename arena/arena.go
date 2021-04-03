@@ -12,8 +12,10 @@ import (
 )
 
 const tileSize float64 = 16
+const wallWidth float64 = 48
+const wallHeight float64 = 13
 
-type Arena struct {
+type data struct {
 	canvas           *pixelgl.Canvas
 	destroyableTiles [2][35]int
 	matrix           pixel.Matrix
@@ -22,11 +24,11 @@ type Arena struct {
 	//tiles           [11][13]int
 	untenLinks     pixel.Vec    // linke untere Spielfeldecke
 	wahrheitsKarte [15][17]bool // [Zeilen][Spalten]
-	w, h           float64
+	w, h           int
 }
 
-func NewArena(width, heigth float64) *Arena {
-	var a *Arena = new(Arena)
+func NewArena(width, heigth int) *data {
+	var a *data = new(data)
 	a.w = width
 	a.h = heigth
 	a.permTiles = setCabins()
@@ -47,8 +49,8 @@ func NewArena(width, heigth float64) *Arena {
 	//}
 	a.untenLinks = pixel.V(24, 6)
 	a.matrix = pixel.IM
-	a.matrix = a.matrix.Moved(pixel.V(width/2, heigth/2))
-	a.canvas = pixelgl.NewCanvas(pixel.R(0, 0, width, heigth))
+	a.matrix = a.matrix.Moved(pixel.V((float64(width)*tileSize+wallWidth)/2, (float64(heigth)*tileSize+wallHeight)/2))
+	a.canvas = pixelgl.NewCanvas(pixel.R(0, 0, float64(width)*tileSize+wallWidth, float64(heigth)*tileSize+wallHeight))
 	drawWallsNturf(a.canvas)
 	drawCabin(a.canvas, a)
 	a.drawStub(a.canvas)
@@ -59,26 +61,32 @@ func NewArena(width, heigth float64) *Arena {
 	return a
 }
 
-func (a *Arena) GetBoolMap() [15][17]bool {
+func (a *data) GetBoolMap() [15][17]bool {
 	return a.wahrheitsKarte
 }
-func (a *Arena) GetCanvas() *pixelgl.Canvas {
+func (a *data) GetCanvas() *pixelgl.Canvas {
 	return a.canvas
 }
-func (a *Arena) GetFieldCoord(v pixel.Vec) (x, y int) {
+func (a *data) GetFieldCoord(v pixel.Vec) (x, y int) {
 	var columns int = 13
 	var rows int = 11
 	x = int(math.Trunc((v.X-a.untenLinks.X)/tileSize))%(columns+1) + 2
 	y = int(math.Trunc((v.Y-a.untenLinks.Y)/tileSize))%(rows+1) + 2
 	return
 }
-func (a *Arena) GetMatrix() pixel.Matrix {
-	return a.matrix
+func (a *data) GetHeight() int {
+	return a.h
 }
-func GetTileSize() float64 {
+func (a *data) GetMatrix() *pixel.Matrix {
+	return &(a.matrix)
+}
+func (a *data) GetTileSize() float64 {
 	return tileSize
 }
-func (a *Arena) GrantedDirections(posBox pixel.Rect) [4]bool { // {links,rechts,oben,unten}
+func (a *data) GetWidth() int {
+	return a.w
+}
+func (a *data) GrantedDirections(posBox pixel.Rect) [4]bool { // {links,rechts,oben,unten}
 	var grDir [4]bool
 	var x1, x2, y1, y2 int
 	var columns int = 13
@@ -117,7 +125,7 @@ func (a *Arena) GrantedDirections(posBox pixel.Rect) [4]bool { // {links,rechts,
 	return grDir
 	//return [4]bool{grDir[0],grDir[1],true,true}
 }
-func (a *Arena) RemoveTile(x, y int) {
+func (a *data) RemoveTiles(x, y int) {
 	//for i := 14; i >= 0; i-- {
 	//	fmt.Println(a.wahrheitsKarte[i])
 	//}
@@ -283,7 +291,7 @@ func setStub() [2][35]int {
 	return locations
 }
 
-func putWallsOnMap(a *Arena) { // setzt die Kollisionsboxen in die kollisionKarte
+func putWallsOnMap(a *data) { // setzt die Kollisionsboxen in die kollisionKarte
 	for i := 1; i < 14; i++ {
 		for j := 1; j < 16; j++ {
 			if i < 2 || i > 12 { // first and last row
@@ -304,7 +312,7 @@ func putWallsOnMap(a *Arena) { // setzt die Kollisionsboxen in die kollisionKart
 	}
 }
 
-func (a *Arena) drawStub(can *pixelgl.Canvas) { // and SetStubs on kollisionsKarte !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+func (a *data) drawStub(can *pixelgl.Canvas) { // and SetStubs on kollisionsKarte !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	const numbOfCabs = 35
 	var stubRow [numbOfCabs]int
 	var stubColumn [numbOfCabs]int
@@ -335,7 +343,7 @@ func (a *Arena) drawStub(can *pixelgl.Canvas) { // and SetStubs on kollisionsKar
 	}
 }
 
-func drawCabin(can *pixelgl.Canvas, a *Arena) { // and SetCabins on kollisionsKarte !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+func drawCabin(can *pixelgl.Canvas, a *data) { // and SetCabins on kollisionsKarte !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	const numbOfCabs = 36
 	var cabinRow [numbOfCabs]int
 	var cabinColumn [numbOfCabs]int
