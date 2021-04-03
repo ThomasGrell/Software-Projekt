@@ -15,7 +15,7 @@ func sun() {
 	var winSizeY float64 = 672
 	var stepSize float64 = 1
 	var slice []items.Bombe
-	var turfNtreesArena *arena.Arena
+	var turfNtreesArena arena.Arena
 
 	wincfg := pixelgl.WindowConfig{
 		Title:  "Bomberman 2021",
@@ -27,16 +27,19 @@ func sun() {
 		panic(err)
 	}
 
-	turfNtreesArena = arena.NewArena(winSizeX, winSizeY)
+	turfNtreesArena = arena.NewArena(13,11 )
 
 	whiteBomberman := characters.NewPlayer(WhiteBomberman)
 	whiteBomberman.Ani().Show()
 
-A:
-	for i := 0; i < 15; i++ {
+// Put character at free space with at least two free neighbours in a row
+A:	for i := 0; i < 15; i++ {
 		for j := 0; j < 17; j++ {
-			if turfNtreesArena.GetBoolMap()[i][j] {
-				whiteBomberman.MoveTo(pixel.V(float64(j)*arena.GetTileSize(), float64(i)*arena.GetTileSize()-14)) // Hier bekommt die Animation ihren Ort.
+			if turfNtreesArena.GetBoolMap()[i][j] && turfNtreesArena.GetBoolMap()[i][j+1] && turfNtreesArena.GetBoolMap()[i][j+2] ||
+				turfNtreesArena.GetBoolMap()[i][j] && turfNtreesArena.GetBoolMap()[i][j-1] && turfNtreesArena.GetBoolMap()[i][j-2] ||
+				turfNtreesArena.GetBoolMap()[i][j] && turfNtreesArena.GetBoolMap()[i+1][j] && turfNtreesArena.GetBoolMap()[i+2][j] ||
+				turfNtreesArena.GetBoolMap()[i][j] && turfNtreesArena.GetBoolMap()[i-1][j] && turfNtreesArena.GetBoolMap()[i-2][j] {
+				whiteBomberman.Move(pixel.V(float64(j)*turfNtreesArena.GetTileSize(), float64(i-1)*turfNtreesArena.GetTileSize())) // why -1 ??????????????????
 				//fmt.Println(i,j)
 				break A
 			}
@@ -45,7 +48,7 @@ A:
 	}
 
 	win.Clear(colornames.Whitesmoke)
-	turfNtreesArena.GetCanvas().Draw(win, turfNtreesArena.GetMatrix())
+	turfNtreesArena.GetCanvas().Draw(win, *(turfNtreesArena.GetMatrix()))
 	whiteBomberman.Ani().Update()
 	win.SetMatrix(pixel.IM.Scaled(pixel.V(0, 0), 3))
 	win.Update()
@@ -73,26 +76,26 @@ A:
 			var item items.Bombe
 			item = items.NewBomb(characters.Player(whiteBomberman))
 			slice = append(slice, item)
-			x, y := turfNtreesArena.GetFieldCoord(whiteBomberman.GetPosBox().Min)
+			x, y := turfNtreesArena.GetFieldCoord(item.GetPos())
 			if x > 2 {
-				turfNtreesArena.RemoveTile(x-1, y)
+				turfNtreesArena.RemoveTiles(x-1, y)
 			}
 			if x < 14 {
-				turfNtreesArena.RemoveTile(x+1, y)
+				turfNtreesArena.RemoveTiles(x+1, y)
 			}
 			if y < 12 {
-				turfNtreesArena.RemoveTile(x, y+1)
+				turfNtreesArena.RemoveTiles(x, y+1)
 			}
 			if y > 2 {
-				turfNtreesArena.RemoveTile(x, y-1)
+				turfNtreesArena.RemoveTiles(x, y-1)
 			}
-			turfNtreesArena.GetCanvas().Draw(win, turfNtreesArena.GetMatrix())
+			turfNtreesArena.GetCanvas().Draw(win, *(turfNtreesArena.GetMatrix()))
 		}
 
 		//fmt.Println(whiteBomberman.GetPosBox(),"Size",whiteBomberman.GetSize())
 
 		win.Clear(colornames.Whitesmoke)
-		turfNtreesArena.GetCanvas().Draw(win, turfNtreesArena.GetMatrix())
+		turfNtreesArena.GetCanvas().Draw(win, *(turfNtreesArena.GetMatrix()))
 		for _, item := range slice {
 			item.(items.Bombe).Draw(win)
 		}
