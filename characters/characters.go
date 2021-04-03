@@ -56,6 +56,8 @@ func NewPlayer(t uint8) *player {
 	switch t {
 	case WhiteBomberman, BlackBomberman, BlueBomberman, RedBomberman:
 		*c = *bm
+		c.size = pixel.V(14,14)
+		c.collisionbox = pixel.R(-c.size.X/2,-c.size.Y*3/4, c.size.X/2, c.size.Y/4)
 	case WhiteBattleman, BlackBattleman, BlueBattleman, RedBattleman:
 		*c = *bm
 		c.life = 1
