@@ -12,7 +12,7 @@ type Arena interface {
 	//Vor.: /
 	//Erg.: Eine 15x17 Repräsentation des Spielfelds ist geliefert. Die unterste linke betretbare Ecke hat die
 	//		Koordinaten (2,2)
-	GetBoolMap() [15][17]bool
+	GetBoolMap() []bool
 
 	//Vor.: /
 	//Erg.: Die grafische Darstellung des Spielfelds inklusive Umrandung, Untergrund, permanenten und

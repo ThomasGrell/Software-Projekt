@@ -33,19 +33,20 @@ func sun() {
 	whiteBomberman.Ani().Show()
 
 // Put character at free space with at least two free neighbours in a row
-A:	for i := 0; i < 15; i++ {
-		for j := 0; j < 17; j++ {
-			if turfNtreesArena.GetBoolMap()[i][j] && turfNtreesArena.GetBoolMap()[i][j+1] && turfNtreesArena.GetBoolMap()[i][j+2] ||
-				turfNtreesArena.GetBoolMap()[i][j] && turfNtreesArena.GetBoolMap()[i][j-1] && turfNtreesArena.GetBoolMap()[i][j-2] ||
-				turfNtreesArena.GetBoolMap()[i][j] && turfNtreesArena.GetBoolMap()[i+1][j] && turfNtreesArena.GetBoolMap()[i+2][j] ||
-				turfNtreesArena.GetBoolMap()[i][j] && turfNtreesArena.GetBoolMap()[i-1][j] && turfNtreesArena.GetBoolMap()[i-2][j] {
-				whiteBomberman.Move(pixel.V(float64(j)*turfNtreesArena.GetTileSize(), float64(i-1)*turfNtreesArena.GetTileSize())) // why -1 ??????????????????
-				//fmt.Println(i,j)
-				break A
-			}
-		}
-
-	}
+//A:	for i := 0; i < 15; i++ {
+//		for j := 0; j < 17; j++ {
+//			if turfNtreesArena.GetBoolMap()[i][j] && turfNtreesArena.GetBoolMap()[i][j+1] && turfNtreesArena.GetBoolMap()[i][j+2] ||
+//				turfNtreesArena.GetBoolMap()[i][j] && turfNtreesArena.GetBoolMap()[i][j-1] && turfNtreesArena.GetBoolMap()[i][j-2] ||
+//				turfNtreesArena.GetBoolMap()[i][j] && turfNtreesArena.GetBoolMap()[i+1][j] && turfNtreesArena.GetBoolMap()[i+2][j] ||
+//				turfNtreesArena.GetBoolMap()[i][j] && turfNtreesArena.GetBoolMap()[i-1][j] && turfNtreesArena.GetBoolMap()[i-2][j] {
+//				whiteBomberman.Move(pixel.V(float64(j)*turfNtreesArena.GetTileSize(), float64(i-1)*turfNtreesArena.GetTileSize())) // why -1 ??????????????????
+//				//fmt.Println(i,j)
+//				break A
+//			}
+//		}
+//
+//	}
+	whiteBomberman.Move(pixel.V(float64(2)*turfNtreesArena.GetTileSize(), float64(3)*turfNtreesArena.GetTileSize()))
 
 	win.Clear(colornames.Whitesmoke)
 	turfNtreesArena.GetCanvas().Draw(win, *(turfNtreesArena.GetMatrix()))
@@ -55,7 +56,6 @@ A:	for i := 0; i < 15; i++ {
 
 	for !win.Closed() && !win.Pressed(pixelgl.KeyEscape) {
 		grDir := turfNtreesArena.GrantedDirections(whiteBomberman.GetPosBox()) // [4]bool left-right-up-down granted?
-
 		if win.Pressed(pixelgl.KeyLeft) && grDir[0] {
 			whiteBomberman.Move(pixel.V(-stepSize, 0))
 			whiteBomberman.Ani().SetView(Left)
@@ -91,8 +91,6 @@ A:	for i := 0; i < 15; i++ {
 			}
 			turfNtreesArena.GetCanvas().Draw(win, *(turfNtreesArena.GetMatrix()))
 		}
-
-		//fmt.Println(whiteBomberman.GetPosBox(),"Size",whiteBomberman.GetSize())
 
 		win.Clear(colornames.Whitesmoke)
 		turfNtreesArena.GetCanvas().Draw(win, *(turfNtreesArena.GetMatrix()))
