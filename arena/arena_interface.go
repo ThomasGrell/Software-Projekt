@@ -10,9 +10,9 @@ import (
 type Arena interface {
 
 	//Vor.: /
-	//Erg.: Eine 15x17 Repräsentation des Spielfelds ist geliefert. Die unterste linke betretbare Ecke hat die
-	//		Koordinaten (2,2)
-	GetBoolMap() []bool
+	//Erg.: Ein Slice der Länge (Spielfeldbreite x Spielfeldhöhe) ist geliefert. Jeder Eintrag repräsentiert die
+	//		Betretbarkeit einer Spielfeldkachel.
+	GetPassability() []bool
 
 	//Vor.: /
 	//Erg.: Die grafische Darstellung des Spielfelds inklusive Umrandung, Untergrund, permanenten und
@@ -26,6 +26,10 @@ type Arena interface {
 	//Vor.: /
 	//Erg.: Die Höhe des Spielfelds = Anzahl der Felder in senkrechter Richtung ist geliefert.
 	GetHeight() int
+
+	//Vor.: /
+	//Erg.: Die Pixelkoordinaten der linken unteren Spielfeldecke sind geliefert.
+	GetLowerLeft() pixel.Vec
 
 	//Vor.: /
 	//Erg.: Der Zeiger auf die Matrix, die der Arena zugrunde liegt, ist geliefert.

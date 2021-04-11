@@ -58,7 +58,7 @@ func NewArena(width, height int) *data {
 	return a
 }
 
-func (a *data) GetBoolMap() []bool {
+func (a *data) GetPassability() []bool {
 	return a.passability
 }
 func (a *data) GetCanvas() *pixelgl.Canvas {
@@ -71,6 +71,9 @@ func (a *data) GetFieldCoord(v pixel.Vec) (x, y int) {
 }
 func (a *data) GetHeight() int {
 	return a.h
+}
+func (a *data) GetLowerLeft() pixel.Vec {
+	return a.lowerLeft
 }
 func (a *data) GetMatrix() *pixel.Matrix {
 	return &(a.matrix)

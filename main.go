@@ -33,20 +33,18 @@ func sun() {
 	whiteBomberman.Ani().Show()
 
 // Put character at free space with at least two free neighbours in a row
-//A:	for i := 0; i < 15; i++ {
-//		for j := 0; j < 17; j++ {
-//			if turfNtreesArena.GetBoolMap()[i][j] && turfNtreesArena.GetBoolMap()[i][j+1] && turfNtreesArena.GetBoolMap()[i][j+2] ||
-//				turfNtreesArena.GetBoolMap()[i][j] && turfNtreesArena.GetBoolMap()[i][j-1] && turfNtreesArena.GetBoolMap()[i][j-2] ||
-//				turfNtreesArena.GetBoolMap()[i][j] && turfNtreesArena.GetBoolMap()[i+1][j] && turfNtreesArena.GetBoolMap()[i+2][j] ||
-//				turfNtreesArena.GetBoolMap()[i][j] && turfNtreesArena.GetBoolMap()[i-1][j] && turfNtreesArena.GetBoolMap()[i-2][j] {
-//				whiteBomberman.Move(pixel.V(float64(j)*turfNtreesArena.GetTileSize(), float64(i-1)*turfNtreesArena.GetTileSize())) // why -1 ??????????????????
-//				//fmt.Println(i,j)
-//				break A
-//			}
-//		}
-//
-//	}
-	whiteBomberman.Move(pixel.V(float64(2)*turfNtreesArena.GetTileSize(), float64(3)*turfNtreesArena.GetTileSize()))
+A:	for i := 2 * turfNtreesArena.GetWidth(); i < len(turfNtreesArena.GetPassability()) - 2 * turfNtreesArena.GetWidth(); i++ {	// Einschränkung des Wertebereichs von i um index out of range Probleme zu vermeiden
+		if turfNtreesArena.GetPassability()[i] && turfNtreesArena.GetPassability()[i-1] && turfNtreesArena.GetPassability()[i-2] ||	// checke links, rechts, oben, unten
+			turfNtreesArena.GetPassability()[i] && turfNtreesArena.GetPassability()[i+1] && turfNtreesArena.GetPassability()[i+2] ||
+			turfNtreesArena.GetPassability()[i] && turfNtreesArena.GetPassability()[i + turfNtreesArena.GetWidth()] &&
+				turfNtreesArena.GetPassability()[i+ 2 * turfNtreesArena.GetWidth()] ||
+			turfNtreesArena.GetPassability()[i] && turfNtreesArena.GetPassability()[i - turfNtreesArena.GetWidth()] &&
+				turfNtreesArena.GetPassability()[i - 2 * turfNtreesArena.GetWidth()] {
+			whiteBomberman.MoveTo(turfNtreesArena.GetLowerLeft().Add(pixel.V(float64(i % turfNtreesArena.GetWidth())*
+				turfNtreesArena.GetTileSize(), float64(i / turfNtreesArena.GetWidth())*turfNtreesArena.GetTileSize())))
+			break A
+		}
+	}
 
 	win.Clear(colornames.Whitesmoke)
 	turfNtreesArena.GetCanvas().Draw(win, *(turfNtreesArena.GetMatrix()))
