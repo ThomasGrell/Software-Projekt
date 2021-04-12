@@ -1,6 +1,7 @@
 package arena
 
 import (
+	. "../constants"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	"image"
@@ -11,9 +12,9 @@ import (
 	"time"
 )
 
-const tileSize float64 = 16
-const wallWidth float64 = 48
-const wallHeight float64 = 13
+//const TileSize float64 = 16
+const WallWidth float64 = 48
+const WallHeight float64 = 13
 
 type data struct {
 	canvas           *pixelgl.Canvas
@@ -28,12 +29,12 @@ type data struct {
 
 func NewArena(width, height int) *data {
 	var a *data = new(data)
-	var s []bool = make([]bool,width*height)
 	a.w = width
 	a.h = height
-	a.permTiles = setCabins()
-	a.destroyableTiles = setStub()
-	a.passability = s
+	a.setPermTiles()
+	a.setDestroyableTiles()
+	a.passability = make([]bool, width*height)
+
 	//fmt.Println(a.passability)
 	for i := range a.passability { a.passability[i] = true }
 	for i := range a.passability {
@@ -50,11 +51,11 @@ func NewArena(width, height int) *data {
 	}
 	a.lowerLeft = pixel.V(24, 6)
 	a.matrix = pixel.IM
-	a.matrix = a.matrix.Moved(pixel.V((float64(width)*tileSize+wallWidth)/2, (float64(height)*tileSize+wallHeight)/2))
-	a.canvas = pixelgl.NewCanvas(pixel.R(0, 0, float64(width)*tileSize+wallWidth, float64(height)*tileSize+wallHeight))
-	drawWallsNturf(a.canvas)
-	drawCabin(a.canvas, a)
-	a.drawStub(a.canvas)
+	a.matrix = a.matrix.Moved(pixel.V((float64(width)*TileSize+WallWidth)/2, (float64(height)*TileSize+WallHeight)/2))
+	a.canvas = pixelgl.NewCanvas(pixel.R(0, 0, float64(width)*TileSize+WallWidth, float64(height)*TileSize+WallHeight))
+	a.drawWallsAndGround()
+	a.drawPermTiles()
+	a.drawDestroyableTiles()
 	return a
 }
 
@@ -65,8 +66,8 @@ func (a *data) GetCanvas() *pixelgl.Canvas {
 	return a.canvas
 }
 func (a *data) GetFieldCoord(v pixel.Vec) (x, y int) {
-	x = int(math.Trunc((v.X-a.lowerLeft.X)/tileSize))%(a.w+1) + 2
-	y = int(math.Trunc((v.Y-a.lowerLeft.Y)/tileSize))%(a.h+1) + 2
+	x = int(math.Trunc((v.X-a.lowerLeft.X)/TileSize))%(a.w+1) + 2
+	y = int(math.Trunc((v.Y-a.lowerLeft.Y)/TileSize))%(a.h+1) + 2
 	return
 }
 func (a *data) GetHeight() int {
@@ -78,8 +79,11 @@ func (a *data) GetLowerLeft() pixel.Vec {
 func (a *data) GetMatrix() *pixel.Matrix {
 	return &(a.matrix)
 }
+func (a *data) GetPermTiles() [2][36]int {
+	return a.permTiles
+}
 func (a *data) GetTileSize() float64 {
-	return tileSize
+	return TileSize
 }
 func (a *data) GetWidth() int {
 	return a.w
@@ -87,13 +91,13 @@ func (a *data) GetWidth() int {
 func (a *data) GrantedDirections(posBox pixel.Rect) [4]bool { // {links,rechts,oben,unten}
 	var grDir [4]bool
 	var x1, x2, y1, y2 int
-	x1 = int(math.Trunc((posBox.Min.X-a.lowerLeft.X)/tileSize))%(a.w+1)
-	y1 = int(math.Trunc((posBox.Min.Y-a.lowerLeft.Y)/tileSize))%(a.h+1)
-	x2 = int(math.Trunc((posBox.Max.X-a.lowerLeft.X)/tileSize))%(a.w+1)
-	y2 = int(math.Trunc((posBox.Max.Y-a.lowerLeft.Y)/tileSize))%(a.h+1)
+	x1 = int(math.Trunc((posBox.Min.X-a.lowerLeft.X)/TileSize))%(a.w+1)
+	y1 = int(math.Trunc((posBox.Min.Y-a.lowerLeft.Y)/TileSize))%(a.h+1)
+	x2 = int(math.Trunc((posBox.Max.X-a.lowerLeft.X)/TileSize))%(a.w+1)
+	y2 = int(math.Trunc((posBox.Max.Y-a.lowerLeft.Y)/TileSize))%(a.h+1)
 	if posBox.Min.X-1 > a.lowerLeft.X {
 		if !a.passability[(y1)*a.w+x2-1] || !a.passability[(y2)*a.w+x2-1] { // if a unpassable field is left of the posBox
-			if posBox.Min.X-1 > a.lowerLeft.X+float64(x2)*tileSize {
+			if posBox.Min.X-1 > a.lowerLeft.X+float64(x2)*TileSize {
 				grDir[0] = true
 
 			} else {
@@ -105,9 +109,9 @@ func (a *data) GrantedDirections(posBox pixel.Rect) [4]bool { // {links,rechts,o
 	} else {
 		grDir[0] = false
 	}
-	if posBox.Max.X+1 < a.lowerLeft.X + float64(a.w)*tileSize {
+	if posBox.Max.X+1 < a.lowerLeft.X + float64(a.w)*TileSize {
 		if !a.passability[((y1)*a.w+x1+1) % 143] || !a.passability[((y2)*a.w+x1+1) % 143] { // if a unpassable field is left of the posBox
-			if posBox.Max.X+1 < a.lowerLeft.X+float64(x1+1)*tileSize {
+			if posBox.Max.X+1 < a.lowerLeft.X+float64(x1+1)*TileSize {
 				grDir[1] = true
 			} else {
 				grDir[1] = false
@@ -118,9 +122,9 @@ func (a *data) GrantedDirections(posBox pixel.Rect) [4]bool { // {links,rechts,o
 	} else {
 		grDir[1] = false
 	}
-	if posBox.Max.Y+1 < a.lowerLeft.Y + float64(a.h)*tileSize {
+	if posBox.Max.Y+1 < a.lowerLeft.Y + float64(a.h)*TileSize {
 		if !a.passability[((y1+1)*a.w+x1) % 143] || !a.passability[((y1+1)*a.w+x2) % 143] { // if a unpassable field is left of the posBox
-			if posBox.Max.Y+1 < a.lowerLeft.Y+float64(y2+1)*tileSize {
+			if posBox.Max.Y+1 < a.lowerLeft.Y+float64(y2+1)*TileSize {
 				grDir[2] = true
 			} else {
 				grDir[2] = false
@@ -133,7 +137,7 @@ func (a *data) GrantedDirections(posBox pixel.Rect) [4]bool { // {links,rechts,o
 	}
 	if posBox.Min.Y-1 > a.lowerLeft.Y {
 		if !a.passability[modulus((y2-1)*a.w+x1)] || !a.passability[modulus((y2-1)*a.w+x2)] { // if a unpassable field is left of the posBox
-			if posBox.Min.Y-1 > a.lowerLeft.Y+float64(y2)*tileSize {
+			if posBox.Min.Y-1 > a.lowerLeft.Y+float64(y2)*TileSize {
 				grDir[3] = true
 			} else {
 				grDir[3] = false
@@ -148,23 +152,23 @@ func (a *data) GrantedDirections(posBox pixel.Rect) [4]bool { // {links,rechts,o
 	//return [4]bool{grDir[0],grDir[1],true,true}
 }
 func (a *data) RemoveTiles(x, y int) {
-	k := checkCoordsOfDestroyables(x, y, a.destroyableTiles)
+	k := a.checkCoordsOfDestroyables(x, y)
 	if k != -1 { // 42 als Fehlerfall: diese Koordinaten wurden nicht gefunden
 		a.destroyableTiles[0][k] = -1	// -1 als "nil-Koordinate"
 		a.destroyableTiles[1][k] = -1
 		a.passability[(y-2)*a.w + (x-2)] = true
-		drawWallsNturf(a.canvas)
-		drawCabin(a.canvas, a)
-		a.drawStub(a.canvas)
+		a.drawWallsAndGround()
+		a.drawPermTiles()
+		a.drawDestroyableTiles()
 	}
 }
 
 //------------------------- Hilfsfunktionen ---------------------------------
 
-func checkCoordsOfDestroyables(x, y int, locations [2][35]int) int {
+func (a *data) checkCoordsOfDestroyables(x, y int) int {
 	var j int
 	for i := 0; i < 35; i++ {
-		if locations[0][i] == x && locations[1][i] == y {
+		if a.destroyableTiles[0][i] == x && a.destroyableTiles[1][i] == y {
 			j = i
 			return j
 		}
@@ -186,22 +190,19 @@ func loadPicture(path string) (pixel.Picture, error) {
 	return pixel.PictureDataFromImage(img), nil
 }
 
-func checkFreeTiles(x, y int, locations [2][35]int) (u int, v int, w bool) {
-	var cabinTiles [2][36]int = setCabins()
-	w = true
-	u = x
-	v = y
+func (a *data) checkTileStatus(x, y int) (int, int, bool) {	// checkt, ob die Kachel (x,y) belegt ist
+	var w bool = true
 	for i := 0; i < 36; i++ {
-		if cabinTiles[0][i] == x && cabinTiles[1][i] == y {
+		if a.permTiles[0][i] == x && a.permTiles[1][i] == y {
 			w = false
 		}
 	}
 	for i := 0; i < 35; i++ {
-		if locations[0][i] == x && locations[1][i] == y {
+		if a.destroyableTiles[0][i] == x && a.destroyableTiles[1][i] == y {
 			w = false
 		}
 	}
-	return
+	return x, y, w
 }
 // Berechnet den Betrag eines int-Wertes
 func modulus (x int) int {
@@ -212,150 +213,65 @@ func modulus (x int) int {
 	}
 }
 // Erzeugt x-y-Koordinaten der Häuser für eine Spielfeldmatrix (13x11 Matrix)
-func setCabins() [2][36]int {
-	var locations [2][36]int
+func (a *data) setPermTiles() {
 	//rand.Seed(time.Now().UnixNano())
 	//for i := range locations[0] {
-	//	locations[0][i] = rand.Intn(13)+2
-	//	locations[1][i] = rand.Intn(11)+2
+	//	a.permTiles[0][i] = rand.Intn(13)+2
+	//	a.permTiles[1][i] = rand.Intn(11)+2
 	//}
-	locations[0][0] = 3
-	locations[0][1] = 5
-	locations[0][2] = 7
-	locations[0][3] = 9
-	locations[0][4] = 11
-	locations[0][5] = 13
-	locations[1][0] = 3
-	locations[1][1] = 3
-	locations[1][2] = 3
-	locations[1][3] = 3
-	locations[1][4] = 3
-	locations[1][5] = 3
-	locations[0][6] = 10
-	locations[0][7] = 11
-	locations[0][8] = 12
-	locations[0][9] = 3
-	locations[0][10] = 5
-	locations[0][11] = 7
-	locations[1][6] = 4
-	locations[1][7] = 4
-	locations[1][8] = 4
-	locations[1][9] = 5
-	locations[1][10] = 5
-	locations[1][11] = 5
-	locations[0][12] = 9
-	locations[0][13] = 11
-	locations[0][14] = 12
-	locations[0][15] = 13
-	locations[0][16] = 3
-	locations[0][17] = 5
-	locations[1][12] = 5
-	locations[1][13] = 5
-	locations[1][14] = 5
-	locations[1][15] = 5
-	locations[1][16] = 7
-	locations[1][17] = 7
-	locations[0][18] = 7
-	locations[0][19] = 9
-	locations[0][20] = 11
-	locations[0][21] = 13
-	locations[0][22] = 3
-	locations[0][23] = 5
-	locations[1][18] = 7
-	locations[1][19] = 7
-	locations[1][20] = 7
-	locations[1][21] = 7
-	locations[1][22] = 9
-	locations[1][23] = 9
-	locations[0][24] = 7
-	locations[0][25] = 9
-	locations[0][26] = 11
-	locations[0][27] = 13
-	locations[0][28] = 4
-	locations[0][29] = 3
-	locations[1][24] = 9
-	locations[1][25] = 9
-	locations[1][26] = 9
-	locations[1][27] = 9
-	locations[1][28] = 10
-	locations[1][29] = 11
-	locations[0][30] = 5
-	locations[0][31] = 7
-	locations[0][32] = 9
-	locations[0][33] = 11
-	locations[0][34] = 13
-	locations[0][35] = 9
-	locations[1][30] = 11
-	locations[1][31] = 11
-	locations[1][32] = 11
-	locations[1][33] = 11
-	locations[1][34] = 11
-	locations[1][35] = 12
-	return locations
+	a.permTiles = [2][36]int{
+		{3, 5, 7, 9, 11, 13, 10, 11, 12, 3, 5, 7, 9, 11, 12, 13, 3, 5, 7, 9, 11, 13, 3, 5, 7, 9, 11, 13, 4, 3, 5, 7, 9, 11, 13, 9},
+		{3,3,3,3,3,3,4,4,4,5,5,5,5,5,5,5,7,7,7,7,7,7,9,9,9,9,9,9,10,11,11,11,11,11,11,12}}
 }
 
 // Erzeugt x-y-Koordinaten der Baumstümpfe für eine Spielfeldmatrix (13x11 Matrix)
-func setStub() [2][35]int {
-	var locations [2][35]int
+func (a *data) setDestroyableTiles() {
 	rand.Seed(time.Now().UnixNano())
 	for i := 0; i < 35; i++ {
 		for {
-			x, y, w := checkFreeTiles(rand.Intn(13)+2, rand.Intn(11)+2, locations)
+			x, y, w := a.checkTileStatus(rand.Intn(13)+2, rand.Intn(11)+2)
 			if w {
-				locations[0][i] = x
-				locations[1][i] = y
+				a.destroyableTiles[0][i] = x
+				a.destroyableTiles[1][i] = y
 				break
 			}
 		}
 	}
-	return locations
 }
 
-func (a *data) drawStub(can *pixelgl.Canvas) { // and SetStubs on kollisionsKarte !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	const numbOfCabs = 35
-	var stubRow [numbOfCabs]int
-	var stubColumn [numbOfCabs]int
-	stubCoord := a.destroyableTiles
-	stubRow = stubCoord[1]
-	stubColumn = stubCoord[0]
+func (a *data) drawDestroyableTiles() {
 	tilesPic, err := loadPicture("graphics/tiles.png")
 	if err != nil {
 		panic(err)
 	}
-	stub := pixel.NewSprite(tilesPic, pixel.R(80, 304, 96, 288))
-	stubMat := pixel.IM
-	stubMat = stubMat.Moved(pixel.V(tileSize/2, tileSize/2).Add(a.lowerLeft))
-	for i := 0; i < 35; i++ {
-		if stubColumn[i] != -1 {
-			stubMat = stubMat.Moved(pixel.V(float64(stubColumn[i]-2)*tileSize, float64(stubRow[i]-2)*tileSize))
-			stub.Draw(can, stubMat)
-			stubMat = stubMat.Moved(pixel.V(-float64(stubColumn[i]-2)*tileSize, -float64(stubRow[i]-2)*tileSize))
+	destrSprite := pixel.NewSprite(tilesPic, pixel.R(80, 304, 96, 288))
+	destrMat := pixel.IM
+	destrMat = destrMat.Moved(pixel.V(TileSize/2, TileSize/2).Add(a.lowerLeft))
+	for i := range a.destroyableTiles[0] {
+		if a.destroyableTiles[0][i] != -1 {
+			destrMat = destrMat.Moved(pixel.V(float64(a.destroyableTiles[0][i]-2)*TileSize, float64(a.destroyableTiles[1][i]-2)*TileSize))
+			destrSprite.Draw(a.canvas, destrMat)
+			destrMat = destrMat.Moved(pixel.V(-float64(a.destroyableTiles[0][i]-2)*TileSize, -float64(a.destroyableTiles[1][i]-2)*TileSize))
 		}
 	}
 }
 
-func drawCabin(can *pixelgl.Canvas, a *data) {
-	const numbOfCabs = 36
-	var cabinRow [numbOfCabs]int
-	var cabinColumn [numbOfCabs]int
-	cabinCoord := a.permTiles
-	cabinRow = cabinCoord[1]
-	cabinColumn = cabinCoord[0]
+func (a *data) drawPermTiles() {
 	tilesPic, err := loadPicture("graphics/tiles.png")
 	if err != nil {
 		panic(err)
 	}
-	cabin := pixel.NewSprite(tilesPic, pixel.R(64, 304, 80, 288))
-	cabinMat := pixel.IM
-	cabinMat = cabinMat.Moved(pixel.V(tileSize/2, tileSize/2).Add(a.lowerLeft))
-	for i := range cabinRow {
-		cabinMat = cabinMat.Moved(pixel.V(float64(cabinColumn[i]-2)*tileSize, float64(cabinRow[i]-2)*tileSize))
-		cabin.Draw(can, cabinMat)
-		cabinMat = cabinMat.Moved(pixel.V(-float64(cabinColumn[i]-2)*tileSize, -float64(cabinRow[i]-2)*tileSize))
+	permSprite := pixel.NewSprite(tilesPic, pixel.R(64, 304, 80, 288))
+	permMat := pixel.IM
+	permMat = permMat.Moved(pixel.V(TileSize/2, TileSize/2).Add(a.lowerLeft))
+	for i := range a.permTiles[0]{
+		permMat = permMat.Moved(pixel.V(float64(a.permTiles[0][i]-2)*TileSize, float64(a.permTiles[1][i]-2)*TileSize))
+		permSprite.Draw(a.canvas, permMat)
+		permMat = permMat.Moved(pixel.V(-float64(a.permTiles[0][i]-2)*TileSize, -float64(a.permTiles[1][i]-2)*TileSize))
 	}
 }
 
-func drawWallsNturf(can *pixelgl.Canvas) { // zeichnet die Umrandung und die Wiese
+func (a *data) drawWallsAndGround() { // zeichnet die Umrandung und die Wiese
 	//var winSizeX float64 = 768 // DIESE FENSTERGRÖẞE WIRD OPTIMAL AUSGEFÜLLT (bei zoomFactor 3)
 	//var winSizeY float64 = 672
 
@@ -429,36 +345,36 @@ func drawWallsNturf(can *pixelgl.Canvas) { // zeichnet die Umrandung und die Wie
 	turfMat := pixel.IM
 	turfMat = turfMat.Moved(pixel.V(2*wallLeftCenterX+turfCenterX, 2*loWallCenterY+turfCenterY))
 
-	edgeLowLeft.Draw(can, edgeLowLeftMat)
-	wallLeft.Draw(can, wallLeftMat)
-	edgeHiLeft.Draw(can, edgeHiLeftMat)
-	hiWall.Draw(can, hiWallMat)
-	edgeHiRight.Draw(can, edgeHiRightMat)
-	wallRight.Draw(can, wallRightMat)
-	edgeLowRight.Draw(can, edgeLowRightMat)
-	loWall.Draw(can, loWallMat)
+	edgeLowLeft.Draw(a.canvas, edgeLowLeftMat)
+	wallLeft.Draw(a.canvas, wallLeftMat)
+	edgeHiLeft.Draw(a.canvas, edgeHiLeftMat)
+	hiWall.Draw(a.canvas, hiWallMat)
+	edgeHiRight.Draw(a.canvas, edgeHiRightMat)
+	wallRight.Draw(a.canvas, wallRightMat)
+	edgeLowRight.Draw(a.canvas, edgeLowRightMat)
+	loWall.Draw(a.canvas, loWallMat)
 
 	wallLeftShift := 2 * wallLeftCenterY
 	for i := 0; i < shortSideWallParts; i++ { // draws left wall
 		wallLeftMat = wallLeftMat.Moved(pixel.V(0, wallLeftShift))
-		wallLeft.Draw(can, wallLeftMat)
+		wallLeft.Draw(a.canvas, wallLeftMat)
 		wallRightMat = wallRightMat.Moved(pixel.V(0, wallLeftShift))
-		wallRight.Draw(can, wallRightMat)
+		wallRight.Draw(a.canvas, wallRightMat)
 	}
 	hiWallShift := 2 * hiWallCenterX
 	for i := 0; i < longSideWallParts; i++ {
 		hiWallMat = hiWallMat.Moved(pixel.V(hiWallShift, 0))
-		hiWall.Draw(can, hiWallMat)
+		hiWall.Draw(a.canvas, hiWallMat)
 		loWallMat = loWallMat.Moved(pixel.V(hiWallShift, 0))
-		loWall.Draw(can, loWallMat)
+		loWall.Draw(a.canvas, loWallMat)
 	}
 	turfRightShift := 2 * turfCenterX
 	turfUpShift := 2 * turfCenterY
 	for i := 0; i <= shortSideWallParts+2; i++ { // es sind 2 Wandteile weniger als Kacheln
-		turf.Draw(can, turfMat)
+		turf.Draw(a.canvas, turfMat)
 		for j := 0; j < longSideWallParts; j++ { // one is already drawn in the line before
 			turfMat = turfMat.Moved(pixel.V(turfRightShift, 0))
-			turf.Draw(can, turfMat)
+			turf.Draw(a.canvas, turfMat)
 		}
 		turfMat = turfMat.Moved(pixel.V(float64(-(longSideWallParts))*turfRightShift, turfUpShift))
 	}

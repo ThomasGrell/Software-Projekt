@@ -41,7 +41,7 @@ A:	for i := 2 * turfNtreesArena.GetWidth(); i < len(turfNtreesArena.GetPassabili
 			turfNtreesArena.GetPassability()[i] && turfNtreesArena.GetPassability()[i - turfNtreesArena.GetWidth()] &&
 				turfNtreesArena.GetPassability()[i - 2 * turfNtreesArena.GetWidth()] {
 			whiteBomberman.MoveTo(turfNtreesArena.GetLowerLeft().Add(pixel.V(float64(i % turfNtreesArena.GetWidth())*
-				turfNtreesArena.GetTileSize(), float64(i / turfNtreesArena.GetWidth())*turfNtreesArena.GetTileSize())))
+				TileSize, float64(i / turfNtreesArena.GetWidth())*TileSize)))
 			break A
 		}
 	}

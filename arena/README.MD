@@ -24,7 +24,7 @@ Dieses könnte man über Konstanten in constants.go regeln.
 In mehreren Methoden werden bisher die Variablen "columns" und "rows"
 konstant belegt. Eine Anpassung für andere Arenen erfordert viele manuelle Änderungen.
 Gleiches gilt für locations[2][35].
-### columns und rows sind raus, locations noch nicht.
+### columns, rows und locations sind raus.
 
 ## Speicherschwein Kollisionskarte
 Die Kollisionskarte umfasst aktuell 15x17x4x8 = 8160 Byte.

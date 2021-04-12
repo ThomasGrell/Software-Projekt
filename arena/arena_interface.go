@@ -36,6 +36,10 @@ type Arena interface {
 	GetMatrix() *pixel.Matrix
 
 	//Vor.: /
+	//Erg.: Das Array, das die Koordinaten der unzerstörbaren Kacheln enthält ist geliefert.
+	GetPermTiles() [2][36]int
+
+	//Vor.: /
 	//Erg.: Die Kantenlänge der Feldelemente (Kacheln) ist geliefert.
 	GetTileSize() float64
 

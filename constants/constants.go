@@ -89,3 +89,9 @@ const (
 
 	Deathflash = 100
 )
+
+const (
+	TileSize = 16
+	WallWidth = 32
+	WallHeight = 16
+)
