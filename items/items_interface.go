@@ -6,6 +6,7 @@ import (
 	"../characters"
 	"github.com/faiface/pixel/pixelgl"
 	"github.com/faiface/pixel"
+	"time"
 )
 
 
@@ -70,6 +71,16 @@ type Item interface{
 	 */
 	GetPos () pixel.Vec
 	
+	/*	Vor.: -
+	 * 	Eff.: Der Zeitpunkt, ab dem das Item nicht mehr existieren sollte ist geliefert. 
+	 */
+	GetTimeStamp () time.Time
+	
+	/*	Vor.: -
+	 * 	Eff.: Die ZeichenMatrix, des Items ist geliefert
+	 */
+	GetMatrix() pixel.Matrix
+	
 }
 
 type Bombe interface {
@@ -86,5 +97,14 @@ type Bombe interface {
 	 */
 	SetOwner (player characters.Player)
 	
+	/*	Vor.: -
+	 * 	Eff.: Die Animation der Bombe ist nun verändert
+	 */
+	SetAnimation(animations.Animation)
+	
+	/*	Vor.: -
+	 * 	Eff.: Wirkungsradius der Bombe ist geliefert
+	 */
+	GetPower() float64
 	
 }

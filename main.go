@@ -2,12 +2,15 @@ package main
 
 import (
 	"./arena"
+	"./animations"
 	"./characters"
 	. "./constants"
 	"./items"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	"golang.org/x/image/colornames"
+	"time"
+	"fmt"
 )
 
 func sun() {
@@ -15,6 +18,8 @@ func sun() {
 	var winSizeY float64 = 672
 	var stepSize float64 = 1
 	var slice []items.Bombe
+	var tempslice []animations.Animation
+	var tempMatrix []pixel.Matrix
 	var turfNtreesArena arena.Arena
 
 	wincfg := pixelgl.WindowConfig{
@@ -70,30 +75,61 @@ A:	for i := 2 * turfNtreesArena.GetWidth(); i < len(turfNtreesArena.GetPassabili
 			whiteBomberman.Move(pixel.V(0, -stepSize))
 			whiteBomberman.Ani().SetView(Down)
 		}
-		if win.Pressed(pixelgl.KeyB) {
+		if win.JustPressed(pixelgl.KeyB) {
 			var item items.Bombe
 			item = items.NewBomb(characters.Player(whiteBomberman))
 			slice = append(slice, item)
-			x, y := turfNtreesArena.GetFieldCoord(item.GetPos())
-			if x > 2 {
-				turfNtreesArena.RemoveTiles(x-1, y)
-			}
-			if x < 14 {
-				turfNtreesArena.RemoveTiles(x+1, y)
-			}
-			if y < 12 {
-				turfNtreesArena.RemoveTiles(x, y+1)
-			}
-			if y > 2 {
-				turfNtreesArena.RemoveTiles(x, y-1)
-			}
-			turfNtreesArena.GetCanvas().Draw(win, *(turfNtreesArena.GetMatrix()))
+			
 		}
 
 		win.Clear(colornames.Whitesmoke)
 		turfNtreesArena.GetCanvas().Draw(win, *(turfNtreesArena.GetMatrix()))
-		for _, item := range slice {
-			item.(items.Bombe).Draw(win)
+		for index,item := range slice {
+			if ((item).GetTimeStamp()).Before(time.Now()) {
+				if len(slice)==1 {
+					slice = slice[:0]
+				} else {
+					fmt.Println(slice)
+					slice = append(slice[0:index],slice[index+1:]...)
+				}
+				var l,r,u,d uint8
+				l = 3
+				r = 3
+				u = 3
+				d = 3
+				ani := animations.NewExplosion(l,r,u,d)
+				ani.Show()
+				tempslice = append(tempslice,ani)
+				tempMatrix = append(tempMatrix,item.GetMatrix())
+				
+				x, y := turfNtreesArena.GetFieldCoord(item.GetPos())
+				if x > 2 {
+					for i:=0; i<int(l); i++ {
+						turfNtreesArena.RemoveTiles(x-i, y)
+					}
+				}
+				if x < 14 {
+					for i:=0; i<int(r); i++ {
+						turfNtreesArena.RemoveTiles(x+i, y)
+					}
+				}
+				if y < 12 {
+					for i:=0; i<int(u); i++ {
+						turfNtreesArena.RemoveTiles(x, y+i)
+					}
+				}
+				if y > 2 {
+					for i:=0; i<int(d); i++ {
+						turfNtreesArena.RemoveTiles(x,y-i)
+					}
+				}
+				turfNtreesArena.GetCanvas().Draw(win, *(turfNtreesArena.GetMatrix()))
+			}
+			item.Draw(win)
+		}
+		for index,a := range(tempslice) {
+			a.Update()
+			(a.GetSprite()).Draw(win,tempMatrix[index])
 		}
 		whiteBomberman.Draw(win)
 		win.Update()

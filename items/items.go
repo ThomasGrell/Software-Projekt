@@ -7,6 +7,7 @@ import (
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	"math"
+	"time"
 )
 
 /*
@@ -20,6 +21,8 @@ type data struct {
 	ani         animations.Animation
 	matrix      pixel.Matrix
 	pos         pixel.Vec
+	timeStamp 	time.Time
+	itemType uint8
 }
 
 type bombe struct {
@@ -28,7 +31,7 @@ type bombe struct {
 
 	// Weshalb float64 und nicht uint8 ???
 	power float64 // Wirkungsradius der Bomben
-
+	
 	// Der Bombe fehlt ein Zeitstempel, wann sie gelegt wurde,
 	// damit sie nach Ablauf einer Zeitspanne explodieren kann.
 	// Auch die Zeitspanne sollte man setzen können, um ggf
@@ -40,15 +43,19 @@ type bombe struct {
 
 func NewItem(t uint8, pos pixel.Vec) *data {
 	var item = new(data)
+	(*item).itemType = t
 	(*item).ani = animations.NewAnimation(t)
 	((*item).ani).Show()
 	(*item).matrix = pixel.IM.Moved(pos)
 	(*item).pos = pos
+	d,_:= time.ParseDuration("100m")
+	(*item).timeStamp = (time.Now()).Add(d)
 	return item
 }
 
 func NewBomb(p characters.Player) *bombe {
 	var bomb = new(bombe)
+	(*bomb).itemType = Bomb
 	(*bomb).owner = p
 	(*bomb).power = float64(p.GetPower())
 	(*bomb).ani = animations.NewAnimation(Bomb)
@@ -56,6 +63,8 @@ func NewBomb(p characters.Player) *bombe {
 	//fmt.Println(p.GetPosBox().Min)
 	(*bomb).pos = pixel.Vec{math.Round(p.GetPosBox().Center().X/16) * 16, math.Round(p.GetPosBox().Center().Y/16) * 16}
 	(*bomb).matrix = pixel.IM.Moved(bomb.pos)
+	d,_:= time.ParseDuration("15s")
+	(*bomb).timeStamp = (time.Now()).Add(d)
 	return bomb
 }
 
@@ -94,6 +103,14 @@ func (item *data) GetPos() pixel.Vec {
 	return (*item).pos
 }
 
+func (item *data) GetTimeStamp () time.Time {
+	return (*item).timeStamp
+}
+
+func (item *data) GetMatrix() pixel.Matrix {
+	return (*item).matrix
+}
+
 //------------------ Funktionen für Bomben -----------------------------
 
 func (item *bombe) Owner() (bool, characters.Player) {
@@ -107,4 +124,13 @@ func (item *bombe) SetOwner(player characters.Player) {
 func (item *bombe) SetPower(newPower float64) {
 	(*item).power = newPower
 	(*item).matrix = ((*item).matrix).ScaledXY((*item).pos, pixel.V(newPower*3.3, newPower*3.3))
+}
+
+func (item *bombe) GetPower() float64 {
+	return (*item).power
+}
+
+func (item *bombe) SetAnimation (newAni animations.Animation) {
+	(*item).ani = newAni
+	((*item).ani).Update()
 }
