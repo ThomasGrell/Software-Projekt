@@ -15,7 +15,7 @@ func sun() {
 	var winSizeY float64 = 672
 	var stepSize float64 = 1
 	var slice []items.Bombe
-	var turfNtreesArena *arena.Arena
+	var turfNtreesArena arena.Arena
 
 	wincfg := pixelgl.WindowConfig{
 		Title:  "Bomberman 2021",
@@ -27,32 +27,33 @@ func sun() {
 		panic(err)
 	}
 
-	turfNtreesArena = arena.NewArena(winSizeX, winSizeY)
+	turfNtreesArena = arena.NewArena(13,11 )
 
 	whiteBomberman := characters.NewPlayer(WhiteBomberman)
 	whiteBomberman.Ani().Show()
 
-A:
-	for i := 0; i < 15; i++ {
-		for j := 0; j < 17; j++ {
-			if turfNtreesArena.GetBoolMap()[i][j] {
-				whiteBomberman.MoveTo(pixel.V(float64(j)*arena.GetTileSize(), float64(i)*arena.GetTileSize()-14)) // Hier bekommt die Animation ihren Ort.
-				//fmt.Println(i,j)
-				break A
-			}
+// Put character at free space with at least two free neighbours in a row
+A:	for i := 2 * turfNtreesArena.GetWidth(); i < len(turfNtreesArena.GetPassability()) - 2 * turfNtreesArena.GetWidth(); i++ {	// Einschränkung des Wertebereichs von i um index out of range Probleme zu vermeiden
+		if turfNtreesArena.GetPassability()[i] && turfNtreesArena.GetPassability()[i-1] && turfNtreesArena.GetPassability()[i-2] ||	// checke links, rechts, oben, unten
+			turfNtreesArena.GetPassability()[i] && turfNtreesArena.GetPassability()[i+1] && turfNtreesArena.GetPassability()[i+2] ||
+			turfNtreesArena.GetPassability()[i] && turfNtreesArena.GetPassability()[i + turfNtreesArena.GetWidth()] &&
+				turfNtreesArena.GetPassability()[i+ 2 * turfNtreesArena.GetWidth()] ||
+			turfNtreesArena.GetPassability()[i] && turfNtreesArena.GetPassability()[i - turfNtreesArena.GetWidth()] &&
+				turfNtreesArena.GetPassability()[i - 2 * turfNtreesArena.GetWidth()] {
+			whiteBomberman.MoveTo(turfNtreesArena.GetLowerLeft().Add(pixel.V(float64(i % turfNtreesArena.GetWidth())*
+				turfNtreesArena.GetTileSize(), float64(i / turfNtreesArena.GetWidth())*turfNtreesArena.GetTileSize())))
+			break A
 		}
-
 	}
 
 	win.Clear(colornames.Whitesmoke)
-	turfNtreesArena.GetCanvas().Draw(win, turfNtreesArena.GetMatrix())
+	turfNtreesArena.GetCanvas().Draw(win, *(turfNtreesArena.GetMatrix()))
 	whiteBomberman.Ani().Update()
 	win.SetMatrix(pixel.IM.Scaled(pixel.V(0, 0), 3))
 	win.Update()
 
 	for !win.Closed() && !win.Pressed(pixelgl.KeyEscape) {
 		grDir := turfNtreesArena.GrantedDirections(whiteBomberman.GetPosBox()) // [4]bool left-right-up-down granted?
-
 		if win.Pressed(pixelgl.KeyLeft) && grDir[0] {
 			whiteBomberman.Move(pixel.V(-stepSize, 0))
 			whiteBomberman.Ani().SetView(Left)
@@ -73,26 +74,24 @@ A:
 			var item items.Bombe
 			item = items.NewBomb(characters.Player(whiteBomberman))
 			slice = append(slice, item)
-			x, y := turfNtreesArena.GetFieldCoord(whiteBomberman.GetPosBox().Min)
+			x, y := turfNtreesArena.GetFieldCoord(item.GetPos())
 			if x > 2 {
-				turfNtreesArena.RemoveTile(x-1, y)
+				turfNtreesArena.RemoveTiles(x-1, y)
 			}
 			if x < 14 {
-				turfNtreesArena.RemoveTile(x+1, y)
+				turfNtreesArena.RemoveTiles(x+1, y)
 			}
 			if y < 12 {
-				turfNtreesArena.RemoveTile(x, y+1)
+				turfNtreesArena.RemoveTiles(x, y+1)
 			}
 			if y > 2 {
-				turfNtreesArena.RemoveTile(x, y-1)
+				turfNtreesArena.RemoveTiles(x, y-1)
 			}
-			turfNtreesArena.GetCanvas().Draw(win, turfNtreesArena.GetMatrix())
+			turfNtreesArena.GetCanvas().Draw(win, *(turfNtreesArena.GetMatrix()))
 		}
 
-		//fmt.Println(whiteBomberman.GetPosBox(),"Size",whiteBomberman.GetSize())
-
 		win.Clear(colornames.Whitesmoke)
-		turfNtreesArena.GetCanvas().Draw(win, turfNtreesArena.GetMatrix())
+		turfNtreesArena.GetCanvas().Draw(win, *(turfNtreesArena.GetMatrix()))
 		for _, item := range slice {
 			item.(items.Bombe).Draw(win)
 		}
