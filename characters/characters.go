@@ -123,6 +123,7 @@ func (c *player) IncLife() {
 	c.life++
 }
 func (c *player) IncMaxBombs()        { c.maxBombs++ }
+func (c *player) IncPower ()		  { c.power++ }
 func (c *player) IncWins()            { c.wins++ }
 func (c *player) ResetWins()          { c.wins = 0 }
 func (c *player) SetLife(l uint8)     { c.life = l }
