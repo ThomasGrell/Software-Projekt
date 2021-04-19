@@ -163,16 +163,19 @@ func (a *data) GrantedDirections(posBox pixel.Rect) [4]bool { // {links,rechts,o
 	return grDir
 	//return [4]bool{grDir[0],grDir[1],true,true}
 }
-func (a *data) RemoveTiles(x, y int) {
+func (a *data) RemoveTiles(x, y int) bool {
+	var b bool
 	k := a.checkCoordsOfDestroyables(x, y)
-	if k != -1 { // 42 als Fehlerfall: diese Koordinaten wurden nicht gefunden
+	if k != -1 { // -1 als Fehlerfall: diese Koordinaten wurden nicht gefunden
 		a.destroyableTiles[0][k] = -1 // -1 als "nil-Koordinate"
 		a.destroyableTiles[1][k] = -1
 		a.passability[(y-2)*a.w+(x-2)] = true
 		a.drawWallsAndGround()
 		a.drawPermTiles()
 		a.drawDestroyableTiles()
+		b = true
 	}
+	return b
 }
 
 //------------------------- Hilfsfunktionen ---------------------------------
