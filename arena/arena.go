@@ -2,7 +2,6 @@ package arena
 
 import (
 	. "../constants"
-	//"fmt"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	"image"
@@ -14,8 +13,8 @@ import (
 )
 
 //const TileSize float64 = 16
-const WallWidth float64 = 48
-const WallHeight float64 = 13
+//const WallWidth float64 = 48
+//const WallHeight float64 = 13
 
 type data struct {
 	canvas           *pixelgl.Canvas
@@ -23,7 +22,7 @@ type data struct {
 	matrix           pixel.Matrix
 	permTiles        [2][36]int
 	//tiles           [11][13]int
-	lowerLeft   pixel.Vec // linke untere Spielfeldecke
+	lowerLeft   pixel.Vec // linke untere Spielfeldecke für korrekte Positionsbestimmung
 	w, h        int
 	passability []bool // Slice showing passability for each tile
 }
@@ -34,11 +33,11 @@ func NewArena(width, height int) *data {
 	for i := 0; i < 2; i++ {
 		a.destroyableTiles[i] = make([]int, 35)
 	}
+
 	a.w = width
 	a.h = height
 	a.setPermTiles()
-	a.setDestroyableTiles() // Reihenfolge!!!!
-
+	a.setDestroyableTiles() // Reihenfolge!!!
 	a.passability = make([]bool, width*height)
 
 	//fmt.Println(a.passability)
@@ -59,8 +58,8 @@ func NewArena(width, height int) *data {
 	}
 	a.lowerLeft = pixel.V(24, 6)
 	a.matrix = pixel.IM
-	a.matrix = a.matrix.Moved(pixel.V((float64(width)*TileSize+WallWidth)/2, (float64(height)*TileSize+WallHeight)/2))
-	a.canvas = pixelgl.NewCanvas(pixel.R(0, 0, float64(width)*TileSize+WallWidth, float64(height)*TileSize+WallHeight))
+	a.matrix = a.matrix.Moved(pixel.V((float64(width)*TileSize+WallWidth)/2-TileSize/4, (float64(height)*TileSize+WallHeight)/2-TileSize/2))
+	a.canvas = pixelgl.NewCanvas(pixel.R(-2*TileSize, -2*TileSize, float64(width)*TileSize+WallWidth + TileSize/2, float64(height)*TileSize+WallHeight))
 	a.drawWallsAndGround()
 	a.drawPermTiles()
 	a.drawDestroyableTiles()
@@ -77,8 +76,8 @@ func (a *data) GetDestroyableTiles() [][]int {
 	return a.destroyableTiles[:][:]
 }
 func (a *data) GetFieldCoord(v pixel.Vec) (x, y int) {
-	x = int(math.Trunc((v.X-a.lowerLeft.X)/TileSize))%(a.w+1) + 2
-	y = int(math.Trunc((v.Y-a.lowerLeft.Y)/TileSize))%(a.h+1) + 2
+	x = int(math.Trunc((v.X - a.lowerLeft.X)/TileSize))%(a.w+1) + 2
+	y = int(math.Trunc((v.Y - a.lowerLeft.Y)/TileSize))%(a.h+1) + 2
 	return
 }
 func (a *data) GetHeight() int {
@@ -160,10 +159,10 @@ func (a *data) GrantedDirections(posBox pixel.Rect) [4]bool { // {links,rechts,o
 		grDir[3] = false
 	}
 	return grDir
-	//return [4]bool{grDir[0],grDir[1],true,true}
+	//return [4]bool{true,true,true,true}
 }
 func (a *data) IsTile(x, y int) bool {
-	var w bool = false
+	var w bool
 	for i := 0; i < 36; i++ {
 		if a.permTiles[0][i] == x && a.permTiles[1][i] == y {
 			return true
@@ -219,18 +218,17 @@ func loadPicture(path string) (pixel.Picture, error) {
 }
 
 func (a *data) checkTileStatus(x, y int) (int, int, bool) { // checkt, ob die Kachel (x,y) belegt ist
-	var w bool = true
 	for i := 0; i < 36; i++ {
 		if a.permTiles[0][i] == x && a.permTiles[1][i] == y {
-			w = false
+			return x, y, false
 		}
 	}
 	for i := 0; i < 35; i++ {
 		if a.destroyableTiles[0][i] == x && a.destroyableTiles[1][i] == y {
-			w = false
+			return x, y, false
 		}
 	}
-	return x, y, w
+	return x, y, true
 }
 
 // Berechnet den Betrag eines int-Wertes
@@ -279,7 +277,7 @@ func (a *data) drawDestroyableTiles() {
 	}
 	destrSprite := pixel.NewSprite(tilesPic, pixel.R(80, 304, 96, 288))
 	destrMat := pixel.IM
-	destrMat = destrMat.Moved(pixel.V(TileSize/2, TileSize/2).Add(a.lowerLeft))
+	destrMat = destrMat.Moved(pixel.V(TileSize + TileSize/2, TileSize/2))
 	for i := range a.destroyableTiles[0] {
 		if a.destroyableTiles[0][i] != -1 {
 			destrMat = destrMat.Moved(pixel.V(float64(a.destroyableTiles[0][i]-2)*TileSize, float64(a.destroyableTiles[1][i]-2)*TileSize))
@@ -296,7 +294,7 @@ func (a *data) drawPermTiles() {
 	}
 	permSprite := pixel.NewSprite(tilesPic, pixel.R(64, 304, 80, 288))
 	permMat := pixel.IM
-	permMat = permMat.Moved(pixel.V(TileSize/2, TileSize/2).Add(a.lowerLeft))
+	permMat = permMat.Moved(pixel.V(TileSize + TileSize/2, TileSize/2))
 	for i := range a.permTiles[0] {
 		permMat = permMat.Moved(pixel.V(float64(a.permTiles[0][i]-2)*TileSize, float64(a.permTiles[1][i]-2)*TileSize))
 		permSprite.Draw(a.canvas, permMat)
@@ -304,111 +302,58 @@ func (a *data) drawPermTiles() {
 	}
 }
 
-func (a *data) drawWallsAndGround() { // zeichnet die Umrandung und die Wiese
-	//var winSizeX float64 = 768 // DIESE FENSTERGRÖẞE WIRD OPTIMAL AUSGEFÜLLT (bei zoomFactor 3)
-	//var winSizeY float64 = 672
-
-	var shortSideWallParts = 8
-	var longSideWallParts = 12 // Warum???
-	var edgeLowLeftCenterX, edgeLowLeftCenterY,
-		wallLeftCenterX, wallLeftCenterY,
-		edgeHiLeftCenterX, edgeHiLeftCenterY,
-		hiWallCenterX, hiWallCenterY,
-		edgeHiRightCenterX, edgeHiRightCenterY,
-		wallRightCenterX, wallRightCenterY,
-		edgeLowRightCenterX, edgeLowRightCenterY,
-		loWallCenterX, loWallCenterY,
-		turfCenterX, turfCenterY float64
-
+func (a *data) drawWallsAndGround() { // baut Arena spaltenweise auf, beginnt unten links
 	tilesPic, err := loadPicture("graphics/tiles.png")
 	if err != nil {
 		panic(err)
 	}
-	edgeLowLeft := pixel.NewSprite(tilesPic, pixel.R(288, 81, 312, 113))
-	wallLeft := pixel.NewSprite(tilesPic, pixel.R(288, 114, 312, 130))
-	edgeHiLeft := pixel.NewSprite(tilesPic, pixel.R(288, 114, 312, 144))
-	hiWall := pixel.NewSprite(tilesPic, pixel.R(312, 136, 328, 144))
-	edgeHiRight := pixel.NewSprite(tilesPic, pixel.R(344, 114, 368, 144))
-	wallRight := pixel.NewSprite(tilesPic, pixel.R(344, 112, 368, 128))
-	edgeLowRight := pixel.NewSprite(tilesPic, pixel.R(344, 81, 368, 115))
-	loWall := pixel.NewSprite(tilesPic, pixel.R(312, 81, 328, 87))
-	turf := pixel.NewSprite(tilesPic, pixel.R(112, 288, 128, 304))
-	edgeLowLeftCenterX = (312 - 288) / 2
-	edgeLowLeftCenterY = (112 - 81) / 2
-	wallLeftCenterX = edgeLowLeftCenterX
-	wallLeftCenterY = (130 - 114) / 2
-	edgeHiLeftCenterX = edgeLowLeftCenterX
-	edgeHiLeftCenterY = (144 - 114) / 2
-	hiWallCenterX = (328 - 312) / 2
-	hiWallCenterY = (144 - 136) / 2
-	edgeHiRightCenterX = (368 - 344) / 2
-	edgeHiRightCenterY = edgeHiLeftCenterY
-	wallRightCenterX = edgeHiRightCenterX
-	wallRightCenterY = (128 - 112) / 2
-	edgeLowRightCenterX = edgeHiRightCenterX
-	edgeLowRightCenterY = edgeLowLeftCenterY
-	loWallCenterX = hiWallCenterX
-	loWallCenterY = (87 - 81) / 2
-	turfCenterX = (128 - 112) / 2
-	turfCenterY = (304 - 288) / 2
-
-	edgeLowLeftMat := pixel.IM
-	edgeLowLeftMat = edgeLowLeftMat.Moved(pixel.V(edgeLowLeftCenterX, edgeLowLeftCenterY+1))
-	// Moved verschiebt den MatrixMITTELPUNKT, +1 in der y-Komponente, weil in tiles.png etwas mehr als 3 tiles in die Mitte passen
-	wallLeftMat := pixel.IM
-	wallLeftMat = wallLeftMat.Moved(pixel.V(wallLeftCenterX, 2*edgeLowLeftCenterY+wallLeftCenterY+1)) // +1 in der y-Komponente, weil in tiles.png etwas mehr als 3 tiles in die Mitte passen
-	edgeHiLeftMat := pixel.IM
-	edgeHiLeftMat = edgeHiLeftMat.Moved(pixel.V(edgeHiLeftCenterX, 2*edgeLowLeftCenterY+
-		2*float64(shortSideWallParts)*wallLeftCenterY+edgeHiLeftCenterY+1))
-	hiWallMat := pixel.IM
-	hiWallMat = hiWallMat.Moved(pixel.V(2*edgeHiLeftCenterX+hiWallCenterX, 2*edgeLowLeftCenterY+
-		2*wallRightCenterY*float64(shortSideWallParts)+2*edgeHiLeftCenterY-hiWallCenterY+1))
-	edgeHiRightMat := pixel.IM
-	edgeHiRightMat = edgeHiRightMat.Moved(pixel.V(2*edgeHiLeftCenterX+2*hiWallCenterX*float64(longSideWallParts+1)+
-		edgeHiRightCenterX, 2*edgeLowRightCenterY+2*wallRightCenterY*float64(shortSideWallParts)+
-		edgeHiRightCenterY+1))
-	wallRightMat := pixel.IM
-	wallRightMat = wallRightMat.Moved(pixel.V(2*edgeLowLeftCenterX+2*loWallCenterX*float64(longSideWallParts+1)+
-		wallRightCenterX, 2*edgeLowRightCenterY+wallRightCenterY))
-	edgeLowRightMat := pixel.IM
-	edgeLowRightMat = edgeLowRightMat.Moved(pixel.V(2*edgeLowLeftCenterX+2*loWallCenterX*float64(longSideWallParts+1)+
-		edgeLowRightCenterX, edgeLowRightCenterY+2))
-	loWallMat := pixel.IM
-	loWallMat = loWallMat.Moved(pixel.V(2*edgeLowLeftCenterX+loWallCenterX, loWallCenterY))
-	turfMat := pixel.IM
-	turfMat = turfMat.Moved(pixel.V(2*wallLeftCenterX+turfCenterX, 2*loWallCenterY+turfCenterY))
-
-	edgeLowLeft.Draw(a.canvas, edgeLowLeftMat)
-	wallLeft.Draw(a.canvas, wallLeftMat)
-	edgeHiLeft.Draw(a.canvas, edgeHiLeftMat)
-	hiWall.Draw(a.canvas, hiWallMat)
-	edgeHiRight.Draw(a.canvas, edgeHiRightMat)
-	wallRight.Draw(a.canvas, wallRightMat)
-	edgeLowRight.Draw(a.canvas, edgeLowRightMat)
-	loWall.Draw(a.canvas, loWallMat)
-
-	wallLeftShift := 2 * wallLeftCenterY
-	for i := 0; i < shortSideWallParts; i++ { // draws left wall
-		wallLeftMat = wallLeftMat.Moved(pixel.V(0, wallLeftShift))
-		wallLeft.Draw(a.canvas, wallLeftMat)
-		wallRightMat = wallRightMat.Moved(pixel.V(0, wallLeftShift))
-		wallRight.Draw(a.canvas, wallRightMat)
+	edgeLowLeft := pixel.NewSprite(tilesPic, pixel.R(24*TileSize, 3*TileSize, 26*TileSize, 5*TileSize))
+	wallLeft := pixel.NewSprite(tilesPic, pixel.R(24*TileSize, 5*TileSize, 26*TileSize, 6*TileSize))
+	edgeHiLeft := pixel.NewSprite(tilesPic, pixel.R(24*TileSize, 6*TileSize, 26*TileSize, 8*TileSize))
+	hiWall := pixel.NewSprite(tilesPic, pixel.R(26*TileSize, 7*TileSize, 27*TileSize, 8*TileSize))
+	edgeHiRight := pixel.NewSprite(tilesPic, pixel.R(27*TileSize, 6*TileSize, 29*TileSize, 8*TileSize))
+	wallRight := pixel.NewSprite(tilesPic, pixel.R(27*TileSize, 5*TileSize, 29*TileSize, 6*TileSize))
+	edgeLowRight := pixel.NewSprite(tilesPic, pixel.R(27*TileSize, 3*TileSize, 29*TileSize, 5*TileSize))
+	loWall := pixel.NewSprite(tilesPic, pixel.R(26*TileSize, 3*TileSize, 27*TileSize, 4*TileSize))
+	turf := pixel.NewSprite(tilesPic, pixel.R(7*TileSize, 18*TileSize, 8*TileSize, 19*TileSize))
+	drawMat := pixel.IM
+	edgeLowLeft.Draw(a.canvas, /*edgeLowLeftMat*/ drawMat)
+	drawMat = drawMat.Moved(pixel.V(0,TileSize + TileSize/2))
+	wallLeft.Draw(a.canvas, drawMat)
+	for i:=0; i<a.h-3; i++ { // -3 weil die beiden Ecken schon Felder sind und ein Wandstück bereits gezeichnet wurde
+		drawMat = drawMat.Moved(pixel.V(0,TileSize))
+		wallLeft.Draw(a.canvas, drawMat)
 	}
-	hiWallShift := 2 * hiWallCenterX
-	for i := 0; i < longSideWallParts; i++ {
-		hiWallMat = hiWallMat.Moved(pixel.V(hiWallShift, 0))
-		hiWall.Draw(a.canvas, hiWallMat)
-		loWallMat = loWallMat.Moved(pixel.V(hiWallShift, 0))
-		loWall.Draw(a.canvas, loWallMat)
-	}
-	turfRightShift := 2 * turfCenterX
-	turfUpShift := 2 * turfCenterY
-	for i := 0; i <= shortSideWallParts+2; i++ { // es sind 2 Wandteile weniger als Kacheln
-		turf.Draw(a.canvas, turfMat)
-		for j := 0; j < longSideWallParts; j++ { // one is already drawn in the line before
-			turfMat = turfMat.Moved(pixel.V(turfRightShift, 0))
-			turf.Draw(a.canvas, turfMat)
+	drawMat = drawMat.Moved(pixel.V(0,TileSize+TileSize/2))
+	edgeHiLeft.Draw(a.canvas, drawMat)
+	for j:=0; j<a.w; j++ {
+		if j==0 {
+			drawMat = drawMat.Moved(pixel.V(TileSize+TileSize/2, -(TileSize*float64(a.h) + TileSize/2)))
+		}else{
+			drawMat = drawMat.Moved(pixel.V(TileSize, -(TileSize*float64(a.h) + TileSize)))
 		}
-		turfMat = turfMat.Moved(pixel.V(float64(-(longSideWallParts))*turfRightShift, turfUpShift))
+		for i := 0; i < a.h+2; i++ { // +2 weil oben und unten Wände sind
+			if i == 0 {
+				loWall.Draw(a.canvas, drawMat)
+			} else if i < a.h+1 {
+				drawMat = drawMat.Moved(pixel.V(0, TileSize))
+				turf.Draw(a.canvas, drawMat)
+			} else {
+				drawMat = drawMat.Moved(pixel.V(0, TileSize))
+				hiWall.Draw(a.canvas, drawMat)
+			}
+
+		}
 	}
+	drawMat = drawMat.Moved(pixel.V(TileSize+TileSize/2, -(TileSize*float64(a.h) + TileSize/2)))
+	edgeLowRight.Draw(a.canvas,drawMat)
+	drawMat = drawMat.Moved(pixel.V(0,TileSize + TileSize/2))
+	wallRight.Draw(a.canvas, drawMat)
+	for i:=0; i<a.h-3; i++ { // -3 weil die beiden Ecken schon Felder sind und ein Wandstück bereits gezeichnet wurde
+		drawMat = drawMat.Moved(pixel.V(0,TileSize))
+		wallRight.Draw(a.canvas, drawMat)
+	}
+	drawMat = drawMat.Moved(pixel.V(0,TileSize+TileSize/2))
+	edgeHiRight.Draw(a.canvas, drawMat)
+
 }
