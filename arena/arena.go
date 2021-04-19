@@ -163,15 +163,15 @@ func (a *data) GrantedDirections(posBox pixel.Rect) [4]bool { // {links,rechts,o
 	//return [4]bool{grDir[0],grDir[1],true,true}
 }
 func (a *data) IsTile(x, y int) bool {
-	var w bool = true
+	var w bool = false
 	for i := 0; i < 36; i++ {
 		if a.permTiles[0][i] == x && a.permTiles[1][i] == y {
-			return false
+			return true
 		}
 	}
 	for i := 0; i < 35; i++ {
 		if a.destroyableTiles[0][i] == x && a.destroyableTiles[1][i] == y {
-			return false
+			return true
 		}
 	}
 	return w

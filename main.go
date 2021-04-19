@@ -13,6 +13,8 @@ import (
 	"time"
 )
 
+
+
 func sun() {
 	var winSizeX float64 = 768
 	var winSizeY float64 = 672
@@ -87,6 +89,7 @@ A:
 
 		win.Clear(colornames.Whitesmoke)
 		turfNtreesArena.GetCanvas().Draw(win, *(turfNtreesArena.GetMatrix()))
+		
 		for index, item := range bombs {
 			if ((item).GetTimeStamp()).Before(time.Now()) {
 				if len(bombs) == 1 {
@@ -114,32 +117,48 @@ A:
 
 				if x > 2 {
 					for i := 1; i <= int(l); i++ {
-						if turfNtreesArena.RemoveTiles(x-i, y) {
-							l = i
+						if turfNtreesArena.IsTile(x-i,y) {
+							if turfNtreesArena.RemoveTiles(x-i, y) {
+								l = i
+							} else {
+								l = i-1
+							}
 							break
 						}
 					}
 				}
 				if x < 14 {
 					for i := 1; i <= int(r); i++ {
-						if turfNtreesArena.RemoveTiles(x+i, y) {
-							r = i
+						if turfNtreesArena.IsTile(x+i,y) {
+							if turfNtreesArena.RemoveTiles(x+i, y) {
+								r = i
+							} else {
+								r = i-1
+							}
 							break
 						}
 					}
 				}
 				if y < 12 {
 					for i := 1; i <= int(u); i++ {
-						if turfNtreesArena.RemoveTiles(x, y+i) {
-							u = i
+						if turfNtreesArena.IsTile(x,y+i) {
+							if turfNtreesArena.RemoveTiles(x, y+i) {
+								u = i
+							} else {
+								u = i-1
+							}
 							break
 						}
 					}
 				}
 				if y > 2 {
 					for i := 1; i <= int(d); i++ {
-						if turfNtreesArena.RemoveTiles(x, y-i) {
-							d = i
+						if turfNtreesArena.IsTile(x,y-i) {
+							if turfNtreesArena.RemoveTiles(x, y-i) {
+								d = i
+							} else {
+								d = i-1
+							}
 							break
 						}
 					}
