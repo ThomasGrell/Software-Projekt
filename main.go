@@ -61,7 +61,6 @@ A:
 
 	for !win.Closed() && !win.Pressed(pixelgl.KeyEscape) {
 		grDir := turfNtreesArena.GrantedDirections(whiteBomberman.GetPosBox()) // [4]bool left-right-up-down granted?
-		fmt.Println(whiteBomberman.GetPos())
 		if win.Pressed(pixelgl.KeyLeft) && grDir[0] {
 			whiteBomberman.Move(pixel.V(-stepSize, 0))
 			whiteBomberman.Ani().SetView(Left)
@@ -95,7 +94,7 @@ A:
 					fmt.Println(bombs)
 					bombs = append(bombs[0:index], bombs[index+1:]...)
 				}
-				destTiles := turfNtreesArena.GetDestroyableTiles()
+				//destTiles := turfNtreesArena.GetDestroyableTiles()
 				x, y := turfNtreesArena.GetFieldCoord(item.GetPos())
 				power := int(item.GetPower())
 				l,r,u,d := power,power,power,power
@@ -106,32 +105,32 @@ A:
 				
 				if x > 2 {
 					for i := 1; i <=int(l); i++ {
-						if destTiles[x-i][y] !=0 {
-							turfNtreesArena.RemoveTiles(x-i, y)
+						if turfNtreesArena.RemoveTiles(x-i, y) {
+							l=i
 							break
 						}
 					}
 				}
 				if x < 14 {
 					for i := 1; i <=int(r); i++ {
-						if destTiles[x+i][y] !=0 {
-							turfNtreesArena.RemoveTiles(x+i, y)
+						if turfNtreesArena.RemoveTiles(x+i, y) {
+							r=i
 							break
 						}
 					}
 				}
 				if y < 12 {
 					for i := 1; i <=int(u); i++ {
-						if destTiles[x][y+i] !=0 {
-							turfNtreesArena.RemoveTiles(x, y+i)
+						if turfNtreesArena.RemoveTiles(x, y+i){
+							u=i
 							break
 						}
 					}
 				}
 				if y > 2 {
 					for i := 1; i <=int(d); i++ {
-						if destTiles[x][y-i] !=0 {
-							turfNtreesArena.RemoveTiles(x, y-i)
+						if turfNtreesArena.RemoveTiles(x, y-i) {
+							d=i
 							break
 						}
 					}
