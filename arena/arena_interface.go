@@ -54,6 +54,8 @@ type Arena interface {
 	//		in diese Richtung erlaubt ist. Die Reihenfolge der Richtungen ist: links - rechts - oben - unten.
 	GrantedDirections(posBox pixel.Rect) [4]bool
 
+	IsTile(x, y int) bool
+
 	//Vor.: /
 	//Eff.: Befinden sich zerstörbare Kacheln in der direkten, senkrechten oder waagerechten Nachbarschaft des Feldes
 	//		mit den Koordinaten (x,y), so sind diese entfernt. Ansonsten ist nichts geschehen.

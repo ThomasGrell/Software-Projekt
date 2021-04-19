@@ -61,10 +61,7 @@ A:
 
 	for !win.Closed() && !win.Pressed(pixelgl.KeyEscape) {
 		grDir := turfNtreesArena.GrantedDirections(whiteBomberman.GetPosBox()) // [4]bool left-right-up-down granted?
-<<<<<<< HEAD
-		//fmt.Println(whiteBomberman.GetPos())
-=======
->>>>>>> 974df07a056f734d204ac12df460261e97cf8ba6
+
 		if win.Pressed(pixelgl.KeyLeft) && grDir[0] {
 			whiteBomberman.Move(pixel.V(-stepSize, 0))
 			whiteBomberman.Ani().SetView(Left)
@@ -101,61 +98,69 @@ A:
 				//destTiles := turfNtreesArena.GetDestroyableTiles()
 				x, y := turfNtreesArena.GetFieldCoord(item.GetPos())
 				power := int(item.GetPower())
-				l,r,u,d := power,power,power,power
-				if 2+l  > x { l = x-2 }
-				if 14-r < x { r = 14-x }
-				if 2+d > y  { d = y-2 }
-				if 12-u < y { u = 12-y }
-				
+				l, r, u, d := power, power, power, power
+				if 2+l > x {
+					l = x - 2
+				}
+				if 14-r < x {
+					r = 14 - x
+				}
+				if 2+d > y {
+					d = y - 2
+				}
+				if 12-u < y {
+					u = 12 - y
+				}
+
 				if x > 2 {
-					for i := 1; i <=int(l); i++ {
+					for i := 1; i <= int(l); i++ {
 						if turfNtreesArena.RemoveTiles(x-i, y) {
-							l=i
+							l = i
 							break
 						}
 					}
 				}
 				if x < 14 {
-					for i := 1; i <=int(r); i++ {
+					for i := 1; i <= int(r); i++ {
 						if turfNtreesArena.RemoveTiles(x+i, y) {
-							r=i
+							r = i
 							break
 						}
 					}
 				}
 				if y < 12 {
-					for i := 1; i <=int(u); i++ {
-						if turfNtreesArena.RemoveTiles(x, y+i){
-							u=i
+					for i := 1; i <= int(u); i++ {
+						if turfNtreesArena.RemoveTiles(x, y+i) {
+							u = i
 							break
 						}
 					}
 				}
 				if y > 2 {
-					for i := 1; i <=int(d); i++ {
+					for i := 1; i <= int(d); i++ {
 						if turfNtreesArena.RemoveTiles(x, y-i) {
-							d=i
+							d = i
 							break
 						}
 					}
 				}
-				
+
 				ani := animations.NewExplosion(uint8(l), uint8(r), uint8(u), uint8(d))
 				ani.Show()
-				tempAni := make([]interface{},2)
-				tempAni[0]=ani
-				tempAni[1]=(item.GetMatrix()).Moved(ani.ToCenter())
-				tempAniSlice = append(tempAniSlice,tempAni)
-				
+				tempAni := make([]interface{}, 2)
+				tempAni[0] = ani
+				tempAni[1] = (item.GetMatrix()).Moved(ani.ToCenter())
+				tempAniSlice = append(tempAniSlice, tempAni)
+
 				turfNtreesArena.GetCanvas().Draw(win, *(turfNtreesArena.GetMatrix()))
 			}
 			item.Draw(win)
 		}
-		for _,a := range tempAniSlice {
+		for _, a := range tempAniSlice {
 			ani := (a[0]).(animations.Animation)
 			ani.Update()
 			mtx := (a[1]).(pixel.Matrix)
-			(ani.GetSprite()).Draw(win,mtx)
+			(ani.GetSprite()).Draw(win, mtx)
 		}
 		whiteBomberman.Draw(win)
 		win.Update()

@@ -2,7 +2,7 @@ package arena
 
 import (
 	. "../constants"
-	"fmt"
+	//"fmt"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	"image"
@@ -34,11 +34,10 @@ func NewArena(width, height int) *data {
 	for i := 0; i < 2; i++ {
 		a.destroyableTiles[i] = make([]int, 35)
 	}
-	fmt.Println(a.destroyableTiles)
-	a.setDestroyableTiles()
 	a.w = width
 	a.h = height
 	a.setPermTiles()
+	a.setDestroyableTiles() // Reihenfolge!!!!
 
 	a.passability = make([]bool, width*height)
 
@@ -162,6 +161,20 @@ func (a *data) GrantedDirections(posBox pixel.Rect) [4]bool { // {links,rechts,o
 	}
 	return grDir
 	//return [4]bool{grDir[0],grDir[1],true,true}
+}
+func (a *data) IsTile(x, y int) bool {
+	var w bool = true
+	for i := 0; i < 36; i++ {
+		if a.permTiles[0][i] == x && a.permTiles[1][i] == y {
+			return false
+		}
+	}
+	for i := 0; i < 35; i++ {
+		if a.destroyableTiles[0][i] == x && a.destroyableTiles[1][i] == y {
+			return false
+		}
+	}
+	return w
 }
 func (a *data) RemoveTiles(x, y int) bool {
 	var b bool
