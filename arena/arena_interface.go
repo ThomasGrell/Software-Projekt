@@ -57,5 +57,5 @@ type Arena interface {
 	//Vor.: /
 	//Eff.: Befinden sich zerstörbare Kacheln in der direkten, senkrechten oder waagerechten Nachbarschaft des Feldes
 	//		mit den Koordinaten (x,y), so sind diese entfernt. Ansonsten ist nichts geschehen.
-	RemoveTiles(x, y int)
+	RemoveTiles(x, y int) bool
 }
