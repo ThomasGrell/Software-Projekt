@@ -20,6 +20,7 @@ type Player interface {
 	GetWins() uint8
 	IncLife()
 	IncMaxBombs()
+	IncPower ()
 	IncWins()
 	ResetWins()
 	SetLife(uint8)

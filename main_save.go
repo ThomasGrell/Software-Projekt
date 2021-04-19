@@ -61,10 +61,6 @@ A:
 
 	for !win.Closed() && !win.Pressed(pixelgl.KeyEscape) {
 		grDir := turfNtreesArena.GrantedDirections(whiteBomberman.GetPosBox()) // [4]bool left-right-up-down granted?
-<<<<<<< HEAD
-		//fmt.Println(whiteBomberman.GetPos())
-=======
->>>>>>> 974df07a056f734d204ac12df460261e97cf8ba6
 		if win.Pressed(pixelgl.KeyLeft) && grDir[0] {
 			whiteBomberman.Move(pixel.V(-stepSize, 0))
 			whiteBomberman.Ani().SetView(Left)
