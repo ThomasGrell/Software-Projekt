@@ -2,6 +2,7 @@ package arena
 
 import (
 	. "../constants"
+	"fmt"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	"image"
@@ -18,7 +19,7 @@ const WallHeight float64 = 13
 
 type data struct {
 	canvas           *pixelgl.Canvas
-	destroyableTiles [2][35]int
+	destroyableTiles [][]int
 	matrix           pixel.Matrix
 	permTiles        [2][36]int
 	//tiles           [11][13]int
@@ -29,10 +30,16 @@ type data struct {
 
 func NewArena(width, height int) *data {
 	var a *data = new(data)
+	a.destroyableTiles = make([][]int, 2)
+	for i := 0; i < 2; i++ {
+		a.destroyableTiles[i] = make([]int, 35)
+	}
+	fmt.Println(a.destroyableTiles)
+	a.setDestroyableTiles()
 	a.w = width
 	a.h = height
 	a.setPermTiles()
-	a.setDestroyableTiles()
+
 	a.passability = make([]bool, width*height)
 
 	//fmt.Println(a.passability)
@@ -67,8 +74,8 @@ func (a *data) GetPassability() []bool {
 func (a *data) GetCanvas() *pixelgl.Canvas {
 	return a.canvas
 }
-func (a *data) GetDestroyableTiles() [2][35]int {
-	return a.destroyableTiles
+func (a *data) GetDestroyableTiles() [][]int {
+	return a.destroyableTiles[:][:]
 }
 func (a *data) GetFieldCoord(v pixel.Vec) (x, y int) {
 	x = int(math.Trunc((v.X-a.lowerLeft.X)/TileSize))%(a.w+1) + 2
@@ -238,6 +245,9 @@ func (a *data) setDestroyableTiles() {
 		for {
 			x, y, w := a.checkTileStatus(rand.Intn(13)+2, rand.Intn(11)+2)
 			if w {
+				//v := make([]int,2)
+				//v[0] = x
+				//v[1] = y
 				a.destroyableTiles[0][i] = x
 				a.destroyableTiles[1][i] = y
 				break

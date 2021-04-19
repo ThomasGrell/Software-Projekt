@@ -19,7 +19,7 @@ type Arena interface {
 	//      zertörbaren Mauern ist geliefert.
 	GetCanvas() *pixelgl.Canvas
 
-	GetDestroyableTiles() [2][35]int
+	GetDestroyableTiles() [][]int
 
 	//Vor.: /
 	//Erg.: Die Koordinaten des Feldes, in dem sich der Punkt v befindet, sind geliefert.
