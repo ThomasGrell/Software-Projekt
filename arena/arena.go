@@ -12,16 +12,11 @@ import (
 	"time"
 )
 
-//const TileSize float64 = 16
-//const WallWidth float64 = 48
-//const WallHeight float64 = 13
-
 type data struct {
 	canvas           *pixelgl.Canvas
 	destroyableTiles [][]int
 	matrix           pixel.Matrix
 	permTiles        [2][36]int
-	//tiles           [11][13]int
 	lowerLeft   pixel.Vec // linke untere Spielfeldecke für korrekte Positionsbestimmung
 	w, h        int
 	passability []bool // Slice showing passability for each tile
@@ -33,25 +28,22 @@ func NewArena(width, height int) *data {
 	for i := 0; i < 2; i++ {
 		a.destroyableTiles[i] = make([]int, 35)
 	}
-
 	a.w = width
 	a.h = height
 	a.setPermTiles()
 	a.setDestroyableTiles() // Reihenfolge!!!
 	a.passability = make([]bool, width*height)
-
-	//fmt.Println(a.passability)
 	for i := range a.passability {
 		a.passability[i] = true
 	}
 	for i := range a.passability {
 		for j := 0; j < len(a.permTiles[0]); j++ {
-			if i/a.w == a.permTiles[1][j]-2 && i%a.w == a.permTiles[0][j]-2 {
+			if i/a.w == a.permTiles[1][j] && i%a.w == a.permTiles[0][j] {
 				a.passability[i] = false
 			}
 		}
 		for j := 0; j < len(a.destroyableTiles[0]); j++ {
-			if i/a.w == a.destroyableTiles[1][j]-2 && i%a.w == a.destroyableTiles[0][j]-2 {
+			if i/a.w == a.destroyableTiles[1][j] && i%a.w == a.destroyableTiles[0][j] {
 				a.passability[i] = false
 			}
 		}
@@ -66,9 +58,6 @@ func NewArena(width, height int) *data {
 	return a
 }
 
-func (a *data) GetPassability() []bool {
-	return a.passability
-}
 func (a *data) GetCanvas() *pixelgl.Canvas {
 	return a.canvas
 }
@@ -76,8 +65,8 @@ func (a *data) GetDestroyableTiles() [][]int {
 	return a.destroyableTiles[:][:]
 }
 func (a *data) GetFieldCoord(v pixel.Vec) (x, y int) {
-	x = int(math.Trunc((v.X - a.lowerLeft.X)/TileSize))%(a.w+1) + 2
-	y = int(math.Trunc((v.Y - a.lowerLeft.Y)/TileSize))%(a.h+1) + 2
+	x = int(math.Trunc((v.X - a.lowerLeft.X)/TileSize))%(a.w+1)
+	y = int(math.Trunc((v.Y - a.lowerLeft.Y)/TileSize))%(a.h+1)
 	return
 }
 func (a *data) GetHeight() int {
@@ -88,6 +77,9 @@ func (a *data) GetLowerLeft() pixel.Vec {
 }
 func (a *data) GetMatrix() *pixel.Matrix {
 	return &(a.matrix)
+}
+func (a *data) GetPassability() []bool {
+	return a.passability
 }
 func (a *data) GetPermTiles() [2][36]int {
 	return a.permTiles
@@ -181,7 +173,7 @@ func (a *data) RemoveTiles(x, y int) bool {
 	if k != -1 { // -1 als Fehlerfall: diese Koordinaten wurden nicht gefunden
 		a.destroyableTiles[0][k] = -1 // -1 als "nil-Koordinate"
 		a.destroyableTiles[1][k] = -1
-		a.passability[(y-2)*a.w+(x-2)] = true
+		a.passability[(y)*a.w+(x)] = true
 		a.drawWallsAndGround()
 		a.drawPermTiles()
 		a.drawDestroyableTiles()
@@ -240,28 +232,18 @@ func modulus(x int) int {
 	}
 }
 
-// Erzeugt x-y-Koordinaten der Häuser für eine Spielfeldmatrix (13x11 Matrix)
 func (a *data) setPermTiles() {
-	//rand.Seed(time.Now().UnixNano())
-	//for i := range locations[0] {
-	//	a.permTiles[0][i] = rand.Intn(13)+2
-	//	a.permTiles[1][i] = rand.Intn(11)+2
-	//}
 	a.permTiles = [2][36]int{
-		{3, 5, 7, 9, 11, 13, 10, 11, 12, 3, 5, 7, 9, 11, 12, 13, 3, 5, 7, 9, 11, 13, 3, 5, 7, 9, 11, 13, 4, 3, 5, 7, 9, 11, 13, 9},
-		{3, 3, 3, 3, 3, 3, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 7, 7, 7, 7, 7, 7, 9, 9, 9, 9, 9, 9, 10, 11, 11, 11, 11, 11, 11, 12}}
+		{1, 3, 5, 7, 9, 11, 8, 9, 10, 1, 3, 5, 7, 9, 10, 11, 1, 3, 5, 7, 9, 11, 1, 3, 5, 7, 9, 11, 2, 1, 3, 5, 7, 9, 11, 7},
+		{1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5, 5, 7, 7, 7, 7, 7, 7, 8, 9, 9, 9, 9, 9, 9, 10}}
 }
 
-// Erzeugt x-y-Koordinaten der Baumstümpfe für eine Spielfeldmatrix (13x11 Matrix)
 func (a *data) setDestroyableTiles() {
 	rand.Seed(time.Now().UnixNano())
 	for i := 0; i < 35; i++ {
 		for {
-			x, y, w := a.checkTileStatus(rand.Intn(13)+2, rand.Intn(11)+2)
+			x, y, w := a.checkTileStatus(rand.Intn(13), rand.Intn(11))
 			if w {
-				//v := make([]int,2)
-				//v[0] = x
-				//v[1] = y
 				a.destroyableTiles[0][i] = x
 				a.destroyableTiles[1][i] = y
 				break
@@ -275,14 +257,14 @@ func (a *data) drawDestroyableTiles() {
 	if err != nil {
 		panic(err)
 	}
-	destrSprite := pixel.NewSprite(tilesPic, pixel.R(80, 304, 96, 288))
+	destrSprite := pixel.NewSprite(tilesPic, pixel.R(5*TileSize, 18*TileSize, 6*TileSize, 19*TileSize))
 	destrMat := pixel.IM
 	destrMat = destrMat.Moved(pixel.V(TileSize + TileSize/2, TileSize/2))
 	for i := range a.destroyableTiles[0] {
 		if a.destroyableTiles[0][i] != -1 {
-			destrMat = destrMat.Moved(pixel.V(float64(a.destroyableTiles[0][i]-2)*TileSize, float64(a.destroyableTiles[1][i]-2)*TileSize))
+			destrMat = destrMat.Moved(pixel.V(float64(a.destroyableTiles[0][i])*TileSize, float64(a.destroyableTiles[1][i])*TileSize))
 			destrSprite.Draw(a.canvas, destrMat)
-			destrMat = destrMat.Moved(pixel.V(-float64(a.destroyableTiles[0][i]-2)*TileSize, -float64(a.destroyableTiles[1][i]-2)*TileSize))
+			destrMat = destrMat.Moved(pixel.V(-float64(a.destroyableTiles[0][i])*TileSize, -float64(a.destroyableTiles[1][i])*TileSize))
 		}
 	}
 }
@@ -292,13 +274,13 @@ func (a *data) drawPermTiles() {
 	if err != nil {
 		panic(err)
 	}
-	permSprite := pixel.NewSprite(tilesPic, pixel.R(64, 304, 80, 288))
+	permSprite := pixel.NewSprite(tilesPic, pixel.R(4*TileSize, 18*TileSize, 5*TileSize, 19*TileSize))
 	permMat := pixel.IM
 	permMat = permMat.Moved(pixel.V(TileSize + TileSize/2, TileSize/2))
 	for i := range a.permTiles[0] {
-		permMat = permMat.Moved(pixel.V(float64(a.permTiles[0][i]-2)*TileSize, float64(a.permTiles[1][i]-2)*TileSize))
+		permMat = permMat.Moved(pixel.V(float64(a.permTiles[0][i])*TileSize, float64(a.permTiles[1][i])*TileSize))
 		permSprite.Draw(a.canvas, permMat)
-		permMat = permMat.Moved(pixel.V(-float64(a.permTiles[0][i]-2)*TileSize, -float64(a.permTiles[1][i]-2)*TileSize))
+		permMat = permMat.Moved(pixel.V(-float64(a.permTiles[0][i])*TileSize, -float64(a.permTiles[1][i])*TileSize))
 	}
 }
 
@@ -355,5 +337,4 @@ func (a *data) drawWallsAndGround() { // baut Arena spaltenweise auf, beginnt un
 	}
 	drawMat = drawMat.Moved(pixel.V(0,TileSize+TileSize/2))
 	edgeHiRight.Draw(a.canvas, drawMat)
-
 }

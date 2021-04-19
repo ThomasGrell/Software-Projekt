@@ -63,7 +63,7 @@ func NewBomb(p characters.Player) *bombe {
 	//fmt.Println(p.GetPosBox().Min)
 	(*bomb).pos = pixel.Vec{math.Round(p.GetPosBox().Center().X/16) * 16, math.Round(p.GetPosBox().Center().Y/16) * 16}
 	(*bomb).matrix = pixel.IM.Moved(bomb.pos)
-	d,_:= time.ParseDuration("15s")
+	d,_:= time.ParseDuration("3s")
 	(*bomb).timeStamp = (time.Now()).Add(d)
 	return bomb
 }

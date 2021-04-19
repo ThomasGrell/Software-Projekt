@@ -6,18 +6,19 @@ import (
 	"./characters"
 	. "./constants"
 	"./items"
-	"fmt"
+	//"fmt"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	"golang.org/x/image/colornames"
 	"time"
 )
 
-
-
 func sun() {
-	var winSizeX float64 = 768
-	var winSizeY float64 = 672
+	const zoomFactor = 3
+	const pitchWidth = 13
+	const pitchHeight = 11
+	var winSizeX float64 = zoomFactor * ((3 + pitchWidth)*TileSize)
+	var winSizeY float64 = zoomFactor * ((1 + pitchHeight)*TileSize)
 	var stepSize float64 = 1
 	var bombs []items.Bombe
 	var turfNtreesArena arena.Arena
@@ -33,7 +34,7 @@ func sun() {
 		panic(err)
 	}
 
-	turfNtreesArena = arena.NewArena(13, 11)
+	turfNtreesArena = arena.NewArena(pitchWidth, pitchHeight)
 
 	whiteBomberman := characters.NewPlayer(WhiteBomberman)
 	whiteBomberman.Ani().Show()
@@ -58,7 +59,7 @@ A:
 	win.Clear(colornames.Whitesmoke)
 	turfNtreesArena.GetCanvas().Draw(win, *(turfNtreesArena.GetMatrix()))
 	whiteBomberman.Ani().Update()
-	win.SetMatrix(pixel.IM.Scaled(pixel.V(0, 0), 3))
+	win.SetMatrix(pixel.IM.Scaled(pixel.V(0, 0), zoomFactor))
 	win.Update()
 
 	for !win.Closed() && !win.Pressed(pixelgl.KeyEscape) {
@@ -89,33 +90,33 @@ A:
 
 		win.Clear(colornames.Whitesmoke)
 		turfNtreesArena.GetCanvas().Draw(win, *(turfNtreesArena.GetMatrix()))
-		
+
 		for index, item := range bombs {
 			if ((item).GetTimeStamp()).Before(time.Now()) {
 				if len(bombs) == 1 {
 					bombs = bombs[:0]
 				} else {
-					fmt.Println(bombs)
+					//fmt.Println(bombs)
 					bombs = append(bombs[0:index], bombs[index+1:]...)
 				}
 				//destTiles := turfNtreesArena.GetDestroyableTiles()
 				x, y := turfNtreesArena.GetFieldCoord(item.GetPos())
 				power := int(item.GetPower())
 				l, r, u, d := power, power, power, power
-				if 2+l > x {
-					l = x - 2
+				if l > x {
+					l = x
 				}
-				if 14-r < x {
-					r = 14 - x
+				if 12-r < x {
+					r = 12 - x
 				}
-				if 2+d > y {
-					d = y - 2
+				if d > y {
+					d = y
 				}
-				if 12-u < y {
-					u = 12 - y
+				if 10-u < y {
+					u = 10 - y
 				}
 
-				if x > 2 {
+				if x > 0 {
 					for i := 1; i <= int(l); i++ {
 						if turfNtreesArena.IsTile(x-i,y) {
 							if turfNtreesArena.RemoveTiles(x-i, y) {
@@ -127,7 +128,7 @@ A:
 						}
 					}
 				}
-				if x < 14 {
+				if x < 12 {
 					for i := 1; i <= int(r); i++ {
 						if turfNtreesArena.IsTile(x+i,y) {
 							if turfNtreesArena.RemoveTiles(x+i, y) {
@@ -139,7 +140,7 @@ A:
 						}
 					}
 				}
-				if y < 12 {
+				if y < 10 {
 					for i := 1; i <= int(u); i++ {
 						if turfNtreesArena.IsTile(x,y+i) {
 							if turfNtreesArena.RemoveTiles(x, y+i) {
@@ -151,7 +152,7 @@ A:
 						}
 					}
 				}
-				if y > 2 {
+				if y > 0 {
 					for i := 1; i <= int(d); i++ {
 						if turfNtreesArena.IsTile(x,y-i) {
 							if turfNtreesArena.RemoveTiles(x, y-i) {
