@@ -19,6 +19,8 @@ type Arena interface {
 	//      zertörbaren Mauern ist geliefert.
 	GetCanvas() *pixelgl.Canvas
 
+	GetDestroyableTiles() [2][35]int
+
 	//Vor.: /
 	//Erg.: Die Koordinaten des Feldes, in dem sich der Punkt v befindet, sind geliefert.
 	GetFieldCoord(v pixel.Vec) (x, y int)
@@ -56,5 +58,4 @@ type Arena interface {
 	//Eff.: Befinden sich zerstörbare Kacheln in der direkten, senkrechten oder waagerechten Nachbarschaft des Feldes
 	//		mit den Koordinaten (x,y), so sind diese entfernt. Ansonsten ist nichts geschehen.
 	RemoveTiles(x, y int)
-
 }
