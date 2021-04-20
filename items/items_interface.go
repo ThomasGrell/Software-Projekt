@@ -76,6 +76,11 @@ type Item interface{
 	 */
 	GetTimeStamp () time.Time
 	
+	/* Vor.: -
+	 * Eff.: Der Zeitpunkt, ab dem das Item nicht mehr existiert ist nun geändert
+	 */
+	SetTimeStamp (time.Time)
+	
 	/*	Vor.: -
 	 * 	Eff.: Die ZeichenMatrix, des Items ist geliefert
 	 */

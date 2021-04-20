@@ -61,7 +61,7 @@ func NewBomb(p characters.Player) *bombe {
 	(*bomb).ani = animations.NewAnimation(Bomb)
 	((*bomb).ani).Show()
 	//fmt.Println(p.GetPosBox().Min)
-	(*bomb).pos = pixel.Vec{math.Round(p.GetPosBox().Center().X/16) * 16, math.Round(p.GetPosBox().Center().Y/16) * 16}
+	(*bomb).pos = pixel.Vec{math.Round(p.GetPosBox().Center().X/TileSize) * TileSize, math.Round(p.GetPosBox().Center().Y/TileSize) * TileSize}
 	(*bomb).matrix = pixel.IM.Moved(bomb.pos)
 	d,_:= time.ParseDuration("3s")
 	(*bomb).timeStamp = (time.Now()).Add(d)
@@ -105,6 +105,10 @@ func (item *data) GetPos() pixel.Vec {
 
 func (item *data) GetTimeStamp () time.Time {
 	return (*item).timeStamp
+}
+
+func (item *data) SetTimeStamp (t time.Time) {
+	(*item).timeStamp = t
 }
 
 func (item *data) GetMatrix() pixel.Matrix {
