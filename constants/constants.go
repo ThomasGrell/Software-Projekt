@@ -90,8 +90,13 @@ const (
 	Deathflash = 100
 )
 
+// Arena Details
 const (
 	TileSize = 16
 	WallWidth = 32
 	WallHeight = 16
+// Arenas
+	MfS = 0
+	TurfNtrees = 1
+	Castle = 2
 )

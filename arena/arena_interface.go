@@ -19,7 +19,8 @@ type Arena interface {
 	//      zertörbaren Mauern ist geliefert.
 	GetCanvas() *pixelgl.Canvas
 
-	GetDestroyableTiles() [][]int
+
+	//GetDestroyableTiles() [][]int
 
 	//Vor.: /
 	//Erg.: Die Koordinaten des Feldes, in dem sich der Punkt v befindet, sind geliefert.
@@ -39,11 +40,11 @@ type Arena interface {
 
 	//Vor.: /
 	//Erg.: Das Array, das die Koordinaten der unzerstörbaren Kacheln enthält ist geliefert.
-	GetPermTiles() [2][36]int
+	GetPermTiles() [2][]int
 
-	//Vor.: /
-	//Erg.: Die Kantenlänge der Feldelemente (Kacheln) ist geliefert.
-	GetTileSize() float64
+	////Vor.: /
+	////Erg.: Die Kantenlänge der Feldelemente (Kacheln) ist geliefert.
+	//GetTileSize() float64
 
 	//Vor.: /
 	//Erg.: Die Breite des Spielfelds = Anzahl der Felder in waagerechter Richtung ist geliefert.
@@ -54,10 +55,18 @@ type Arena interface {
 	//		in diese Richtung erlaubt ist. Die Reihenfolge der Richtungen ist: links - rechts - oben - unten.
 	GrantedDirections(posBox pixel.Rect) [4]bool
 
+	//Vor.: /
+	//Erg.: Falls auf der Kachel mit den Koordinaten x,y ein permanentes Hindernis steht, so ist true geliefert, sonst
+	//		false.
 	IsTile(x, y int) bool
+
+	//Vor.: /
+	//Erg.: Falls auf der Kachel mit den Koordinaten x,y ein permanentes Hindernis steht, so ist false geliefert, sonst
+	//		true.
+	IsFreeTile(x, y int) bool
 
 	//Vor.: /
 	//Eff.: Befinden sich zerstörbare Kacheln in der direkten, senkrechten oder waagerechten Nachbarschaft des Feldes
 	//		mit den Koordinaten (x,y), so sind diese entfernt. Ansonsten ist nichts geschehen.
-	RemoveTiles(x, y int) bool
+	//RemoveTiles(x, y int) bool
 }
