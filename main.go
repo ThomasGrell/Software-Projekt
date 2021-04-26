@@ -56,46 +56,46 @@ func checkForExplosions() []int {
 
 			// Falls es Hindernisse gibt, die zerstörbar oder unzerstörbar sind
 
-			for i := 1; i <= int(l); i++ {
-				if turfNtreesArena.IsTile(x-i, y) {
-					if turfNtreesArena.RemoveTiles(x-i, y) {
-						l = i
-					} else {
-						l = i - 1
-					}
-					break
-				}
-			}
-			for i := 1; i <= int(r); i++ {
-				if turfNtreesArena.IsTile(x+i, y) {
-					if turfNtreesArena.RemoveTiles(x+i, y) {
-						r = i
-					} else {
-						r = i - 1
-					}
-					break
-				}
-			}
-			for i := 1; i <= int(u); i++ {
-				if turfNtreesArena.IsTile(x, y+i) {
-					if turfNtreesArena.RemoveTiles(x, y+i) {
-						u = i
-					} else {
-						u = i - 1
-					}
-					break
-				}
-			}
-			for i := 1; i <= int(d); i++ {
-				if turfNtreesArena.IsTile(x, y-i) {
-					if turfNtreesArena.RemoveTiles(x, y-i) {
-						d = i
-					} else {
-						d = i - 1
-					}
-					break
-				}
-			}
+			//for i := 1; i <= int(l); i++ {
+			//	if turfNtreesArena.IsTile(x-i, y) {
+			//		if turfNtreesArena.RemoveTiles(x-i, y) {
+			//			l = i
+			//		} else {
+			//			l = i - 1
+			//		}
+			//		break
+			//	}
+			//}
+			//for i := 1; i <= int(r); i++ {
+			//	if turfNtreesArena.IsTile(x+i, y) {
+			//		if turfNtreesArena.RemoveTiles(x+i, y) {
+			//			r = i
+			//		} else {
+			//			r = i - 1
+			//		}
+			//		break
+			//	}
+			//}
+			//for i := 1; i <= int(u); i++ {
+			//	if turfNtreesArena.IsTile(x, y+i) {
+			//		if turfNtreesArena.RemoveTiles(x, y+i) {
+			//			u = i
+			//		} else {
+			//			u = i - 1
+			//		}
+			//		break
+			//	}
+			//}
+			//for i := 1; i <= int(d); i++ {
+			//	if turfNtreesArena.IsTile(x, y-i) {
+			//		if turfNtreesArena.RemoveTiles(x, y-i) {
+			//			d = i
+			//		} else {
+			//			d = i - 1
+			//		}
+			//		break
+			//	}
+			//}
 
 			// falls sich ein Monster oder Player im Explosionsradius befindet
 
@@ -257,6 +257,7 @@ func isThereABomb(v pixel.Vec) (bool, items.Bombe) {
 
 func sun() {
 	const zoomFactor = 3
+	const typ = 2
 	const pitchWidth = 13
 	const pitchHeight = 11
 	var winSizeX float64 = zoomFactor * ((3 + pitchWidth) * TileSize) // TileSize = 16
@@ -273,7 +274,7 @@ func sun() {
 		panic(err)
 	}
 
-	turfNtreesArena = arena.NewArena(pitchWidth, pitchHeight)
+	turfNtreesArena = arena.NewArena(typ, pitchWidth, pitchHeight)
 
 	whiteBomberman = characters.NewPlayer(WhiteBomberman)
 	whiteBomberman.Ani().Show()
