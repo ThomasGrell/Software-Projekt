@@ -189,8 +189,6 @@ func checkForExplosions () []int {
 			tempAni[0] = ani
 			tempAni[1] = (item.GetMatrix()).Moved(ani.ToCenter())
 			tempAniSlice = append(tempAniSlice, tempAni)
-			s2 := sounds.NewSound(Deathflash)
-			go s2.PlaySound()	
 		}
 	}
 	
@@ -218,6 +216,8 @@ func showExpolosions (win *pixelgl.Window) []int {
 		ani := (a[0]).(animations.Animation)
 		ani.Update()
 		mtx := (a[1]).(pixel.Matrix)
+		s2 := sounds.NewSound(Deathflash)
+		go s2.PlaySound()	
 		(ani.GetSprite()).Draw(win, mtx)
 		if !ani.IsVisible() {
 			indexe = append(indexe,index)
