@@ -73,8 +73,8 @@ func NewEnemy(t uint8) *enemy {
 	c := new(enemy)
 	*c = *en
 	c.ani = animations.NewAnimation(t)
-	c.size = pixel.V(14,14)
-	c.collisionbox = pixel.R(-c.size.X/2,-c.size.Y*3/4, c.size.X/2, c.size.Y/4)
+	c.size = pixel.V(16,16)
+	c.collisionbox = pixel.R(-c.size.X/2,-c.size.Y/2 , c.size.X/2, c.size.Y/2)
 	c.matrix = pixel.IM.Moved(c.GetMovedPos())
 	switch t {
 	case Balloon:
