@@ -11,7 +11,7 @@ import (
 )
 
 type data struct {
-	canvas      *pixelgl.Canvas
+	canvas    *pixelgl.Canvas
 	lowerLeft pixel.Vec // linke untere Spielfeldecke für korrekte Positionsbestimmung
 	matrix    pixel.Matrix
 	typ       int
@@ -31,19 +31,18 @@ func NewArena(typ, width, height int) *data {
 		a.passably[i] = true
 	}
 	for i := 0; i < len(a.permTiles[0]); i++ {
-		a.passably[a.w * a.permTiles[1][i] + a.permTiles[0][i]] = false
+		a.passably[a.w*a.permTiles[1][i]+a.permTiles[0][i]] = false
 	}
 	switch a.typ {
 	case MfS:
-		a.lowerLeft = pixel.V(24,8)
+		a.lowerLeft = pixel.V(24, 8)
 	case TurfNtrees:
 		a.lowerLeft = pixel.V(24, 8)
 	case Castle:
 		a.lowerLeft = pixel.V(24, 8)
 	}
-	a.matrix = pixel.IM
-	a.matrix = a.matrix.Moved(pixel.V((float64(width)*TileSize+WallWidth)/2-TileSize/4, (float64(height)*TileSize+WallHeight)/2-TileSize/2))
-	a.canvas = pixelgl.NewCanvas(pixel.R(-2*TileSize, -2*TileSize, float64(width)*TileSize+WallWidth + TileSize/2, float64(height)*TileSize+WallHeight))
+	a.matrix = pixel.IM.Moved(pixel.V((float64(width)*TileSize+WallWidth)/2-TileSize/4, (float64(height)*TileSize+WallHeight)/2-TileSize/2))
+	a.canvas = pixelgl.NewCanvas(pixel.R(-2*TileSize, -2*TileSize, float64(width)*TileSize+WallWidth+TileSize/2, float64(height)*TileSize+WallHeight))
 	a.drawWallsAndGround()
 	a.drawPermTiles()
 	return a
@@ -53,8 +52,8 @@ func (a *data) GetCanvas() *pixelgl.Canvas {
 	return a.canvas
 }
 func (a *data) GetFieldCoord(v pixel.Vec) (x, y int) {
-	x = int(math.Trunc((v.X - a.lowerLeft.X)/TileSize))%(a.w+1)
-	y = int(math.Trunc((v.Y - a.lowerLeft.Y)/TileSize))%(a.h+1)
+	x = int(math.Trunc((v.X-a.lowerLeft.X)/TileSize)) % (a.w + 1)
+	y = int(math.Trunc((v.Y-a.lowerLeft.Y)/TileSize)) % (a.h + 1)
 	return
 }
 func (a *data) GetHeight() int {
@@ -97,7 +96,7 @@ func (a *data) GrantedDirections(posBox pixel.Rect) [4]bool { // {links,rechts,o
 		grDir[0] = false
 	}
 	if posBox.Max.X+1 < a.lowerLeft.X+float64(a.w)*TileSize {
-		if !a.passably[((y1)*a.w+x1+1)% (a.w * a.h)] || !a.passably[((y2)*a.w+x1+1)% (a.w * a.h)] { // if a unpassable field is left of the posBox
+		if !a.passably[((y1)*a.w+x1+1)%(a.w*a.h)] || !a.passably[((y2)*a.w+x1+1)%(a.w*a.h)] { // if a unpassable field is left of the posBox
 			if posBox.Max.X+1 < a.lowerLeft.X+float64(x1+1)*TileSize {
 				grDir[1] = true
 			} else {
@@ -110,7 +109,7 @@ func (a *data) GrantedDirections(posBox pixel.Rect) [4]bool { // {links,rechts,o
 		grDir[1] = false
 	}
 	if posBox.Max.Y+1 < a.lowerLeft.Y+float64(a.h)*TileSize {
-		if !a.passably[((y1+1)*a.w+x1)% (a.w * a.h)] || !a.passably[((y1+1)*a.w+x2)% (a.w * a.h)] { // if a unpassable field is left of the posBox
+		if !a.passably[((y1+1)*a.w+x1)%(a.w*a.h)] || !a.passably[((y1+1)*a.w+x2)%(a.w*a.h)] { // if a unpassable field is left of the posBox
 			if posBox.Max.Y+1 < a.lowerLeft.Y+float64(y2+1)*TileSize {
 				grDir[2] = true
 			} else {
@@ -138,11 +137,11 @@ func (a *data) GrantedDirections(posBox pixel.Rect) [4]bool { // {links,rechts,o
 	return grDir
 	//return [4]bool{true,true,true,true}
 }
-func (a *data) IsFreeTile(x,y int) bool {
+func (a *data) IsFreeTile(x, y int) bool {
 	return a.passably[a.w*y+x]
 }
 func (a *data) IsTile(x, y int) bool {
-	return !a.IsFreeTile(x,y)
+	return !a.IsFreeTile(x, y)
 }
 
 //------------------------- Hilfsfunktionen ---------------------------------
@@ -174,16 +173,16 @@ func (a *data) setPermTiles() {
 	switch a.typ {
 	case MfS:
 		permTilesDefault = [2][]int{
-			{0,1,1,1,1,1,1,2,3,3,3,3,3,3,3,3,4,5,5,5,5,5,5,5,7,7,7,7,7,7,7,9,9,9,9,9,9,10},
-			{2,1,3,5,7,9,11,11,0,1,3,5,7,9,10,11,9,1,2,3,5,7,8,9,11,1,3,5,7,8,9,11,1,3,5,7,9,11,10}}
+			{0, 1, 1, 1, 1, 1, 1, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 5, 5, 5, 5, 5, 5, 5, 7, 7, 7, 7, 7, 7, 7, 9, 9, 9, 9, 9, 9, 10},
+			{2, 1, 3, 5, 7, 9, 11, 11, 0, 1, 3, 5, 7, 9, 10, 11, 9, 1, 2, 3, 5, 7, 8, 9, 11, 1, 3, 5, 7, 8, 9, 11, 1, 3, 5, 7, 9, 11, 10}}
 	case TurfNtrees:
 		permTilesDefault = [2][]int{
 			{1, 3, 5, 7, 9, 11, 8, 9, 10, 1, 3, 5, 7, 9, 10, 11, 1, 3, 5, 7, 9, 11, 1, 3, 5, 7, 9, 11, 2, 1, 3, 5, 7, 9, 11, 7},
 			{1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5, 5, 7, 7, 7, 7, 7, 7, 8, 9, 9, 9, 9, 9, 9, 10}}
 	case Castle:
 		permTilesDefault = [2][]int{
-		{1,3,5,7,9,11,2,1,3,5,7,9,11,12,1,3,5,6,7,8,9,11,2,1,3,5,7,9,11,5,11,1,3,5,7,9,11},
-		{1,1,1,1,1,1,2,3,3,3,3,3,3,4,5,5,5,5,5,5,5,5,6,7,7,7,7,7,7,8,8,9,9,9,9,9,9}}
+			{1, 3, 5, 7, 9, 11, 2, 1, 3, 5, 7, 9, 11, 12, 1, 3, 5, 6, 7, 8, 9, 11, 2, 1, 3, 5, 7, 9, 11, 5, 11, 1, 3, 5, 7, 9, 11},
+			{1, 1, 1, 1, 1, 1, 2, 3, 3, 3, 3, 3, 3, 4, 5, 5, 5, 5, 5, 5, 5, 5, 6, 7, 7, 7, 7, 7, 7, 8, 8, 9, 9, 9, 9, 9, 9}}
 	}
 	// Feld kleiner oder gleich groß wie das Standardfeld
 	for j := range permTilesDefault[0] {
@@ -195,22 +194,24 @@ func (a *data) setPermTiles() {
 	if a.w > 13 || a.h > 11 { // Feld größer als das Standardfeld
 		j := 36
 		for {
-			if a.permTiles[0][j-36] + 12 < a.w - 1 {
+			if a.permTiles[0][j-36]+12 < a.w-1 {
 				a.permTiles[0] = append(a.permTiles[0], a.permTiles[0][j-36]+12) // permTiles rechts vom Standardfeld
 				a.permTiles[1] = append(a.permTiles[1], a.permTiles[1][j-36])
 			}
-			if a.permTiles[1][j-36] + 10 < a.h - 1 {
+			if a.permTiles[1][j-36]+10 < a.h-1 {
 				a.permTiles[0] = append(a.permTiles[0], a.permTiles[0][j-36]) // permTiles oberhalb vom Standardfeld
 				a.permTiles[1] = append(a.permTiles[1], a.permTiles[1][j-36]+10)
 			}
-			if a.permTiles[0][j-36] + 12 < a.w - 1 && a.permTiles[1][j-36] + 10 < a.h - 1 {
+			if a.permTiles[0][j-36]+12 < a.w-1 && a.permTiles[1][j-36]+10 < a.h-1 {
 				a.permTiles[0] = append(a.permTiles[0], a.permTiles[0][j-36]+12) // permTiles rechts oberhalb vom Standardfeld
 				a.permTiles[1] = append(a.permTiles[1], a.permTiles[1][j-36]+10)
 				j++
-			}else{
+			} else {
 				j++
 			}
-			if j >= len(a.permTiles[0])+36{break}
+			if j >= len(a.permTiles[0])+36 {
+				break
+			}
 		}
 	}
 }
@@ -229,12 +230,9 @@ func (a *data) drawPermTiles() {
 	case Castle:
 		permSprite = pixel.NewSprite(tilesPic, pixel.R(28*TileSize, 9*TileSize, 29*TileSize, 10*TileSize))
 	}
-	permMat := pixel.IM
-	permMat = permMat.Moved(pixel.V(TileSize + TileSize/2, TileSize/2))
+	permMat := pixel.IM.Moved(pixel.V(TileSize+TileSize/2, TileSize/2))
 	for i := range a.permTiles[0] {
-		permMat = permMat.Moved(pixel.V(float64(a.permTiles[0][i])*TileSize, float64(a.permTiles[1][i])*TileSize))
-		permSprite.Draw(a.canvas, permMat)
-		permMat = permMat.Moved(pixel.V(-float64(a.permTiles[0][i])*TileSize, -float64(a.permTiles[1][i])*TileSize))
+		permSprite.Draw(a.canvas, permMat.Moved(pixel.V(float64(a.permTiles[0][i])*TileSize, float64(a.permTiles[1][i])*TileSize)))
 	}
 }
 
@@ -277,19 +275,19 @@ func (a *data) drawWallsAndGround() { // baut Arena spaltenweise auf, beginnt un
 		ground = pixel.NewSprite(tilesPic, pixel.R(28*TileSize, 11*TileSize, 29*TileSize, 12*TileSize))
 	}
 	drawMat := pixel.IM
-	edgeLowLeft.Draw(a.canvas, /*edgeLowLeftMat*/ drawMat)
-	drawMat = drawMat.Moved(pixel.V(0,TileSize + TileSize/2))
+	edgeLowLeft.Draw(a.canvas /*edgeLowLeftMat*/, drawMat)
+	drawMat = drawMat.Moved(pixel.V(0, TileSize+TileSize/2))
 	wallLeft.Draw(a.canvas, drawMat)
-	for i:=0; i<a.h-3; i++ { // -3 weil die beiden Ecken schon Felder sind und ein Wandstück bereits gezeichnet wurde
-		drawMat = drawMat.Moved(pixel.V(0,TileSize))
+	for i := 0; i < a.h-3; i++ { // -3 weil die beiden Ecken schon Felder sind und ein Wandstück bereits gezeichnet wurde
+		drawMat = drawMat.Moved(pixel.V(0, TileSize))
 		wallLeft.Draw(a.canvas, drawMat)
 	}
-	drawMat = drawMat.Moved(pixel.V(0,TileSize+TileSize/2))
+	drawMat = drawMat.Moved(pixel.V(0, TileSize+TileSize/2))
 	edgeHiLeft.Draw(a.canvas, drawMat)
-	for j:=0; j<a.w; j++ {
-		if j==0 {
+	for j := 0; j < a.w; j++ {
+		if j == 0 {
 			drawMat = drawMat.Moved(pixel.V(TileSize+TileSize/2, -(TileSize*float64(a.h) + TileSize/2)))
-		}else{
+		} else {
 			drawMat = drawMat.Moved(pixel.V(TileSize, -(TileSize*float64(a.h) + TileSize)))
 		}
 		for i := 0; i < a.h+2; i++ { // +2 weil oben und unten Wände sind
@@ -306,13 +304,13 @@ func (a *data) drawWallsAndGround() { // baut Arena spaltenweise auf, beginnt un
 		}
 	}
 	drawMat = drawMat.Moved(pixel.V(TileSize+TileSize/2, -(TileSize*float64(a.h) + TileSize/2)))
-	edgeLowRight.Draw(a.canvas,drawMat)
-	drawMat = drawMat.Moved(pixel.V(0,TileSize + TileSize/2))
+	edgeLowRight.Draw(a.canvas, drawMat)
+	drawMat = drawMat.Moved(pixel.V(0, TileSize+TileSize/2))
 	wallRight.Draw(a.canvas, drawMat)
-	for i:=0; i<a.h-3; i++ { // -3 weil die beiden Ecken schon Felder sind und ein Wandstück bereits gezeichnet wurde
-		drawMat = drawMat.Moved(pixel.V(0,TileSize))
+	for i := 0; i < a.h-3; i++ { // -3 weil die beiden Ecken schon Felder sind und ein Wandstück bereits gezeichnet wurde
+		drawMat = drawMat.Moved(pixel.V(0, TileSize))
 		wallRight.Draw(a.canvas, drawMat)
 	}
-	drawMat = drawMat.Moved(pixel.V(0,TileSize+TileSize/2))
+	drawMat = drawMat.Moved(pixel.V(0, TileSize+TileSize/2))
 	edgeHiRight.Draw(a.canvas, drawMat)
 }
