@@ -180,6 +180,10 @@ func (c *character) IsMortal() bool {
 func (c *character) IsWallghost() bool   { return c.wallghost }
 func (c *character) SetBombghost(b bool) { c.bombghost = b }
 
+func (c *character) GetMatrix () pixel.Matrix {
+	return (*c).matrix
+}
+
 /*
 
 Wofür ist das gut? Skaliert wird das Fenster, nicht die Charaktere.

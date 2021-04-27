@@ -38,6 +38,8 @@ type Character interface {
 
 	DecLife()
 	DecSpeed()
+	
+	GetMatrix () pixel.Matrix
 
 	// Vor.: keine
 	// Eff.: Zeichnet den Sprite in das Fenster. Dabei sind die Mitten der Grundlinien
