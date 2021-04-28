@@ -23,4 +23,6 @@ IsTile (x,y int) bool
 
 RemoveTile(x,y int) bool
 
+RemoveItems (x,y,dir,len int)
+
 }

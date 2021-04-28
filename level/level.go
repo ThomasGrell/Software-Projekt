@@ -78,27 +78,56 @@ func (l *lv) SetRandomItems (number int) {//, ar arena.Arena) {
 			xx,yy := dTile.GetIndexPos()
 			if xx==x && yy==y { nt.Ani().SetVisible(false) }
 		}*/
-		fmt.Println(x,y)
-		fmt.Println(nt.Ani().IsVisible())
 		(*l).layer3 = append((*l).layer3,nt)
 		freeTiles = append(freeTiles[:index],freeTiles[index+1:]...)
 		i++
 	}
 }
 
-//////////////////////////////// ToDo Clear not visible Tiles //////////////////////////////////////77
+func (l *lv) RemoveItems (x,y,dir,len int) {
+	switch dir {
+		case 0: 								//left
+			for _,dItem := range (*l).layer3 {
+				xx,yy := dItem.GetIndexPos()
+				if xx+len>=x && xx<=x && yy==y {
+					dItem.Ani().Die()
+				}
+			}
+		case 1:									// right
+			for _,dItem := range (*l).layer3 {
+				xx,yy := dItem.GetIndexPos()
+				if xx-len<=x && xx>=x && yy==y {
+					dItem.Ani().Die()
+				}
+			}
+		case 2:									// up
+			for _,dItem := range (*l).layer3 {
+				xx,yy := dItem.GetIndexPos()
+				if xx==x && yy>=y && yy-len<=y {
+					dItem.Ani().Die()
+				}
+			}
+		case 3:									// down
+			for _,dItem := range (*l).layer3 {
+				xx,yy := dItem.GetIndexPos()
+				if xx==x && yy<=y && yy+len>=y {
+					dItem.Ani().Die()
+				}
+			}
+	}
+	
+}
 
 func (l *lv) RemoveTile(x,y int) bool {
 	for i := len( (*l).layer4 )-1; i>=0; i-- {
 		xx,yy := (*l).layer4[i].GetIndexPos()
 		if xx==x && yy==y {
 			(*l).layer4[i].Ani().Die()
-			//(*l).layer4 = append((*l).layer4[:i],(*l).layer4[i+1:]...)
 			return true
 		}
 	}
 	return false
-} 
+}
 
 func (l *lv) IsTile (x,y int) bool {
 	if (*l).ar.IsTile(x,y) { return true }
@@ -115,7 +144,8 @@ func (l *lv) SetRandomTiles (number int) {//, ar arena.Arena) {
 	var index,x,y,i,t int
 	ar := (*l).ar
 	rand.Seed(time.Now().UnixNano())
-	t = 120+rand.Intn(18)
+	t = 120+rand.Intn(19)
+	fmt.Println("TeilNr:",t)
 	width := (*l).width 
 	height := (*l).height
 	var freeTiles [][2]int
@@ -130,12 +160,9 @@ func (l *lv) SetRandomTiles (number int) {//, ar arena.Arena) {
 		number = len(freeTiles)/2
 	}
 	for i<number {
-		fmt.Println(len(freeTiles))
 		index = rand.Intn(len(freeTiles))
 		x = freeTiles[index][0]
 		y = freeTiles[index][1]
-		if t>132 {t++}		// christmastree ist too big!!!
-		//nt := tiles.NewTile(uint8(t),ar.GetLowerLeft().Add(pixel.V(float64(x)*TileSize+TileSize/2, float64(y)*TileSize+TileSize/2)))
 		nt := tiles.NewTile(uint8(t),ar.GetLowerLeft(),x,y)
 		(*l).layer4 = append((*l).layer4,nt)
 		freeTiles = append(freeTiles[:index],freeTiles[index+1:]...)
@@ -144,13 +171,23 @@ func (l *lv) SetRandomTiles (number int) {//, ar arena.Arena) {
 }
 
 func (l *lv) DrawTiles (win *pixelgl.Window) {
-	for _, dTile := range (*l).layer4 {
+	for i := len( (*l).layer4 )-1; i>=0; i-- {
+		dTile := (*l).layer4[i]
+		if !dTile.Ani().IsVisible(){
+			(*l).layer4 = append((*l).layer4[:i],(*l).layer4[i+1:]...)
+		} else {
 			dTile.Draw(win)
+		}
 	}
 }
 
 func (l *lv) DrawItems (win *pixelgl.Window) {
-	for _, dItem := range (*l).layer3 {
+	for i := len( (*l).layer3 )-1; i>=0; i-- {
+			dItem := (*l).layer3[i]
+		if !dItem.Ani().IsVisible(){
+			(*l).layer3 = append((*l).layer3[:i],(*l).layer3[i+1:]...)
+		} else {
 			dItem.Draw(win)
+		}
 	}
 }

@@ -7,7 +7,7 @@ import (
 	. "./constants"
 	"./tiles"
 	"./sounds"
-	"fmt"
+	//"fmt"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	//"golang.org/x/image/colornames"
@@ -26,7 +26,7 @@ var whiteBomberman characters.Player
 
 
 
-////////////////////////////////////////// ToDo also Items should Die ////////////////////////////////////////////
+
 // Vor: ...
 // Eff: Ist der Counddown der Bombe abgelaufen passiert folgendes:
 //     		- Eine neue Explosionsanimation ist erstellt und an die Position der ehemaligen bombe gesetzt.
@@ -164,7 +164,14 @@ func checkForExplosions() []int {
 					break
 				}
 			}
-
+			
+			// Items, die im Expolsionsradius liegen werden zerstört, die Expolion wird aber nicht kleiner!
+			
+			lev.RemoveItems(x,y,0,l)
+			lev.RemoveItems(x,y,1,r)
+			lev.RemoveItems(x,y,2,u)
+			lev.RemoveItems(x,y,3,d)
+			
 			// falls weitere Bomben im Explosionsradius liegen, werden auch gleich explodieren
 
 			for i := 1; i <= l; i++ {
@@ -192,8 +199,6 @@ func checkForExplosions() []int {
 				}
 			}
 
-			fmt.Println("")
-
 			ani := animations.NewExplosion(uint8(l), uint8(r), uint8(u), uint8(d))
 			ani.Show()
 			tempAni := make([]interface{}, 2)
@@ -209,10 +214,9 @@ func checkForExplosions() []int {
 }
 
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // Vor.:...
-// Eff.: Explodiere Bomben sind aus dem slice bombs gelöscht
+// Eff.: Explodierte Bomben sind aus dem slice bombs gelöscht
 
 func removeExplodedBombs(indexe []int) {
 	for i := len(indexe) - 1; i >= 0; i-- {
@@ -241,9 +245,6 @@ func showExpolosions(win *pixelgl.Window) []int {
 
 func clearExplosions(indexe []int) {
 	for index := len(indexe) - 1; index >= 0; index-- {
-		fmt.Println(tempAniSlice)
-		fmt.Print(index)
-		fmt.Println("")
 		if len(tempAniSlice) != 0 {
 			if len(tempAniSlice) == 1 {
 				tempAniSlice = tempAniSlice[:0]
@@ -263,6 +264,32 @@ func isThereABomb(v pixel.Vec) (bool, tiles.Bombe) {
 	return false, nil
 }
 
+
+func getGrantedDirections (c characters.Character) [4]bool {
+	var b [4]bool
+	b[0]=true
+	b[1]=true
+	b[2]=true
+	b[3]=true
+	pb := c.GetPosBox()
+	ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
+	ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
+	if lev.IsTile(int((ll.X-1)/TileSize),int(ll.Y/TileSize))||lev.IsTile(int((ll.X-1)/TileSize),int(ur.Y/TileSize))|| ll.X-1<0 {b[0]=false}
+	if int((ur.X+1)/TileSize)>turfNtreesArena.GetWidth()-1 {
+		b[1]=false
+	} else if lev.IsTile(int((ur.X+1)/TileSize),int(ll.Y/TileSize)) || lev.IsTile(int((ur.X+1)/TileSize),int(ur.Y/TileSize)){
+		b[1]=false
+	}
+	if int((ur.Y+1)/TileSize)>turfNtreesArena.GetHeight()-1 {
+		b[2]=false
+	} else if lev.IsTile(int(ll.X/TileSize),int((ur.Y+1)/TileSize)) || lev.IsTile(int(ur.X/TileSize),int((ur.Y+1)/TileSize)) {
+		b[2]=false
+	}
+	if lev.IsTile(int(ll.X/TileSize),int((ll.Y-1)/TileSize))|| lev.IsTile(int(ur.X/TileSize),int((ll.Y-1)/TileSize))|| ll.Y-1<0 {b[3]=false}
+
+	return b
+}
+
 func sun() {
 	const zoomFactor = 3
 	const typ = 2
@@ -271,7 +298,6 @@ func sun() {
 	var winSizeX float64 = zoomFactor * ((3 + pitchWidth) * TileSize) // TileSize = 16
 	var winSizeY float64 = zoomFactor * ((1 + pitchHeight) * TileSize)
 	var stepSize float64 = 1
-	//var destTiles []tiles.Tile
 	
 
 	wincfg := pixelgl.WindowConfig{
@@ -288,8 +314,9 @@ func sun() {
 	turfNtreesArena = arena.NewArena(typ, pitchWidth, pitchHeight)
 	
 	lev = level.NewBlankLevel(turfNtreesArena)
-	lev.SetRandomTiles(60)
+	lev.SetRandomTiles(6)
 	lev.SetRandomItems(10)
+	
 	whiteBomberman = characters.NewPlayer(WhiteBomberman)
 	whiteBomberman.Ani().Show()
 	whiteBomberman.IncPower()
@@ -321,7 +348,7 @@ A:
 	}
 */
 
-	// Nomberman is in lowleft Corner
+	// Bomberman is in lowleft Corner
 	whiteBomberman.MoveTo(turfNtreesArena.GetLowerLeft().Add(pixel.V(0, 0)))
 	
 ///////////////////////// ToDo Enyemys should be a Part of Level //////////////////////////////////////////////
@@ -332,8 +359,6 @@ A:
 			i := rand.Intn(turfNtreesArena.GetWidth())
 			j := rand.Intn(turfNtreesArena.GetHeight())
 			if !turfNtreesArena.IsTile(i, j) && xx != i && yy != j {
-				fmt.Println(i,j)
-				fmt.Println(turfNtreesArena.GetLowerLeft())
 				m.MoveTo(turfNtreesArena.GetLowerLeft().Add(pixel.V(float64(i)*
 					TileSize, float64(j)*TileSize)))
 				m.Ani().SetVisible(true)
@@ -348,13 +373,13 @@ A:
 	win.Update()
 
 	for !win.Closed() && !win.Pressed(pixelgl.KeyEscape) {
-//////////////////////////// ToDo Implement a similar Function inside Level /////////////////////////////////////
-		grDir := turfNtreesArena.GrantedDirections(whiteBomberman.GetPosBox()) // [4]bool left-right-up-down granted?
+//////////////////////////// ToDo Implement a similar Function inside Main /////////////////////////////////////
+		//grDir := turfNtreesArena.GrantedDirections(whiteBomberman.GetPosBox()) // [4]bool left-right-up-down granted?
+		grDir := getGrantedDirections(whiteBomberman)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		keypressed := false
 
 		if win.Pressed(pixelgl.KeyLeft) && grDir[0] {
-			fmt.Println(whiteBomberman.GetPosBox())
 			whiteBomberman.Move(pixel.V(-stepSize, 0))
 			whiteBomberman.Ani().SetView(Left)
 			keypressed = true
@@ -379,13 +404,13 @@ A:
 		}
 		if win.JustPressed(pixelgl.KeyB) {
 			pb := characters.Player(whiteBomberman).GetPosBox()
+			loleft := turfNtreesArena.GetLowerLeft()
 			b, _ := isThereABomb(pixel.Vec{math.Round(pb.Center().X/TileSize) * TileSize, math.Round(pb.Center().Y/TileSize) * TileSize})
-			c := lev.IsTile(int(pb.Min.X/TileSize)-1,int(pb.Min.Y/TileSize))
+			c := lev.IsTile(int((pb.Min.X-loleft.X)/TileSize),int((pb.Min.Y-loleft.Y)/TileSize))
 			if !b && !c {
 				var item tiles.Bombe
 				item = tiles.NewBomb(characters.Player(whiteBomberman))
 				bombs = append(bombs, item)
-				fmt.Println(item.GetPos())
 			}
 		}
 
@@ -429,17 +454,24 @@ A:
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////7
 
 		turfNtreesArena.GetCanvas().Draw(win, *(turfNtreesArena.GetMatrix()))
-
+		
+		
 		removeExplodedBombs(checkForExplosions())
 
-		for _, item := range bombs {
-			item.Draw(win)
-		}
+		
 		lev.DrawItems(win)
 		lev.DrawTiles(win)
 		
+		for _, item := range bombs {
+			item.Draw(win)
+		}
+		
+		
+		
 
 		clearExplosions(showExpolosions(win))
+		
+		
 
 		whiteBomberman.Draw(win)
 
