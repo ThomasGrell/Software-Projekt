@@ -7,14 +7,14 @@ import(	"../arena"
 		"math/rand"
 		"time"
 		"fmt"
-		//. "../constants"
+		. "../constants"
 		"github.com/faiface/pixel"
 		"github.com/faiface/pixel/pixelgl")
 
 
 type lv struct {
-	layer1 []characters.Enemy		// monster
-	layer2 []characters.Player		// Bomberman and Battleman
+	layer2 []characters.Enemy		// monster
+	layer1 []characters.Player		// Bomberman and Battleman
 	layer4 []tiles.Tile				// destroyable Tiles
 	layer3 []tiles.Item				// Items
 	loleft pixel.Vec
@@ -32,11 +32,11 @@ func NewBlankLevel (ar arena.Arena) *lv {
 }
 
 func (l *lv) SetMonster (m []characters.Enemy) {
-	(*l).layer1 = m
+	(*l).layer2 = m
 }
 
 func (l *lv) SetPLayer (p []characters.Player) {
-	(*l).layer2 = p
+	(*l).layer1 = p
 }
 
 func (l *lv) SetItems (it []tiles.Item) {
@@ -49,6 +49,46 @@ func (l *lv) SetTiles (t []tiles.Tile) {
 
 func (l *lv) GetTiles () []tiles.Tile {
 	return (*l).layer4
+}
+
+func (l *lv) IsItem (x,y int) bool {
+	for _,dItem := range (*l).layer3 {
+		xx,yy := dItem.GetIndexPos()
+		if xx==x && yy==y {return true }
+	}
+	return false
+}
+
+func (l *lv) SetRandomEnemys (number int) {
+	//ar := (*l).ar
+	rand.Seed(time.Now().UnixNano())
+	width := (*l).width 
+	height := (*l).height
+	var freeTiles [][2]int
+	for x:=0; x<width; x++ {
+		for y:=0; y<height; y++ {
+			if !(*l).IsTile(x,y) && x+y>1 && x+y<width+height-2 && !(*l).IsItem(x,y)  {freeTiles=append(freeTiles,[2]int{x,y})}
+		}
+	}
+	if len(freeTiles)-10-len(l.layer4)-len(l.layer3) < number {
+		fmt.Println("Nicht genügend freie Plätze.")
+		fmt.Println("Es werden nur ",(len(freeTiles)-10-len(l.layer4)-len(l.layer3))/5," Tiele zufällig platziert.")
+		number = (len(freeTiles)-10-len(l.layer4)-len(l.layer3))/5
+	}
+	var index,x,y,i,t int
+	var ne characters.Enemy
+	for i<number {
+		index = rand.Intn(len(freeTiles))
+		x = freeTiles[index][0]
+		y = freeTiles[index][1]
+		t = 8+rand.Intn(27)
+		ne = characters.NewEnemy(uint8(t))
+		ne.MoveTo(l.loleft.Add(pixel.V(float64(x)*TileSize, float64(y)*TileSize)))
+		ne.Ani().SetVisible(true)
+		(*l).layer2 = append((*l).layer2,ne)
+		freeTiles = append(freeTiles[:index],freeTiles[index+1:]...)
+		i++
+	}
 }
 
 func (l *lv) SetRandomItems (number int) {//, ar arena.Arena) {
@@ -65,6 +105,7 @@ func (l *lv) SetRandomItems (number int) {//, ar arena.Arena) {
 	if len(freeTiles)-10-len(l.layer4) < number {
 		fmt.Println("Nicht genügend freie Plätze.")
 		fmt.Println("Es werden nur ",(len(freeTiles)-10)/5," Tiele zufällig platziert.")
+		number = (len(freeTiles)-10)/5
 	}
 	var index,x,y,i,t int
 	var nt tiles.Item
@@ -74,10 +115,10 @@ func (l *lv) SetRandomItems (number int) {//, ar arena.Arena) {
 		y = freeTiles[index][1]
 		t = 100+rand.Intn(12)
 		nt = tiles.NewItem(uint8(t),ar.GetLowerLeft(),x,y)
-		/*for _,dTile := range l.layer4 {
+		for _,dTile := range l.layer4 {
 			xx,yy := dTile.GetIndexPos()
 			if xx==x && yy==y { nt.Ani().SetVisible(false) }
-		}*/
+		}
 		(*l).layer3 = append((*l).layer3,nt)
 		freeTiles = append(freeTiles[:index],freeTiles[index+1:]...)
 		i++
@@ -89,28 +130,28 @@ func (l *lv) RemoveItems (x,y,dir,len int) {
 		case 0: 								//left
 			for _,dItem := range (*l).layer3 {
 				xx,yy := dItem.GetIndexPos()
-				if xx+len>=x && xx<=x && yy==y {
+				if xx+len>=x && xx<=x && yy==y && dItem.Ani().IsVisible() {
 					dItem.Ani().Die()
 				}
 			}
 		case 1:									// right
 			for _,dItem := range (*l).layer3 {
 				xx,yy := dItem.GetIndexPos()
-				if xx-len<=x && xx>=x && yy==y {
+				if xx-len<=x && xx>=x && yy==y && dItem.Ani().IsVisible() {
 					dItem.Ani().Die()
 				}
 			}
 		case 2:									// up
 			for _,dItem := range (*l).layer3 {
 				xx,yy := dItem.GetIndexPos()
-				if xx==x && yy>=y && yy-len<=y {
+				if xx==x && yy>=y && yy-len<=y && dItem.Ani().IsVisible() {
 					dItem.Ani().Die()
 				}
 			}
 		case 3:									// down
 			for _,dItem := range (*l).layer3 {
 				xx,yy := dItem.GetIndexPos()
-				if xx==x && yy<=y && yy+len>=y {
+				if xx==x && yy<=y && yy+len>=y && dItem.Ani().IsVisible() {
 					dItem.Ani().Die()
 				}
 			}
@@ -123,9 +164,27 @@ func (l *lv) RemoveTile(x,y int) bool {
 		xx,yy := (*l).layer4[i].GetIndexPos()
 		if xx==x && yy==y {
 			(*l).layer4[i].Ani().Die()
+			for _,dItem := range (*l).layer3 {
+				xxx,yyy := dItem.GetIndexPos()
+				if xxx==xx && yyy==yy {
+					dItem.Ani().SetVisible(true)
+				}
+			}
 			return true
 		}
 	}
+	return false
+}
+
+func (l *lv) RemoveEnemy(x,y int) bool {
+	for _,en := range (*l).layer2 {
+		xx,yy := (*l).ar.GetFieldCoord(en.GetPos())
+		if x==xx && y==yy {
+			en.Ani().Die()
+			return true
+		}
+	}
+	
 	return false
 }
 
@@ -188,6 +247,17 @@ func (l *lv) DrawItems (win *pixelgl.Window) {
 			(*l).layer3 = append((*l).layer3[:i],(*l).layer3[i+1:]...)
 		} else {
 			dItem.Draw(win)
+		}
+	}
+}
+
+func (l *lv) DrawEnemys (win *pixelgl.Window) {
+	for i := len( (*l).layer2 )-1; i>=0; i-- {
+			en := (*l).layer2[i]
+		if !en.Ani().IsVisible(){
+			(*l).layer2 = append((*l).layer2[:i],(*l).layer2[i+1:]...)
+		} else {
+			en.Draw(win)
 		}
 	}
 }

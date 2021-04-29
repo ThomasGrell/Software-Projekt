@@ -7,7 +7,7 @@ import (
 	. "./constants"
 	"./tiles"
 	"./sounds"
-	//"fmt"
+	"fmt"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	//"golang.org/x/image/colornames"
@@ -15,11 +15,13 @@ import (
 	"math/rand"
 	"time"
 	"./level"
+	"./level1"
 )
 
 var bombs []tiles.Bombe
 var turfNtreesArena arena.Arena
 var lev level.Level
+var lev1 level1.Level
 var tempAniSlice [][]interface{} // [Animation][Matrix]
 var monster []characters.Enemy
 var whiteBomberman characters.Player
@@ -60,47 +62,44 @@ func checkForExplosions() []int {
 			}
 
 			// Falls es Hindernisse gibt, die zerstörbar oder unzerstörbar sind
-
-			for i := 1; i <= int(l); i++ {
-				if lev.IsTile(x-i, y) {
-					if lev.RemoveTile(x-i, y) {
-						l = i
-					} else {
-						l = i - 1
-					}
-					break
+			
+			bl,xl,yl := lev1.GetPosOfNextTile(x,y,pixel.V(float64(-l),0))
+			if bl {
+				fmt.Println("Links: ",xl,yl)
+				if lev1.IsDestroyableTile(xl,yl) {
+					l=x-xl
+				} else {
+					l=x-xl-1
 				}
 			}
-			for i := 1; i <= int(r); i++ {
-				if lev.IsTile(x+i, y) {
-					if lev.RemoveTile(x+i, y) {
-						r = i
-					} else {
-						r = i - 1
-					}
-					break
+			br,xr,yr := lev1.GetPosOfNextTile(x,y,pixel.V(float64(r),0))
+			if br {
+				fmt.Println("Rechts: ",xr,yr)
+				if lev1.IsDestroyableTile(xr,yr) {
+					r=xr-x
+				} else {
+					r=xr-x-1
 				}
 			}
-			for i := 1; i <= int(u); i++ {
-				if lev.IsTile(x, y+i) {
-					if lev.RemoveTile(x, y+i) {
-						u = i
-					} else {
-						u = i - 1
-					}
-					break
+			bd,xd,yd := lev1.GetPosOfNextTile(x,y,pixel.V(0,float64(-d)))
+			if bd {
+				fmt.Println("Unten: ",xd,yd)
+				if lev1.IsDestroyableTile(xd,yd) {
+					d=y-yd
+				} else {
+					d=y-yd-1
 				}
 			}
-			for i := 1; i <= int(d); i++ {
-				if lev.IsTile(x, y-i) {
-					if lev.RemoveTile(x, y-i) {
-						d = i
-					} else {
-						d = i - 1
-					}
-					break
+			bu,xu,yu := lev1.GetPosOfNextTile(x,y,pixel.V(0,float64(u)))
+			if bu {
+				fmt.Println("Oben: ",xu,yu)
+				if lev1.IsDestroyableTile(xu,yu) {
+					u=yu-y
+				} else {
+					u=yu-y-1
 				}
 			}
+			
 
 			// falls sich ein Monster oder Player im Explosionsradius befindet
 
@@ -165,12 +164,25 @@ func checkForExplosions() []int {
 				}
 			}
 			
+			if xl+l==x {
+				lev1.RemoveTile(xl,yl)
+			}
+			if xr-r==x {
+				lev1.RemoveTile(xr,yr)
+			}
+			if yd+d==y {
+				lev1.RemoveTile(xd,yd)
+			}
+			if yu-u==y {
+				lev1.RemoveTile(xu,yu)
+			}
+			
 			// Items, die im Expolsionsradius liegen werden zerstört, die Expolion wird aber nicht kleiner!
 			
-			lev.RemoveItems(x,y,0,l)
-			lev.RemoveItems(x,y,1,r)
-			lev.RemoveItems(x,y,2,u)
-			lev.RemoveItems(x,y,3,d)
+			lev1.RemoveItems(x,y,pixel.V(float64(-l),0))
+			lev1.RemoveItems(x,y,pixel.V(float64(r),0))
+			lev1.RemoveItems(x,y,pixel.V(0,float64(-d)))
+			lev1.RemoveItems(x,y,pixel.V(0,float64(u)))
 			
 			// falls weitere Bomben im Explosionsradius liegen, werden auch gleich explodieren
 
@@ -274,18 +286,18 @@ func getGrantedDirections (c characters.Character) [4]bool {
 	pb := c.GetPosBox()
 	ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
 	ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
-	if lev.IsTile(int((ll.X-1)/TileSize),int(ll.Y/TileSize))||lev.IsTile(int((ll.X-1)/TileSize),int(ur.Y/TileSize))|| ll.X-1<0 {b[0]=false}
+	if lev1.IsTile(int((ll.X-1)/TileSize),int(ll.Y/TileSize))||lev1.IsTile(int((ll.X-1)/TileSize),int(ur.Y/TileSize))|| ll.X-1<0 {b[0]=false}
 	if int((ur.X+1)/TileSize)>turfNtreesArena.GetWidth()-1 {
 		b[1]=false
-	} else if lev.IsTile(int((ur.X+1)/TileSize),int(ll.Y/TileSize)) || lev.IsTile(int((ur.X+1)/TileSize),int(ur.Y/TileSize)){
+	} else if lev1.IsTile(int((ur.X+1)/TileSize),int(ll.Y/TileSize)) || lev1.IsTile(int((ur.X+1)/TileSize),int(ur.Y/TileSize)){
 		b[1]=false
 	}
 	if int((ur.Y+1)/TileSize)>turfNtreesArena.GetHeight()-1 {
 		b[2]=false
-	} else if lev.IsTile(int(ll.X/TileSize),int((ur.Y+1)/TileSize)) || lev.IsTile(int(ur.X/TileSize),int((ur.Y+1)/TileSize)) {
+	} else if lev1.IsTile(int(ll.X/TileSize),int((ur.Y+1)/TileSize)) || lev1.IsTile(int(ur.X/TileSize),int((ur.Y+1)/TileSize)) {
 		b[2]=false
 	}
-	if lev.IsTile(int(ll.X/TileSize),int((ll.Y-1)/TileSize))|| lev.IsTile(int(ur.X/TileSize),int((ll.Y-1)/TileSize))|| ll.Y-1<0 {b[3]=false}
+	if lev1.IsTile(int(ll.X/TileSize),int((ll.Y-1)/TileSize))|| lev1.IsTile(int(ur.X/TileSize),int((ll.Y-1)/TileSize))|| ll.Y-1<0 {b[3]=false}
 
 	return b
 }
@@ -314,8 +326,10 @@ func sun() {
 	turfNtreesArena = arena.NewArena(typ, pitchWidth, pitchHeight)
 	
 	lev = level.NewBlankLevel(turfNtreesArena)
-	lev.SetRandomTiles(6)
+	lev.SetRandomTiles(10)
 	lev.SetRandomItems(10)
+	lev1 = level1.NewBlankLevel(turfNtreesArena,1)
+	lev1.SetRandomTilesAndItems (20,10)
 	
 	whiteBomberman = characters.NewPlayer(WhiteBomberman)
 	whiteBomberman.Ani().Show()
@@ -459,9 +473,11 @@ A:
 		removeExplodedBombs(checkForExplosions())
 
 		
-		lev.DrawItems(win)
-		lev.DrawTiles(win)
-		
+		//lev.DrawItems(win)
+		//lev.DrawTiles(win)
+		for i:=0; i<pitchHeight; i++ {
+			lev1.DrawColumn(i,win)
+		}
 		for _, item := range bombs {
 			item.Draw(win)
 		}
