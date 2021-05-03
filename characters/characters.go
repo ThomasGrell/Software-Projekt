@@ -56,8 +56,8 @@ func NewPlayer(t uint8) *player {
 	switch t {
 	case WhiteBomberman, BlackBomberman, BlueBomberman, RedBomberman:
 		*c = *bm
-		c.size = pixel.V(14,14)
-		c.collisionbox = pixel.R(-c.size.X/2,-c.size.Y*3/4, c.size.X/2, c.size.Y/4)
+		c.size = pixel.V(14, 14)
+		c.collisionbox = pixel.R(-c.size.X/2, -c.size.Y*3/4, c.size.X/2, c.size.Y/4)
 	case WhiteBattleman, BlackBattleman, BlueBattleman, RedBattleman:
 		*c = *bm
 		c.life = 1
@@ -73,8 +73,8 @@ func NewEnemy(t uint8) *enemy {
 	c := new(enemy)
 	*c = *en
 	c.ani = animations.NewAnimation(t)
-	c.size = pixel.V(16,16)
-	c.collisionbox = pixel.R(-c.size.X/2,-c.size.Y/2 , c.size.X/2, c.size.Y/2)
+	c.size = pixel.V(16, 16)
+	c.collisionbox = pixel.R(-c.size.X/2, -c.size.Y/2, c.size.X/2, c.size.Y/2)
 	c.matrix = pixel.IM.Moved(c.GetMovedPos())
 	switch t {
 	case Balloon:
@@ -125,7 +125,7 @@ func (c *player) IncLife() {
 	c.life++
 }
 func (c *player) IncMaxBombs()        { c.maxBombs++ }
-func (c *player) IncPower ()		  { c.power++ }
+func (c *player) IncPower()           { c.power++ }
 func (c *player) IncWins()            { c.wins++ }
 func (c *player) ResetWins()          { c.wins = 0 }
 func (c *player) SetLife(l uint8)     { c.life = l }
@@ -152,7 +152,9 @@ func (c *character) DecSpeed() {
 }
 func (c *character) Draw(win *pixelgl.Window) {
 	c.ani.Update()
-	c.ani.GetSprite().Draw(win, c.matrix)
+	if c.ani.IsVisible() {
+		c.ani.GetSprite().Draw(win, c.matrix)
+	}
 }
 func (c *character) GetBaselineCenter() pixel.Vec {
 	return c.collisionbox.Min.Add(pixel.V(c.size.X/2, 0))
@@ -180,7 +182,7 @@ func (c *character) IsMortal() bool {
 func (c *character) IsWallghost() bool   { return c.wallghost }
 func (c *character) SetBombghost(b bool) { c.bombghost = b }
 
-func (c *character) GetMatrix () pixel.Matrix {
+func (c *character) GetMatrix() pixel.Matrix {
 	return (*c).matrix
 }
 

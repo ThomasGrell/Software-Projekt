@@ -8,7 +8,6 @@ import (
 	"./level1"
 	"./sounds"
 	"./tiles"
-	"fmt"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	//"golang.org/x/image/colornames"
@@ -30,15 +29,13 @@ var whiteBomberman characters.Player
 //      	- Es ertönt der Explosionssound.
 //      Ist der Countdown nicht abgelaufen, passiert nichts.
 
-func checkForExplosions() []int {
+func checkForExplosions() {
 
-	//var bomben []tiles.Bombe
-	var indexe []int
-
-	for index, item := range bombs {
+	for _, item := range bombs {
 		if ((item).GetTimeStamp()).Before(time.Now()) {
 			//bomben = append (bomben,item)
-			indexe = append(indexe, index)
+
+			item.Ani().Die()
 
 			x, y := turfNtreesArena.GetFieldCoord(item.GetPos())
 			power := int(item.GetPower())
@@ -200,48 +197,38 @@ func checkForExplosions() []int {
 		}
 	}
 
-	return indexe
 }
 
 // Vor.:...
-// Eff.: Explodierte Bomben sind aus dem slice bombs gelöscht
-
-func removeExplodedBombs(indexe []int) {
-	fmt.Println(bombs)
-	for i := len(indexe) - 1; i >= 0; i-- {
-		index := indexe[i]
-		if len(bombs) == 1 {
-			bombs = bombs[:0]
-		} else {
-			bombs = append(bombs[:index], bombs[index+1:]...)
+// Eff.: Nicht explodierte Bomben aus dem Slice existingBombs werden in den
+//       Slice remainingBombs kopiert
+func removeExplodedBombs(existingBombs []tiles.Bombe) (remainingBombs []tiles.Bombe) {
+	j := 0
+	for i, bomb := range existingBombs {
+		if !bomb.IsVisible() {
+			remainingBombs = append(remainingBombs, existingBombs[j:i]...)
+			j = i + 1
 		}
 	}
+	remainingBombs = append(remainingBombs, existingBombs[j:]...)
+	return remainingBombs
 }
 
-func showExpolosions(win *pixelgl.Window) []int {
-	var indexe []int
-	for index, a := range tempAniSlice {
+func showExplosions(win *pixelgl.Window) {
+	for _, a := range tempAniSlice {
 		ani := (a[0]).(animations.Animation)
 		ani.Update()
-		mtx := (a[1]).(pixel.Matrix)
-		(ani.GetSprite()).Draw(win, mtx)
-		if !ani.IsVisible() {
-			indexe = append(indexe, index)
-		}
+		ani.GetSprite().Draw(win, (a[1]).(pixel.Matrix))
 	}
-	return indexe
 }
 
-func clearExplosions(indexe []int) {
-	for index := len(indexe) - 1; index >= 0; index-- {
-		if len(tempAniSlice) != 0 {
-			if len(tempAniSlice) == 1 {
-				tempAniSlice = tempAniSlice[:0]
-			} else {
-				tempAniSlice = append(tempAniSlice[:index], tempAniSlice[index+1:]...)
-			}
+func clearExplosions(existingExplosions [][]interface{}) (remainingExplosions [][]interface{}) {
+	for _, exp := range existingExplosions {
+		if exp[0].(animations.Animation).IsVisible() {
+			remainingExplosions = append(remainingExplosions, exp)
 		}
 	}
+	return remainingExplosions
 }
 
 func isThereABomb(v pixel.Vec) (bool, tiles.Bombe) {
@@ -321,19 +308,19 @@ func sun() {
 
 	// Put character at free space with at least two free neighbours in a row
 	/*
-	A:
-		for i := 2 * turfNtreesArena.GetWidth(); i < len(turfNtreesArena.GetPassability())-2*turfNtreesArena.GetWidth(); i++ { // Einschränkung des Wertebereichs von i um index out of range Probleme zu vermeiden
-			if turfNtreesArena.GetPassability()[i] && turfNtreesArena.GetPassability()[i-1] && turfNtreesArena.GetPassability()[i-2] || // checke links, rechts, oben, unten
-				turfNtreesArena.GetPassability()[i] && turfNtreesArena.GetPassability()[i+1] && turfNtreesArena.GetPassability()[i+2] ||
-				turfNtreesArena.GetPassability()[i] && turfNtreesArena.GetPassability()[i+turfNtreesArena.GetWidth()] &&
-					turfNtreesArena.GetPassability()[i+2*turfNtreesArena.GetWidth()] ||
-				turfNtreesArena.GetPassability()[i] && turfNtreesArena.GetPassability()[i-turfNtreesArena.GetWidth()] &&
-					turfNtreesArena.GetPassability()[i-2*turfNtreesArena.GetWidth()] {
-				whiteBomberman.MoveTo(turfNtreesArena.GetLowerLeft().Add(pixel.V(float64(i%turfNtreesArena.GetWidth())*
-					TileSize, float64(i/turfNtreesArena.GetWidth())*TileSize)))
-				break A
+		A:
+			for i := 2 * turfNtreesArena.GetWidth(); i < len(turfNtreesArena.GetPassability())-2*turfNtreesArena.GetWidth(); i++ { // Einschränkung des Wertebereichs von i um index out of range Probleme zu vermeiden
+				if turfNtreesArena.GetPassability()[i] && turfNtreesArena.GetPassability()[i-1] && turfNtreesArena.GetPassability()[i-2] || // checke links, rechts, oben, unten
+					turfNtreesArena.GetPassability()[i] && turfNtreesArena.GetPassability()[i+1] && turfNtreesArena.GetPassability()[i+2] ||
+					turfNtreesArena.GetPassability()[i] && turfNtreesArena.GetPassability()[i+turfNtreesArena.GetWidth()] &&
+						turfNtreesArena.GetPassability()[i+2*turfNtreesArena.GetWidth()] ||
+					turfNtreesArena.GetPassability()[i] && turfNtreesArena.GetPassability()[i-turfNtreesArena.GetWidth()] &&
+						turfNtreesArena.GetPassability()[i-2*turfNtreesArena.GetWidth()] {
+					whiteBomberman.MoveTo(turfNtreesArena.GetLowerLeft().Add(pixel.V(float64(i%turfNtreesArena.GetWidth())*
+						TileSize, float64(i/turfNtreesArena.GetWidth())*TileSize)))
+					break A
+				}
 			}
-		}
 	*/
 
 	// Bomberman is in lowleft Corner
@@ -357,10 +344,12 @@ func sun() {
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+	itemBatch := pixel.NewBatch(&pixel.TrianglesData{}, animations.ItemImage)
 	win.SetMatrix(pixel.IM.Scaled(pixel.V(0, 0), zoomFactor))
 	win.Update()
 	last := time.Now()
 	dt := time.Since(last).Seconds()
+
 	for !win.Closed() && !win.Pressed(pixelgl.KeyEscape) {
 		//////////////////////////// ToDo Implement a similar Function inside Main /////////////////////////////////////
 		//grDir := turfNtreesArena.GrantedDirections(whiteBomberman.GetPosBox()) // [4]bool left-right-up-down granted?
@@ -393,14 +382,12 @@ func sun() {
 			whiteBomberman.Ani().SetView(Stay)
 		}
 		if win.JustPressed(pixelgl.KeyB) {
-			pb := characters.Player(whiteBomberman).GetPosBox()
+			pb := whiteBomberman.GetPosBox()
 			loleft := turfNtreesArena.GetLowerLeft()
 			b, _ := isThereABomb(pixel.Vec{math.Round(pb.Center().X/TileSize) * TileSize, math.Round(pb.Center().Y/TileSize) * TileSize})
 			c := lev1.IsTile(int((pb.Min.X-loleft.X)/TileSize), int((pb.Min.Y-loleft.Y)/TileSize))
 			if !b && !c {
-				var item tiles.Bombe
-				item = tiles.NewBomb(characters.Player(whiteBomberman))
-				bombs = append(bombs, item)
+				bombs = append(bombs, tiles.NewBomb(whiteBomberman))
 			}
 		}
 
@@ -445,18 +432,25 @@ func sun() {
 
 		turfNtreesArena.GetCanvas().Draw(win, *(turfNtreesArena.GetMatrix()))
 
-		removeExplodedBombs(checkForExplosions())
+		checkForExplosions()
+		bombs = removeExplodedBombs(bombs)
+
+		itemBatch.Clear()
 
 		//lev.DrawItems(win)
 		//lev.DrawTiles(win)
 		for i := 0; i < pitchHeight; i++ {
-			lev1.DrawColumn(i, win)
-		}
-		for _, item := range bombs {
-			item.Draw(win)
+			lev1.DrawColumn(i, itemBatch)
 		}
 
-		clearExplosions(showExpolosions(win))
+		for _, item := range bombs {
+			item.Draw(itemBatch)
+		}
+
+		itemBatch.Draw(win)
+
+		showExplosions(win)
+		tempAniSlice = clearExplosions(tempAniSlice)
 
 		whiteBomberman.Draw(win)
 

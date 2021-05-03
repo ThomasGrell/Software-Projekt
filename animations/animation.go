@@ -14,8 +14,8 @@ import (
 var bm, en *enhancedAnimation
 var be *basicAnimation
 
-var characterImage *pixel.PictureData
-var itemImage *pixel.PictureData
+var CharacterImage *pixel.PictureData
+var ItemImage *pixel.PictureData
 
 type basicAnimation struct {
 	// Position/Bewegung:
@@ -91,7 +91,7 @@ func NewAnimation(t uint8) Animation {
 		c := new(enhancedAnimation)
 		c.whatAmI = t
 		*c = *bm
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
 		c.lastUpdate = time.Now().UnixNano()
 		c.intervall = 2e8
 		return c
@@ -105,7 +105,7 @@ func NewAnimation(t uint8) Animation {
 		c.lpos.Y = bm.lpos.Y - 24
 		c.rpos.Y = bm.rpos.Y - 24
 		c.kpos.Y = bm.kpos.Y - 24
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
 		c.lastUpdate = time.Now().UnixNano()
 		c.intervall = 2e8
 		return c
@@ -119,7 +119,7 @@ func NewAnimation(t uint8) Animation {
 		c.lpos.Y = bm.lpos.Y - 24*2
 		c.rpos.Y = bm.rpos.Y - 24*2
 		c.kpos.Y = bm.kpos.Y - 24*2
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
 		c.lastUpdate = time.Now().UnixNano()
 		c.intervall = 2e8
 		return c
@@ -133,7 +133,7 @@ func NewAnimation(t uint8) Animation {
 		c.lpos.Y = bm.lpos.Y - 24*3
 		c.rpos.Y = bm.rpos.Y - 24*3
 		c.kpos.Y = bm.kpos.Y - 24*3
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
 		c.lastUpdate = time.Now().UnixNano()
 		c.intervall = 2e8
 		return c
@@ -155,7 +155,7 @@ func NewAnimation(t uint8) Animation {
 		c.rn = 2
 		c.kpos.X = 336 + 2*16
 		c.kpos.Y = 224
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
 		c.lastUpdate = time.Now().UnixNano()
 		c.intervall = 2e8
 		return c
@@ -175,7 +175,7 @@ func NewAnimation(t uint8) Animation {
 		c.lpos.Y = 17 * 16
 		c.rpos.Y = 17 * 16
 		c.kpos.Y = 17 * 16
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
 		c.lastUpdate = time.Now().UnixNano()
 		c.intervall = 2e8
 		return c
@@ -195,7 +195,7 @@ func NewAnimation(t uint8) Animation {
 		c.lpos.Y = 16 * 16
 		c.rpos.Y = 16 * 16
 		c.kpos.Y = 16 * 16
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
 		c.lastUpdate = time.Now().UnixNano()
 		c.intervall = 2e8
 		return c
@@ -218,7 +218,7 @@ func NewAnimation(t uint8) Animation {
 		c.kpos.Y = 8 * 16
 		c.width = pixel.V(16, 32)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
 		c.lastUpdate = time.Now().UnixNano()
 		c.intervall = 2e8
 		return c
@@ -226,7 +226,7 @@ func NewAnimation(t uint8) Animation {
 		c := new(basicAnimation)
 		c.whatAmI = t
 		*c = *be
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
 		c.intervall = 2e8
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -236,7 +236,7 @@ func NewAnimation(t uint8) Animation {
 		*c = *be
 		c.pos.Y = 352
 		c.kpos.Y = 352
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
 		c.intervall = 2e8
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -247,7 +247,7 @@ func NewAnimation(t uint8) Animation {
 		c.pos.Y = 336
 		en.kpos.Y = 21 * 16
 		en.kn = 9
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
 		c.intervall = 2e8
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -257,7 +257,7 @@ func NewAnimation(t uint8) Animation {
 		*c = *be
 		c.pos.Y = 20 * 16
 		c.kpos.Y = 20 * 16
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
 		c.intervall = 2e8
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -267,7 +267,7 @@ func NewAnimation(t uint8) Animation {
 		*c = *be
 		c.pos.Y = 19 * 16
 		c.kpos.Y = 19 * 16
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
 		c.intervall = 2e8
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -278,7 +278,7 @@ func NewAnimation(t uint8) Animation {
 		c.pos.Y = 18 * 16
 		c.kpos.Y = 18 * 16
 		c.kn = 9
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
 		c.intervall = 2e8
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -288,7 +288,7 @@ func NewAnimation(t uint8) Animation {
 		*c = *be
 		c.pos.Y = 17 * 16
 		c.kpos.Y = 17 * 16
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
 		c.intervall = 2e8
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -297,7 +297,7 @@ func NewAnimation(t uint8) Animation {
 		c.whatAmI = t
 		*c = *be
 		c.pos.Y = 16 * 16
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
 		c.intervall = 2e8
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -311,7 +311,7 @@ func NewAnimation(t uint8) Animation {
 		c.n = 4
 		c.kpos.X = 304 + 4*16
 		c.kpos.Y = 15 * 16
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
 		c.lastUpdate = time.Now().UnixNano()
 		return c
 	case YellowPopEye:
@@ -320,7 +320,7 @@ func NewAnimation(t uint8) Animation {
 		*c = *be
 		c.pos.Y = 13 * 16
 		c.kpos.Y = 13 * 16
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
 		c.intervall = 2e8
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -330,7 +330,7 @@ func NewAnimation(t uint8) Animation {
 		*c = *be
 		c.pos.Y = 7 * 16
 		c.kpos.Y = 7 * 16
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
 		c.intervall = 2e8
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -340,7 +340,7 @@ func NewAnimation(t uint8) Animation {
 		*c = *be
 		c.pos.Y = 6 * 16
 		c.kpos.Y = 6 * 16
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
 		c.intervall = 2e8
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -350,7 +350,7 @@ func NewAnimation(t uint8) Animation {
 		*c = *be
 		c.pos.Y = 5 * 16
 		c.kpos.Y = 5 * 16
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
 		c.intervall = 2e8
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -361,7 +361,7 @@ func NewAnimation(t uint8) Animation {
 		c.pos.Y = 4 * 16
 		c.kpos.Y = 4 * 16
 		c.kn = 9
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
 		c.intervall = 2e8
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -373,7 +373,7 @@ func NewAnimation(t uint8) Animation {
 		c.pos.X -= 16
 		c.pos.Y = 3 * 16
 		c.kpos.Y = 3 * 16
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
 		c.intervall = 2e8
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -384,7 +384,7 @@ func NewAnimation(t uint8) Animation {
 		c.pos.Y = 2 * 16
 		c.kpos.Y = 2 * 16
 		c.kn = 6
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
 		c.intervall = 2e8
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -396,7 +396,7 @@ func NewAnimation(t uint8) Animation {
 		c.kpos.X = 6 * 16
 		c.pos.Y = 15 * 16
 		c.kpos.Y = 15 * 16
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
 		c.intervall = 2e8
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -408,7 +408,7 @@ func NewAnimation(t uint8) Animation {
 		c.kpos.X = 6 * 16
 		c.pos.Y = 15 * 16
 		c.kpos.Y = 15 * 16
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
 		c.intervall = 2e8
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -423,7 +423,7 @@ func NewAnimation(t uint8) Animation {
 		c.seesaw = false
 		c.pos.Y = 13 * 16
 		c.kpos.Y = 13 * 16
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
 		c.intervall = 2e8
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -441,7 +441,7 @@ func NewAnimation(t uint8) Animation {
 		c.in = 6
 		c.kn = 12
 		c.seesaw = true
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
 		c.intervall = 2e8
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -460,7 +460,7 @@ func NewAnimation(t uint8) Animation {
 		c.width = pixel.V(16, 16)
 		c.iwidth = pixel.V(16, 24)
 		c.kwidth = pixel.V(16, 16)
-		c.sprite = pixel.NewSprite(characterImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
 		c.intervall = 2e8
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -478,7 +478,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.sprite = pixel.NewSprite(ItemImage, ItemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -496,7 +496,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.sprite = pixel.NewSprite(ItemImage, ItemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -514,7 +514,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, characterImage.Bounds())
+		c.sprite = pixel.NewSprite(ItemImage, ItemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -532,7 +532,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.sprite = pixel.NewSprite(ItemImage, ItemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -550,7 +550,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.sprite = pixel.NewSprite(ItemImage, ItemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -568,7 +568,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.sprite = pixel.NewSprite(ItemImage, ItemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -586,7 +586,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.sprite = pixel.NewSprite(ItemImage, ItemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -604,7 +604,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.sprite = pixel.NewSprite(ItemImage, ItemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -622,7 +622,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.sprite = pixel.NewSprite(ItemImage, ItemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -640,7 +640,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.sprite = pixel.NewSprite(ItemImage, ItemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -658,7 +658,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.sprite = pixel.NewSprite(ItemImage, ItemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -676,7 +676,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.sprite = pixel.NewSprite(ItemImage, ItemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -694,7 +694,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.sprite = pixel.NewSprite(ItemImage, ItemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -712,7 +712,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.sprite = pixel.NewSprite(ItemImage, ItemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -730,7 +730,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.sprite = pixel.NewSprite(ItemImage, ItemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -748,7 +748,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.sprite = pixel.NewSprite(ItemImage, ItemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -766,7 +766,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.sprite = pixel.NewSprite(ItemImage, ItemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -784,7 +784,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.sprite = pixel.NewSprite(ItemImage, ItemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -802,7 +802,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.sprite = pixel.NewSprite(ItemImage, ItemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -820,7 +820,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.sprite = pixel.NewSprite(ItemImage, ItemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -838,7 +838,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.sprite = pixel.NewSprite(ItemImage, ItemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -856,7 +856,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.sprite = pixel.NewSprite(ItemImage, ItemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -874,7 +874,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.sprite = pixel.NewSprite(ItemImage, ItemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -892,7 +892,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.sprite = pixel.NewSprite(ItemImage, ItemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -910,7 +910,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.sprite = pixel.NewSprite(ItemImage, ItemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -928,7 +928,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 32)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.sprite = pixel.NewSprite(ItemImage, ItemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -946,7 +946,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.sprite = pixel.NewSprite(ItemImage, ItemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -964,7 +964,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.sprite = pixel.NewSprite(ItemImage, ItemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -982,7 +982,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.sprite = pixel.NewSprite(ItemImage, ItemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -1000,7 +1000,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.sprite = pixel.NewSprite(ItemImage, ItemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -1018,7 +1018,7 @@ func NewAnimation(t uint8) Animation {
 		c.kn = 7
 		c.width = pixel.V(16, 16)
 		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(itemImage, itemImage.Bounds())
+		c.sprite = pixel.NewSprite(ItemImage, ItemImage.Bounds())
 		c.seesaw = true
 		c.lastUpdate = time.Now().UnixNano()
 		return c
@@ -1037,7 +1037,7 @@ func NewExplosion(l, r, u, d uint8) Animation {
 	b.dPower = d
 	b.canvas = pixelgl.NewCanvas(pixel.R(0, 0, float64(16*(r+l+1)), float64(16*(u+d+1))))
 	b.sprite = pixel.NewSprite(b.canvas, b.canvas.Bounds())
-	b.batch = pixel.NewBatch(&pixel.TrianglesData{}, itemImage)
+	b.batch = pixel.NewBatch(&pixel.TrianglesData{}, ItemImage)
 	b.delta = 1
 	b.count = 0
 	b.drawCanvas()
@@ -1087,46 +1087,46 @@ func (c *explosionAnimation) drawCanvas() {
 	h := 16 * float64(c.uPower+c.dPower+1)
 
 	// Zeichne linke Flammenspitze
-	s := pixel.NewSprite(itemImage, pixel.R(float64(c.count)*5*16, 8*16, float64(c.count)*5*16+16, 9*16))
+	s := pixel.NewSprite(ItemImage, pixel.R(float64(c.count)*5*16, 8*16, float64(c.count)*5*16+16, 9*16))
 	s.Draw(c.batch, pixel.IM.Moved(pixel.V(8, float64(c.dPower)*16+8)))
 
 	// Zeichne untere Flammenspitze
-	s.Set(itemImage, pixel.R(2*16+float64(c.count)*5*16, 6*16, 2*16+float64(c.count)*5*16+16, 7*16))
+	s.Set(ItemImage, pixel.R(2*16+float64(c.count)*5*16, 6*16, 2*16+float64(c.count)*5*16+16, 7*16))
 	s.Draw(c.batch, pixel.IM.Moved(pixel.V(float64(c.lPower)*16+8, 8)))
 
 	// Zeichne obere Flammenspitze
-	s.Set(itemImage, pixel.R(2*16+float64(c.count)*5*16, 10*16, 3*16+float64(c.count)*5*16, 16*11))
+	s.Set(ItemImage, pixel.R(2*16+float64(c.count)*5*16, 10*16, 3*16+float64(c.count)*5*16, 16*11))
 	s.Draw(c.batch, pixel.IM.Moved(pixel.V(float64(c.lPower)*16+8, h-8)))
 
 	// Zeichne rechte Flammenspitze
-	s.Set(itemImage, pixel.R(4*16+float64(c.count)*5*16, 8*16, 5*16+float64(c.count)*5*16, 9*16))
+	s.Set(ItemImage, pixel.R(4*16+float64(c.count)*5*16, 8*16, 5*16+float64(c.count)*5*16, 9*16))
 	s.Draw(c.batch, pixel.IM.Moved(pixel.V(w-8, float64(c.dPower)*16+8)))
 
 	// Zeichne Mitte der Flamme
-	s.Set(itemImage, pixel.R(2*16+float64(c.count)*5*16, 8*16, 3*16+float64(c.count)*5*16, 9*16))
+	s.Set(ItemImage, pixel.R(2*16+float64(c.count)*5*16, 8*16, 3*16+float64(c.count)*5*16, 9*16))
 	s.Draw(c.batch, pixel.IM.Moved(pixel.V(float64(c.lPower*16+8), float64(c.dPower)*16+8)))
 
 	// Zeichne linken Explosionsast
 	for i := uint8(1); i < c.lPower; i++ {
-		s.Set(itemImage, pixel.R(1*16+float64(c.count)*5*16, 8*16, 2*16+float64(c.count)*5*16, 9*16))
+		s.Set(ItemImage, pixel.R(1*16+float64(c.count)*5*16, 8*16, 2*16+float64(c.count)*5*16, 9*16))
 		s.Draw(c.batch, pixel.IM.Moved(pixel.V(float64(i*16+8), float64(c.dPower)*16+8)))
 	}
 
 	// Zeichne rechten Explosionsast
 	for i := uint8(1); i < c.rPower; i++ {
-		s.Set(itemImage, pixel.R(3*16+float64(c.count)*5*16, 8*16, 4*16+float64(c.count)*5*16, 9*16))
+		s.Set(ItemImage, pixel.R(3*16+float64(c.count)*5*16, 8*16, 4*16+float64(c.count)*5*16, 9*16))
 		s.Draw(c.batch, pixel.IM.Moved(pixel.V(float64((c.lPower+i)*16+8), float64(c.dPower)*16+8)))
 	}
 
 	// Zeichne unteren Explosionsast
 	for i := uint8(1); i < c.dPower; i++ {
-		s.Set(itemImage, pixel.R(2*16+float64(c.count)*5*16, 7*16, 3*16+float64(c.count)*5*16, 8*16))
+		s.Set(ItemImage, pixel.R(2*16+float64(c.count)*5*16, 7*16, 3*16+float64(c.count)*5*16, 8*16))
 		s.Draw(c.batch, pixel.IM.Moved(pixel.V(float64(c.lPower*16+8), float64(i*16+8))))
 	}
 
 	// Zeichne oberen Explosionsast
 	for i := uint8(1); i < c.uPower; i++ {
-		s.Set(itemImage, pixel.R(2*16+float64(c.count)*5*16, 9*16, 3*16+float64(c.count)*5*16, 10*16))
+		s.Set(ItemImage, pixel.R(2*16+float64(c.count)*5*16, 9*16, 3*16+float64(c.count)*5*16, 10*16))
 		s.Draw(c.batch, pixel.IM.Moved(pixel.V(float64(c.lPower*16+8), float64((i+c.dPower)*16+8))))
 	}
 
@@ -1265,9 +1265,9 @@ func (c *basicAnimation) Update() {
 	if !c.visible {
 		c.sprite.Set(pixel.MakePictureData(r), r)
 	} else if c.whatAmI >= Bomb {
-		c.sprite.Set(itemImage, r)
+		c.sprite.Set(ItemImage, r)
 	} else {
-		c.sprite.Set(characterImage, r)
+		c.sprite.Set(CharacterImage, r)
 	}
 }
 
@@ -1381,7 +1381,7 @@ func (c *enhancedAnimation) SetView(view uint8) {
 func (c *enhancedAnimation) Update() {
 	r := c.getSpriteCoords()
 	if c.visible {
-		c.sprite.Set(characterImage, r)
+		c.sprite.Set(CharacterImage, r)
 	} else {
 		c.sprite.Set(pixel.MakePictureData(r), r)
 	}
@@ -1400,7 +1400,7 @@ func init() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	characterImage = pixel.PictureDataFromImage(img)
+	CharacterImage = pixel.PictureDataFromImage(img)
 
 	file, err = os.Open("graphics/animations.png")
 	if err != nil {
@@ -1414,7 +1414,7 @@ func init() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	itemImage = pixel.PictureDataFromImage(img)
+	ItemImage = pixel.PictureDataFromImage(img)
 
 	bm = new(enhancedAnimation)
 	bm.visible = false
