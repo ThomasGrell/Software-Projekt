@@ -309,7 +309,6 @@ func sun() {
 	const pitchHeight = 11
 	var winSizeX float64 = zoomFactor * ((3 + pitchWidth) * TileSize) // TileSize = 16
 	var winSizeY float64 = zoomFactor * ((1 + pitchHeight) * TileSize)
-	var stepSize float64 = 1
 	
 
 	wincfg := pixelgl.WindowConfig{
@@ -385,31 +384,33 @@ A:
 
 	win.SetMatrix(pixel.IM.Scaled(pixel.V(0, 0), zoomFactor))
 	win.Update()
-
+	last := time.Now()
+	dt := time.Since(last).Seconds()
 	for !win.Closed() && !win.Pressed(pixelgl.KeyEscape) {
 //////////////////////////// ToDo Implement a similar Function inside Main /////////////////////////////////////
 		//grDir := turfNtreesArena.GrantedDirections(whiteBomberman.GetPosBox()) // [4]bool left-right-up-down granted?
 		grDir := getGrantedDirections(whiteBomberman)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		keypressed := false
-
+		dt = time.Since(last).Seconds()
+		last = time.Now()
 		if win.Pressed(pixelgl.KeyLeft) && grDir[0] {
-			whiteBomberman.Move(pixel.V(-stepSize, 0))
+			whiteBomberman.Move(pixel.V(-whiteBomberman.GetSpeed()*dt, 0))  //
 			whiteBomberman.Ani().SetView(Left)
 			keypressed = true
 		}
 		if win.Pressed(pixelgl.KeyRight) && grDir[1] {
-			whiteBomberman.Move(pixel.V(stepSize, 0))
+			whiteBomberman.Move(pixel.V(whiteBomberman.GetSpeed()*dt, 0))
 			whiteBomberman.Ani().SetView(Right)
 			keypressed = true
 		}
 		if win.Pressed(pixelgl.KeyUp) && grDir[2] {
-			whiteBomberman.Move(pixel.V(0, stepSize))
+			whiteBomberman.Move(pixel.V(0, whiteBomberman.GetSpeed()*dt))
 			whiteBomberman.Ani().SetView(Up)
 			keypressed = true
 		}
 		if win.Pressed(pixelgl.KeyDown) && grDir[3] {
-			whiteBomberman.Move(pixel.V(0, -stepSize))
+			whiteBomberman.Move(pixel.V(0, -whiteBomberman.GetSpeed()*dt))
 			whiteBomberman.Ani().SetView(Down)
 			keypressed = true
 		}
