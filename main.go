@@ -5,11 +5,12 @@ import (
 	"./arena"
 	"./characters"
 	. "./constants"
+	"./level1"
 	"./sounds"
 	"./tiles"
+	"fmt"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
-	"./level1"
 	//"golang.org/x/image/colornames"
 	"math"
 	"math/rand"
@@ -22,9 +23,6 @@ var lev1 level1.Level
 var tempAniSlice [][]interface{} // [Animation][Matrix]
 var monster []characters.Enemy
 var whiteBomberman characters.Player
-
-
-
 
 // Vor: ...
 // Eff: Ist der Counddown der Bombe abgelaufen passiert folgendes:
@@ -45,138 +43,125 @@ func checkForExplosions() []int {
 			x, y := turfNtreesArena.GetFieldCoord(item.GetPos())
 			power := int(item.GetPower())
 			l, r, u, d := power, power, power, power
+
+			// Explosion darf nicht über Spielfeldrand hinausragen
 			if l > x {
 				l = x
 			}
-			if 12-r < x {
-				r = 12 - x
+			if turfNtreesArena.GetWidth()-1-r < x {
+				r = turfNtreesArena.GetWidth() - 1 - x
 			}
 			if d > y {
 				d = y
 			}
-			if 10-u < y {
-				u = 10 - y
+			if turfNtreesArena.GetHeight()-1-u < y {
+				u = turfNtreesArena.GetHeight() - 1 - y
 			}
 
 			// Falls es Hindernisse gibt, die zerstörbar oder unzerstörbar sind
-			
-			bl,xl,yl := lev1.GetPosOfNextTile(x,y,pixel.V(float64(-l),0))
+			bl, xl, yl := lev1.GetPosOfNextTile(x, y, pixel.V(float64(-l), 0))
 			if bl {
-				if lev1.IsDestroyableTile(xl,yl) {
-					l=x-xl
+				if lev1.IsDestroyableTile(xl, yl) {
+					l = x - xl
 				} else {
-					l=x-xl-1
+					l = x - xl - 1
 				}
 			}
-			br,xr,yr := lev1.GetPosOfNextTile(x,y,pixel.V(float64(r),0))
+			br, xr, yr := lev1.GetPosOfNextTile(x, y, pixel.V(float64(r), 0))
 			if br {
-				if lev1.IsDestroyableTile(xr,yr) {
-					r=xr-x
+				if lev1.IsDestroyableTile(xr, yr) {
+					r = xr - x
 				} else {
-					r=xr-x-1
+					r = xr - x - 1
 				}
 			}
-			bd,xd,yd := lev1.GetPosOfNextTile(x,y,pixel.V(0,float64(-d)))
+			bd, xd, yd := lev1.GetPosOfNextTile(x, y, pixel.V(0, float64(-d)))
 			if bd {
-				if lev1.IsDestroyableTile(xd,yd) {
-					d=y-yd
+				if lev1.IsDestroyableTile(xd, yd) {
+					d = y - yd
 				} else {
-					d=y-yd-1
+					d = y - yd - 1
 				}
 			}
-			bu,xu,yu := lev1.GetPosOfNextTile(x,y,pixel.V(0,float64(u)))
+			bu, xu, yu := lev1.GetPosOfNextTile(x, y, pixel.V(0, float64(u)))
 			if bu {
-				if lev1.IsDestroyableTile(xu,yu) {
-					u=yu-y
+				if lev1.IsDestroyableTile(xu, yu) {
+					u = yu - y
 				} else {
-					u=yu-y-1
+					u = yu - y - 1
 				}
 			}
-			
 
 			// falls sich ein Monster oder Player im Explosionsradius befindet
 
-			for i := 1; i <= int(l); i++ {
-				b := false
+		A:
+			for i := 1; i <= l; i++ {
 				for _, m := range monster {
 					xx, yy := turfNtreesArena.GetFieldCoord(m.GetPos())
 					if x-i == xx && y == yy {
 						l = i
 						m.Ani().Die()
-						b = true
-						break
+						break A
 					}
 				}
-				if b {
-					break
-				}
 			}
-			for i := 1; i <= int(r); i++ {
-				b := false
+
+		B:
+			for i := 1; i <= r; i++ {
 				for _, m := range monster {
 					xx, yy := turfNtreesArena.GetFieldCoord(m.GetPos())
 					if x+i == xx && y == yy {
 						r = i
 						m.Ani().Die()
-						b = true
-						break
+						break B
 					}
 				}
-				if b {
-					break
-				}
 			}
-			for i := 1; i <= int(u); i++ {
-				b := false
+
+		C:
+			for i := 1; i <= u; i++ {
 				for _, m := range monster {
 					xx, yy := turfNtreesArena.GetFieldCoord(m.GetPos())
 					if y+i == yy && x == xx {
 						u = i
 						m.Ani().Die()
-						b = true
-						break
+						break C
 					}
 				}
-				if b {
-					break
-				}
 			}
-			for i := 1; i <= int(d); i++ {
-				b := false
+
+		D:
+			for i := 1; i <= d; i++ {
 				for _, m := range monster {
 					xx, yy := turfNtreesArena.GetFieldCoord(m.GetPos())
 					if y-i == yy && x == xx {
 						d = i
 						m.Ani().Die()
-						b = true
-						break
+						break D
 					}
 				}
-				if b {
-					break
-				}
 			}
-			
-			if xl+l==x {
-				lev1.RemoveTile(xl,yl)
+
+			if xl+l == x {
+				lev1.RemoveTile(xl, yl)
 			}
-			if xr-r==x {
-				lev1.RemoveTile(xr,yr)
+			if xr-r == x {
+				lev1.RemoveTile(xr, yr)
 			}
-			if yd+d==y {
-				lev1.RemoveTile(xd,yd)
+			if yd+d == y {
+				lev1.RemoveTile(xd, yd)
 			}
-			if yu-u==y {
-				lev1.RemoveTile(xu,yu)
+			if yu-u == y {
+				lev1.RemoveTile(xu, yu)
 			}
-			
+
 			// Items, die im Expolsionsradius liegen werden zerstört, die Expolion wird aber nicht kleiner!
-			
-			lev1.RemoveItems(x,y,pixel.V(float64(-l),0))
-			lev1.RemoveItems(x,y,pixel.V(float64(r),0))
-			lev1.RemoveItems(x,y,pixel.V(0,float64(-d)))
-			lev1.RemoveItems(x,y,pixel.V(0,float64(u)))
-			
+
+			lev1.RemoveItems(x, y, pixel.V(float64(-l), 0))
+			lev1.RemoveItems(x, y, pixel.V(float64(r), 0))
+			lev1.RemoveItems(x, y, pixel.V(0, float64(-d)))
+			lev1.RemoveItems(x, y, pixel.V(0, float64(u)))
+
 			// falls weitere Bomben im Explosionsradius liegen, werden auch gleich explodieren
 
 			for i := 1; i <= l; i++ {
@@ -218,12 +203,11 @@ func checkForExplosions() []int {
 	return indexe
 }
 
-
-
 // Vor.:...
 // Eff.: Explodierte Bomben sind aus dem slice bombs gelöscht
 
 func removeExplodedBombs(indexe []int) {
+	fmt.Println(bombs)
 	for i := len(indexe) - 1; i >= 0; i-- {
 		index := indexe[i]
 		if len(bombs) == 1 {
@@ -269,28 +253,31 @@ func isThereABomb(v pixel.Vec) (bool, tiles.Bombe) {
 	return false, nil
 }
 
-
-func getGrantedDirections (c characters.Character) [4]bool {
+func getGrantedDirections(c characters.Character) [4]bool {
 	var b [4]bool
-	b[0]=true
-	b[1]=true
-	b[2]=true
-	b[3]=true
+	b[0] = true
+	b[1] = true
+	b[2] = true
+	b[3] = true
 	pb := c.GetPosBox()
 	ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
 	ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
-	if lev1.IsTile(int((ll.X-1)/TileSize),int(ll.Y/TileSize))||lev1.IsTile(int((ll.X-1)/TileSize),int(ur.Y/TileSize))|| ll.X-1<0 {b[0]=false}
-	if int((ur.X+1)/TileSize)>turfNtreesArena.GetWidth()-1 {
-		b[1]=false
-	} else if lev1.IsTile(int((ur.X+1)/TileSize),int(ll.Y/TileSize)) || lev1.IsTile(int((ur.X+1)/TileSize),int(ur.Y/TileSize)){
-		b[1]=false
+	if lev1.IsTile(int((ll.X-1)/TileSize), int(ll.Y/TileSize)) || lev1.IsTile(int((ll.X-1)/TileSize), int(ur.Y/TileSize)) || ll.X-1 < 0 {
+		b[0] = false
 	}
-	if int((ur.Y+1)/TileSize)>turfNtreesArena.GetHeight()-1 {
-		b[2]=false
-	} else if lev1.IsTile(int(ll.X/TileSize),int((ur.Y+1)/TileSize)) || lev1.IsTile(int(ur.X/TileSize),int((ur.Y+1)/TileSize)) {
-		b[2]=false
+	if int((ur.X+1)/TileSize) > turfNtreesArena.GetWidth()-1 {
+		b[1] = false
+	} else if lev1.IsTile(int((ur.X+1)/TileSize), int(ll.Y/TileSize)) || lev1.IsTile(int((ur.X+1)/TileSize), int(ur.Y/TileSize)) {
+		b[1] = false
 	}
-	if lev1.IsTile(int(ll.X/TileSize),int((ll.Y-1)/TileSize))|| lev1.IsTile(int(ur.X/TileSize),int((ll.Y-1)/TileSize))|| ll.Y-1<0 {b[3]=false}
+	if int((ur.Y+1)/TileSize) > turfNtreesArena.GetHeight()-1 {
+		b[2] = false
+	} else if lev1.IsTile(int(ll.X/TileSize), int((ur.Y+1)/TileSize)) || lev1.IsTile(int(ur.X/TileSize), int((ur.Y+1)/TileSize)) {
+		b[2] = false
+	}
+	if lev1.IsTile(int(ll.X/TileSize), int((ll.Y-1)/TileSize)) || lev1.IsTile(int(ur.X/TileSize), int((ll.Y-1)/TileSize)) || ll.Y-1 < 0 {
+		b[3] = false
+	}
 
 	return b
 }
@@ -302,7 +289,6 @@ func sun() {
 	const pitchHeight = 11
 	var winSizeX float64 = zoomFactor * ((3 + pitchWidth) * TileSize) // TileSize = 16
 	var winSizeY float64 = zoomFactor * ((1 + pitchHeight) * TileSize)
-	
 
 	wincfg := pixelgl.WindowConfig{
 		Title:  "Bomberman 2021",
@@ -313,13 +299,12 @@ func sun() {
 	if err != nil {
 		panic(err)
 	}
-	
-	
+
 	turfNtreesArena = arena.NewArena(typ, pitchWidth, pitchHeight)
-	
-	lev1 = level1.NewBlankLevel(turfNtreesArena,1)
-	lev1.SetRandomTilesAndItems (20,10)
-	
+
+	lev1 = level1.NewBlankLevel(turfNtreesArena, 1)
+	lev1.SetRandomTilesAndItems(20, 10)
+
 	whiteBomberman = characters.NewPlayer(WhiteBomberman)
 	whiteBomberman.Ani().Show()
 	whiteBomberman.IncPower()
@@ -336,25 +321,25 @@ func sun() {
 
 	// Put character at free space with at least two free neighbours in a row
 	/*
-A:
-	for i := 2 * turfNtreesArena.GetWidth(); i < len(turfNtreesArena.GetPassability())-2*turfNtreesArena.GetWidth(); i++ { // Einschränkung des Wertebereichs von i um index out of range Probleme zu vermeiden
-		if turfNtreesArena.GetPassability()[i] && turfNtreesArena.GetPassability()[i-1] && turfNtreesArena.GetPassability()[i-2] || // checke links, rechts, oben, unten
-			turfNtreesArena.GetPassability()[i] && turfNtreesArena.GetPassability()[i+1] && turfNtreesArena.GetPassability()[i+2] ||
-			turfNtreesArena.GetPassability()[i] && turfNtreesArena.GetPassability()[i+turfNtreesArena.GetWidth()] &&
-				turfNtreesArena.GetPassability()[i+2*turfNtreesArena.GetWidth()] ||
-			turfNtreesArena.GetPassability()[i] && turfNtreesArena.GetPassability()[i-turfNtreesArena.GetWidth()] &&
-				turfNtreesArena.GetPassability()[i-2*turfNtreesArena.GetWidth()] {
-			whiteBomberman.MoveTo(turfNtreesArena.GetLowerLeft().Add(pixel.V(float64(i%turfNtreesArena.GetWidth())*
-				TileSize, float64(i/turfNtreesArena.GetWidth())*TileSize)))
-			break A
+	A:
+		for i := 2 * turfNtreesArena.GetWidth(); i < len(turfNtreesArena.GetPassability())-2*turfNtreesArena.GetWidth(); i++ { // Einschränkung des Wertebereichs von i um index out of range Probleme zu vermeiden
+			if turfNtreesArena.GetPassability()[i] && turfNtreesArena.GetPassability()[i-1] && turfNtreesArena.GetPassability()[i-2] || // checke links, rechts, oben, unten
+				turfNtreesArena.GetPassability()[i] && turfNtreesArena.GetPassability()[i+1] && turfNtreesArena.GetPassability()[i+2] ||
+				turfNtreesArena.GetPassability()[i] && turfNtreesArena.GetPassability()[i+turfNtreesArena.GetWidth()] &&
+					turfNtreesArena.GetPassability()[i+2*turfNtreesArena.GetWidth()] ||
+				turfNtreesArena.GetPassability()[i] && turfNtreesArena.GetPassability()[i-turfNtreesArena.GetWidth()] &&
+					turfNtreesArena.GetPassability()[i-2*turfNtreesArena.GetWidth()] {
+				whiteBomberman.MoveTo(turfNtreesArena.GetLowerLeft().Add(pixel.V(float64(i%turfNtreesArena.GetWidth())*
+					TileSize, float64(i/turfNtreesArena.GetWidth())*TileSize)))
+				break A
+			}
 		}
-	}
-*/
+	*/
 
 	// Bomberman is in lowleft Corner
 	whiteBomberman.MoveTo(turfNtreesArena.GetLowerLeft().Add(pixel.V(0, 0)))
-	
-///////////////////////// ToDo Enyemys should be a Part of Level //////////////////////////////////////////////
+
+	///////////////////////// ToDo Enyemys should be a Part of Level //////////////////////////////////////////////
 	xx, yy := turfNtreesArena.GetFieldCoord(whiteBomberman.GetPos())
 
 	for _, m := range monster {
@@ -369,23 +354,23 @@ A:
 			}
 		}
 	}
-	
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	win.SetMatrix(pixel.IM.Scaled(pixel.V(0, 0), zoomFactor))
 	win.Update()
 	last := time.Now()
 	dt := time.Since(last).Seconds()
 	for !win.Closed() && !win.Pressed(pixelgl.KeyEscape) {
-//////////////////////////// ToDo Implement a similar Function inside Main /////////////////////////////////////
+		//////////////////////////// ToDo Implement a similar Function inside Main /////////////////////////////////////
 		//grDir := turfNtreesArena.GrantedDirections(whiteBomberman.GetPosBox()) // [4]bool left-right-up-down granted?
 		grDir := getGrantedDirections(whiteBomberman)
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		keypressed := false
 		dt = time.Since(last).Seconds()
 		last = time.Now()
 		if win.Pressed(pixelgl.KeyLeft) && grDir[0] {
-			whiteBomberman.Move(pixel.V(-whiteBomberman.GetSpeed()*dt, 0))  //
+			whiteBomberman.Move(pixel.V(-whiteBomberman.GetSpeed()*dt, 0)) //
 			whiteBomberman.Ani().SetView(Left)
 			keypressed = true
 		}
@@ -411,7 +396,7 @@ A:
 			pb := characters.Player(whiteBomberman).GetPosBox()
 			loleft := turfNtreesArena.GetLowerLeft()
 			b, _ := isThereABomb(pixel.Vec{math.Round(pb.Center().X/TileSize) * TileSize, math.Round(pb.Center().Y/TileSize) * TileSize})
-			c := lev1.IsTile(int((pb.Min.X-loleft.X)/TileSize),int((pb.Min.Y-loleft.Y)/TileSize))
+			c := lev1.IsTile(int((pb.Min.X-loleft.X)/TileSize), int((pb.Min.Y-loleft.Y)/TileSize))
 			if !b && !c {
 				var item tiles.Bombe
 				item = tiles.NewBomb(characters.Player(whiteBomberman))
@@ -419,7 +404,7 @@ A:
 			}
 		}
 
-/////////////////////////////////////ToDO Moving Enemys ///////////////////////////////////////////////////////////
+		/////////////////////////////////////ToDO Moving Enemys ///////////////////////////////////////////////////////////
 
 		/*
 			for _,m := range(monster) {
@@ -455,30 +440,23 @@ A:
 				}
 			}
 		*/
-		
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////7
+
+		/////////////////////////////////////////////////////////////////////////////////////////////////////////////7
 
 		turfNtreesArena.GetCanvas().Draw(win, *(turfNtreesArena.GetMatrix()))
-		
-		
+
 		removeExplodedBombs(checkForExplosions())
 
-		
 		//lev.DrawItems(win)
 		//lev.DrawTiles(win)
-		for i:=0; i<pitchHeight; i++ {
-			lev1.DrawColumn(i,win)
+		for i := 0; i < pitchHeight; i++ {
+			lev1.DrawColumn(i, win)
 		}
 		for _, item := range bombs {
 			item.Draw(win)
 		}
-		
-		
-		
 
 		clearExplosions(showExpolosions(win))
-		
-		
 
 		whiteBomberman.Draw(win)
 
