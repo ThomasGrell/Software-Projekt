@@ -152,6 +152,7 @@ func (l *lv) DrawColumn (y int,win *pixelgl.Window) {
 }
 
 func (l *lv) IsTile (x,y int) bool {
+	if x >= l.width || x < 0 || y >= l.height || y < 0 {return true}
 	return (*l).freePos[y][x]==1 || (*l).freePos[y][x]==2
 }
 

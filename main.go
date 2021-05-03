@@ -5,15 +5,15 @@ import (
 	"./arena"
 	"./characters"
 	. "./constants"
-	"./tiles"
 	"./sounds"
+	"./tiles"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
+	"./level1"
 	//"golang.org/x/image/colornames"
 	"math"
 	"math/rand"
 	"time"
-	"./level1"
 )
 
 var bombs []tiles.Bombe
