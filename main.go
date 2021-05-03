@@ -7,20 +7,17 @@ import (
 	. "./constants"
 	"./tiles"
 	"./sounds"
-	"fmt"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	//"golang.org/x/image/colornames"
 	"math"
 	"math/rand"
 	"time"
-	"./level"
 	"./level1"
 )
 
 var bombs []tiles.Bombe
 var turfNtreesArena arena.Arena
-var lev level.Level
 var lev1 level1.Level
 var tempAniSlice [][]interface{} // [Animation][Matrix]
 var monster []characters.Enemy
@@ -65,7 +62,6 @@ func checkForExplosions() []int {
 			
 			bl,xl,yl := lev1.GetPosOfNextTile(x,y,pixel.V(float64(-l),0))
 			if bl {
-				fmt.Println("Links: ",xl,yl)
 				if lev1.IsDestroyableTile(xl,yl) {
 					l=x-xl
 				} else {
@@ -74,7 +70,6 @@ func checkForExplosions() []int {
 			}
 			br,xr,yr := lev1.GetPosOfNextTile(x,y,pixel.V(float64(r),0))
 			if br {
-				fmt.Println("Rechts: ",xr,yr)
 				if lev1.IsDestroyableTile(xr,yr) {
 					r=xr-x
 				} else {
@@ -83,7 +78,6 @@ func checkForExplosions() []int {
 			}
 			bd,xd,yd := lev1.GetPosOfNextTile(x,y,pixel.V(0,float64(-d)))
 			if bd {
-				fmt.Println("Unten: ",xd,yd)
 				if lev1.IsDestroyableTile(xd,yd) {
 					d=y-yd
 				} else {
@@ -92,7 +86,6 @@ func checkForExplosions() []int {
 			}
 			bu,xu,yu := lev1.GetPosOfNextTile(x,y,pixel.V(0,float64(u)))
 			if bu {
-				fmt.Println("Oben: ",xu,yu)
 				if lev1.IsDestroyableTile(xu,yu) {
 					u=yu-y
 				} else {
@@ -324,9 +317,6 @@ func sun() {
 	
 	turfNtreesArena = arena.NewArena(typ, pitchWidth, pitchHeight)
 	
-	lev = level.NewBlankLevel(turfNtreesArena)
-	lev.SetRandomTiles(10)
-	lev.SetRandomItems(10)
 	lev1 = level1.NewBlankLevel(turfNtreesArena,1)
 	lev1.SetRandomTilesAndItems (20,10)
 	
@@ -421,7 +411,7 @@ A:
 			pb := characters.Player(whiteBomberman).GetPosBox()
 			loleft := turfNtreesArena.GetLowerLeft()
 			b, _ := isThereABomb(pixel.Vec{math.Round(pb.Center().X/TileSize) * TileSize, math.Round(pb.Center().Y/TileSize) * TileSize})
-			c := lev.IsTile(int((pb.Min.X-loleft.X)/TileSize),int((pb.Min.Y-loleft.Y)/TileSize))
+			c := lev1.IsTile(int((pb.Min.X-loleft.X)/TileSize),int((pb.Min.Y-loleft.Y)/TileSize))
 			if !b && !c {
 				var item tiles.Bombe
 				item = tiles.NewBomb(characters.Player(whiteBomberman))
