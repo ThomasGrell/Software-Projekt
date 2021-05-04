@@ -7,6 +7,7 @@ import (
 	. "./constants"
 	"./sounds"
 	"./tiles"
+	"fmt"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	"./level1"
@@ -279,7 +280,9 @@ func getGrantedDirections (c characters.Character) [4]bool {
 	pb := c.GetPosBox()
 	ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
 	ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
-	if lev1.IsTile(int((ll.X-1)/TileSize),int(ll.Y/TileSize))||lev1.IsTile(int((ll.X-1)/TileSize),int(ur.Y/TileSize))|| ll.X-1<0 {b[0]=false}
+	if lev1.IsTile(int((ll.X-1)/TileSize),int(ll.Y/TileSize))||lev1.IsTile(int((ll.X-1)/TileSize),int(ur.Y/TileSize))|| ll.X-1<0 {
+		b[0]=false
+	}
 	if int((ur.X+1)/TileSize)>turfNtreesArena.GetWidth()-1 {
 		b[1]=false
 	} else if lev1.IsTile(int((ur.X+1)/TileSize),int(ll.Y/TileSize)) || lev1.IsTile(int((ur.X+1)/TileSize),int(ur.Y/TileSize)){
@@ -384,6 +387,7 @@ A:
 		keypressed := false
 		dt = time.Since(last).Seconds()
 		last = time.Now()
+
 		if win.Pressed(pixelgl.KeyLeft) && grDir[0] {
 			whiteBomberman.Move(pixel.V(-whiteBomberman.GetSpeed()*dt, 0))  //
 			whiteBomberman.Ani().SetView(Left)
@@ -421,40 +425,56 @@ A:
 
 /////////////////////////////////////ToDO Moving Enemys ///////////////////////////////////////////////////////////
 
-		/*
-			for _,m := range(monster) {
-				xx,yy := turfNtreesArena.GetFieldCoord(m.GetPos())
-				x,y := turfNtreesArena.GetFieldCoord(whiteBomberman.GetPos())
-				if x == xx && y == yy {
-					whiteBomberman.DecLife()
-				}
-				if !m.IsFollowing() {
-					dir := rand.Intn(4)
-					switch dir {
-						case 0:									// l
-							if !turfNtreesArena.IsTile(xx-1,yy) {
-								m.Move(pixel.V(-stepSize,0))
-								m.Ani().SetView(Left)
-							}
-						case 1:									// r
-							if !turfNtreesArena.IsTile(xx+1,yy) {
-								m.Move(pixel.V(stepSize,0))
-								m.Ani().SetView(Right)
-							}
-						case 2:									// up
-							if !turfNtreesArena.IsTile(xx,yy+1) {
-								m.Move(pixel.V(0,stepSize))
-								m.Ani().SetView(Up)
-							}
-						case 3:
-							if	!turfNtreesArena.IsTile(xx,yy-1) {
-								m.Move(pixel.V(0,-stepSize))
-								m.Ani().SetView(Down)
-							}
-					}
-				}
-			}
-		*/
+		//dir := rand.Intn(4)
+		//for _,m := range(monster) {
+		//	xx,yy := turfNtreesArena.GetFieldCoord(m.GetPos())
+		//	x,y := turfNtreesArena.GetFieldCoord(whiteBomberman.GetPos())
+		//	if x == xx && y == yy {
+		//		whiteBomberman.DecLife()
+		//	}
+		//	if !m.IsFollowing() {
+		//
+		//		switch dir {
+		//			case 0:									// l
+		//				if !lev1.IsTile(xx-1,yy) {
+		//					m.Move(pixel.V(-m.GetSpeed()*dt,0))
+		//					m.Ani().SetView(Left)
+		//				}else{dir = 1}
+		//			case 1:									// r
+		//				if !lev1.IsTile(xx+1,yy) {
+		//					m.Move(pixel.V(m.GetSpeed()*dt,0))
+		//					m.Ani().SetView(Right)
+		//				}else{dir = 2}
+		//			case 2:									// up
+		//				if !lev1.IsTile(xx,yy+1) {
+		//					m.Move(pixel.V(0,m.GetSpeed()*dt))
+		//					m.Ani().SetView(Up)
+		//				}else{dir = 3}
+		//			case 3:
+		//				if	!lev1.IsTile(xx,yy-1) {
+		//					m.Move(pixel.V(0,-m.GetSpeed()*dt))
+		//					m.Ani().SetView(Down)
+		//				}else{dir = 0}
+		//		}
+		//	}
+		//}
+		grDir = getGrantedDirections(monster[0])
+		//ll := monster[0].GetPosBox().Min
+		//ur := monster[0].GetPosBox().Max
+		//fmt.Println( lev1.IsTile(int((ll.X-1)/TileSize),int(ll.Y/TileSize)), lev1.IsTile(int((ll.X-1)/TileSize),int(ur.Y/TileSize)), ll.X-1<0, int(ur.Y/TileSize)  )
+		ll := whiteBomberman.GetPosBox().Min
+		ur := whiteBomberman.GetPosBox().Max
+		fmt.Println( lev1.IsTile(int((ll.X-1)/TileSize),int(ll.Y/TileSize)), lev1.IsTile(int((ll.X-1)/TileSize),int(ur.Y/TileSize)), ll.X-1<0, int(ur.Y/TileSize)  )
+		if grDir[0] {													// l
+			monster[0].Move(pixel.V(-monster[0].GetSpeed()*dt, 0))
+		}else if grDir[2] {												// u
+			monster[0].Move(pixel.V(-monster[0].GetSpeed()*dt,0))
+		}else if grDir[1] {												// r
+			monster[0].Move(pixel.V(monster[0].GetSpeed()*dt, 0))
+		}else if grDir[3] {												// d
+			monster[0].Move(pixel.V(0,-monster[0].GetSpeed()*dt))
+		}
+
 		
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////7
 
