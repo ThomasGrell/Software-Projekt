@@ -291,7 +291,7 @@ func sun() {
 	turfNtreesArena = arena.NewArena(typ, pitchWidth, pitchHeight)
 
 	lev1 = level1.NewBlankLevel(turfNtreesArena, 1)
-	lev1.SetRandomTilesAndItems(100, 10)
+	lev1.SetRandomTilesAndItems(40, 10)
 
 	whiteBomberman = characters.NewPlayer(WhiteBomberman)
 	whiteBomberman.Ani().Show()
