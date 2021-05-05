@@ -7,6 +7,7 @@ import (
 	. "./constants"
 	"./level1"
 	"./sounds"
+	"fmt"
 	"./tiles"
 	//"fmt"
 	"github.com/faiface/pixel"
@@ -352,33 +353,114 @@ func sun() {
 	dt := time.Since(last).Seconds()
 
 	for !win.Closed() && !win.Pressed(pixelgl.KeyEscape) {
-		//////////////////////////// ToDo Implement a similar Function inside Main /////////////////////////////////////
-		//grDir := turfNtreesArena.GrantedDirections(whiteBomberman.GetPosBox()) // [4]bool left-right-up-down granted?
-		grDir := getGrantedDirections(whiteBomberman)
-		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		keypressed := false
 		dt = time.Since(last).Seconds()
 		last = time.Now()
-
-		if win.Pressed(pixelgl.KeyLeft) && grDir[0] {
-			whiteBomberman.Move(pixel.V(-whiteBomberman.GetSpeed()*dt, 0)) //
-			whiteBomberman.Ani().SetView(Left)
-			keypressed = true
+		if win.Pressed(pixelgl.KeyLeft) {
+			dist := -whiteBomberman.GetSpeed()*dt
+			pb := whiteBomberman.GetPosBox()
+			ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
+			ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
+			bl,xl,_ := lev1.GetPosOfNextTile (int(ll.X/TileSize),int(ll.Y/TileSize),pixel.V(dist,0))
+			bu,xu,_ := lev1.GetPosOfNextTile (int(ll.X/TileSize),int(ur.Y/TileSize),pixel.V(dist,0))
+			if !bl && !bu {
+				whiteBomberman.Move(pixel.V(dist, 0))  //
+				whiteBomberman.Ani().SetView(Left)
+				keypressed = true
+			} else {
+				if bl && (xl>=xu || xu==-1) {
+					if ll.X +dist < float64((xl+1)*TileSize) {
+						dist = float64((xl+1)*TileSize)-ll.X+0.1
+					}
+				} else if bu && (xu>=xl || xl==-1) {
+					if ll.X +dist < float64((xu+1)*TileSize) {
+						dist = float64((xu+1)*TileSize)-ll.X+0.1
+					}
+				}
+				whiteBomberman.Move(pixel.V(dist, 0)) 
+				whiteBomberman.Ani().SetView(Left)
+				keypressed = true
+			}
 		}
-		if win.Pressed(pixelgl.KeyRight) && grDir[1] {
-			whiteBomberman.Move(pixel.V(whiteBomberman.GetSpeed()*dt, 0))
-			whiteBomberman.Ani().SetView(Right)
-			keypressed = true
+		if win.Pressed(pixelgl.KeyRight){
+			dist := whiteBomberman.GetSpeed()*dt
+			pb := whiteBomberman.GetPosBox()
+			ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
+			ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
+			bl,xl,_ := lev1.GetPosOfNextTile (int((ur.X)/TileSize),int(ll.Y/TileSize),pixel.V(dist,0))
+			bu,xu,_ := lev1.GetPosOfNextTile (int((ur.X)/TileSize),int(ur.Y/TileSize),pixel.V(dist,0))
+			if !bl && !bu {
+				whiteBomberman.Move(pixel.V(dist, 0)) 
+				whiteBomberman.Ani().SetView(Right)
+				keypressed = true
+			} else {
+				if bl && (xl<=xu || xu==-1) {
+					if ur.X +dist > float64((xl)*TileSize) {
+						dist = float64((xl)*TileSize)-ur.X-0.1
+					}
+				} else if bu && (xu<=xl || xl==-1) {
+					if ur.X +dist > float64((xu)*TileSize) {
+						dist = float64((xu)*TileSize)-ur.X-0.1
+					}
+				}
+				whiteBomberman.Move(pixel.V(dist, 0)) 
+				whiteBomberman.Ani().SetView(Right)
+				keypressed = true
+			}
 		}
-		if win.Pressed(pixelgl.KeyUp) && grDir[2] {
-			whiteBomberman.Move(pixel.V(0, whiteBomberman.GetSpeed()*dt))
-			whiteBomberman.Ani().SetView(Up)
-			keypressed = true
+		if win.Pressed(pixelgl.KeyUp) { 
+			dist := whiteBomberman.GetSpeed()*dt
+			pb := whiteBomberman.GetPosBox()
+			ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
+			ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
+			bl,_,yl := lev1.GetPosOfNextTile (int((ll.X)/TileSize),int((ur.Y)/TileSize),pixel.V(0,dist))
+			br,_,yr := lev1.GetPosOfNextTile (int((ur.X)/TileSize),int((ur.Y)/TileSize),pixel.V(0,dist))
+			if !bl && !br {
+				whiteBomberman.Move(pixel.V(0,dist)) 
+				whiteBomberman.Ani().SetView(Up)
+				keypressed = true
+			} else {
+				if bl && (yl<=yr || yr==-1) {
+					if ur.Y +dist > float64((yl)*TileSize) {
+						dist = float64((yl)*TileSize)-ur.Y-0.1
+					}
+				} else if br && (yr<=yl || yl==-1) {
+					if ur.Y +dist > float64((yr)*TileSize) {
+						dist = float64((yr)*TileSize)-ur.Y-0.1
+					}
+				}
+				whiteBomberman.Move(pixel.V(0,dist)) 
+				whiteBomberman.Ani().SetView(Up)
+				keypressed = true
+			}
 		}
-		if win.Pressed(pixelgl.KeyDown) && grDir[3] {
-			whiteBomberman.Move(pixel.V(0, -whiteBomberman.GetSpeed()*dt))
-			whiteBomberman.Ani().SetView(Down)
-			keypressed = true
+		if win.Pressed(pixelgl.KeyDown) { 
+			dist := -whiteBomberman.GetSpeed()*dt
+			pb := whiteBomberman.GetPosBox()
+			ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
+			ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
+			bl,_,yl := lev1.GetPosOfNextTile (int((ll.X)/TileSize),int((ll.Y)/TileSize),pixel.V(0,dist))
+			br,xr,yr := lev1.GetPosOfNextTile (int((ur.X)/TileSize),int((ll.Y)/TileSize),pixel.V(0,dist))
+			if !bl && !br {
+				whiteBomberman.Move(pixel.V(0,dist))  
+				whiteBomberman.Ani().SetView(Down)
+				keypressed = true
+			} else {
+				fmt.Println(br,xr,yr)
+				if bl && (yl>=yr || yr==-1) {
+					if ll.Y +dist < float64((yl+1)*TileSize) {
+						dist = float64((yl+1)*TileSize)-ll.Y+0.1
+					}
+				} else if br && (yr>=yl || yl==-1) {
+					if ll.Y +dist < float64((yr+1)*TileSize) {
+						dist = float64((yr+1)*TileSize)-ll.Y+0.1
+					}
+				}
+				fmt.Println(dist,ll.Y,float64((yr)*TileSize))
+				whiteBomberman.Move(pixel.V(0,dist))  
+				whiteBomberman.Ani().SetView(Down)
+				keypressed = true
+			}
 		}
 		if !keypressed {
 			whiteBomberman.Ani().SetView(Stay)
