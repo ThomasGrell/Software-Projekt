@@ -385,6 +385,9 @@ func sun() {
 		panic(err)
 	}
 
+	s1 := sounds.NewSound(ThroughSpace)
+	go s1.PlaySound()
+
 	turfNtreesArena = arena.NewArena(typ, pitchWidth, pitchHeight)
 
 	lev1 = level1.NewBlankLevel(turfNtreesArena, 1)

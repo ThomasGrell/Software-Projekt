@@ -12,52 +12,61 @@ import (
 
 type sound struct {
 	nr   uint8
+	path string
 	done chan bool
 	quit chan bool
 }
 
 func NewSound(nr uint8) *sound {
 	s := new(sound)
+	s.nr = nr
 	s.done = make(chan bool)
 	s.quit = make(chan bool)
-	s.nr = nr
+	switch nr {
+	// Musik:
+	case ThroughSpace:
+		s.path = "soundeffects/through_space.ogg"
+
+	// Soundeffekte:
+	case Deathflash:
+		s.path = "soundeffects/deathflash.ogg"
+	}
 	return s
 }
 
 func (s *sound) PlaySound() {
 
-	var path string
-
-	switch s.nr {
-	// Musik:
-	case ThroughSpace:
-		path = "soundeffects/through_space.ogg"
-
-	// Soundeffekte:
-	case Deathflash:
-		path = "soundeffects/deathflash.ogg"
-	}
-
-	f, err := os.Open(path)
+	f, err := os.Open(s.path)
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer f.Close()
 
 	streamer, _, err := vorbis.Decode(f)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer streamer.Close()
-
 	speaker.Play(beep.Seq(streamer, beep.Callback(func() {
 		s.done <- true
 	})))
 
-	select {
-	case <-s.quit:
-		speaker.Clear()
-	case <-s.done:
-		speaker.Clear()
+A:
+	for {
+		select {
+		case <-s.quit:
+			speaker.Clear()
+		case <-s.done:
+			// Falls es Musik ist dann wird diese in einer Endlosschleife wiederholt.
+			if s.nr < 100 {
+				streamer.Seek(0)
+				speaker.Play(beep.Seq(streamer, beep.Callback(func() {
+					s.done <- true
+				})))
+			} else {
+				break A
+			}
+		}
 	}
 }
 
