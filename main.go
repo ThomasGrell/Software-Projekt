@@ -357,11 +357,20 @@ func sun() {
 		last = time.Now()
 		if win.Pressed(pixelgl.KeyLeft) {
 			dist := -whiteBomberman.GetSpeed()*dt
+			if dist <= -TileSize {
+				dist=-TileSize+0.1
+			}
 			pb := whiteBomberman.GetPosBox()
 			ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
 			ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
-			bl,xl,_ := lev1.GetPosOfNextTile (int(ll.X/TileSize),int(ll.Y/TileSize),pixel.V(dist,0))
-			bu,xu,_ := lev1.GetPosOfNextTile (int(ll.X/TileSize),int(ur.Y/TileSize),pixel.V(dist,0))
+			bl,xl,yl := lev1.GetPosOfNextTile (int(ll.X/TileSize),int(ll.Y/TileSize),pixel.V(-TileSize,0))
+			bu,xu,yu := lev1.GetPosOfNextTile (int(ll.X/TileSize),int(ur.Y/TileSize),pixel.V(-TileSize,0))
+			fmt.Println(dist)
+			fmt.Println("Unten: ",bl,xl,yl)
+			fmt.Println(int(ll.X/TileSize),int(ll.Y/TileSize))
+			fmt.Println("Oben: ",bu,xu,yu)
+			fmt.Println(int(ll.X/TileSize),int(ur.Y/TileSize))
+			fmt.Println()
 			if !bl && !bu {
 				whiteBomberman.Move(pixel.V(dist, 0))  //
 				whiteBomberman.Ani().SetView(Left)
@@ -383,11 +392,14 @@ func sun() {
 		}
 		if win.Pressed(pixelgl.KeyRight){
 			dist := whiteBomberman.GetSpeed()*dt
+			if dist >=TileSize {
+				dist=TileSize-0.1
+			}
 			pb := whiteBomberman.GetPosBox()
 			ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
 			ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
-			bl,xl,_ := lev1.GetPosOfNextTile (int((ur.X)/TileSize),int(ll.Y/TileSize),pixel.V(dist,0))
-			bu,xu,_ := lev1.GetPosOfNextTile (int((ur.X)/TileSize),int(ur.Y/TileSize),pixel.V(dist,0))
+			bl,xl,_ := lev1.GetPosOfNextTile (int((ur.X)/TileSize),int(ll.Y/TileSize),pixel.V(TileSize,0))
+			bu,xu,_ := lev1.GetPosOfNextTile (int((ur.X)/TileSize),int(ur.Y/TileSize),pixel.V(TileSize,0))
 			if !bl && !bu {
 				whiteBomberman.Move(pixel.V(dist, 0)) 
 				whiteBomberman.Ani().SetView(Right)
@@ -409,11 +421,14 @@ func sun() {
 		}
 		if win.Pressed(pixelgl.KeyUp) { 
 			dist := whiteBomberman.GetSpeed()*dt
+			if dist >=TileSize {
+				dist=TileSize-0.1
+			}
 			pb := whiteBomberman.GetPosBox()
 			ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
 			ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
-			bl,_,yl := lev1.GetPosOfNextTile (int((ll.X)/TileSize),int((ur.Y)/TileSize),pixel.V(0,dist))
-			br,_,yr := lev1.GetPosOfNextTile (int((ur.X)/TileSize),int((ur.Y)/TileSize),pixel.V(0,dist))
+			bl,_,yl := lev1.GetPosOfNextTile (int((ll.X)/TileSize),int((ur.Y)/TileSize),pixel.V(0,TileSize))
+			br,_,yr := lev1.GetPosOfNextTile (int((ur.X)/TileSize),int((ur.Y)/TileSize),pixel.V(0,TileSize))
 			if !bl && !br {
 				whiteBomberman.Move(pixel.V(0,dist)) 
 				whiteBomberman.Ani().SetView(Up)
@@ -435,11 +450,14 @@ func sun() {
 		}
 		if win.Pressed(pixelgl.KeyDown) { 
 			dist := -whiteBomberman.GetSpeed()*dt
+			if dist <= -TileSize {
+				dist=-TileSize+0.1
+			}
 			pb := whiteBomberman.GetPosBox()
 			ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
 			ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
-			bl,_,yl := lev1.GetPosOfNextTile (int((ll.X)/TileSize),int((ll.Y)/TileSize),pixel.V(0,dist))
-			br,xr,yr := lev1.GetPosOfNextTile (int((ur.X)/TileSize),int((ll.Y)/TileSize),pixel.V(0,dist))
+			bl,_,yl := lev1.GetPosOfNextTile (int((ll.X)/TileSize),int((ll.Y)/TileSize),pixel.V(0,-TileSize))
+			br,xr,yr := lev1.GetPosOfNextTile (int((ur.X)/TileSize),int((ll.Y)/TileSize),pixel.V(0,-TileSize))
 			if !bl && !br {
 				whiteBomberman.Move(pixel.V(0,dist))  
 				whiteBomberman.Ani().SetView(Down)
