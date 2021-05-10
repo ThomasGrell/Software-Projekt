@@ -218,7 +218,7 @@ func init() {
 	bm.life = 3
 	bm.maxBombs = 1
 	bm.power = 1
-	bm.speed = 100
+	bm.speed = 200
 	bm.kick = false
 	bm.mortal = true
 	bm.wallghost = false
