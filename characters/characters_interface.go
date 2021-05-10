@@ -3,7 +3,6 @@ package characters
 import (
 	"../animations"
 	"github.com/faiface/pixel"
-	"github.com/faiface/pixel/pixelgl"
 )
 
 type Enemy interface {
@@ -42,7 +41,7 @@ type Character interface {
 	// Vor.: keine
 	// Eff.: Zeichnet den Sprite in das Fenster. Dabei sind die Mitten der Grundlinien
 	//       der Kollisionsbox und des Sprites aufeinander ausgerichtet.
-	Draw(win *pixelgl.Window)
+	Draw(target pixel.Target)
 
 	// Vor.: keine
 	// Eff.: Die Koordinaten der Mitte der Grundlinie der Kollisionsbox werden geliefert.
