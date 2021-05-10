@@ -7,9 +7,8 @@ import (
 	. "./constants"
 	"./level1"
 	"./sounds"
-	"fmt"
 	"./tiles"
-	//"fmt"
+	"fmt"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	//"golang.org/x/image/colornames"
@@ -296,8 +295,8 @@ func sun() {
 
 	whiteBomberman = characters.NewPlayer(WhiteBomberman)
 	whiteBomberman.Ani().Show()
-	whiteBomberman.IncPower()
-	whiteBomberman.IncPower()
+	//whiteBomberman.IncPower()
+	//whiteBomberman.IncPower()
 
 	// 2 Enemys
 
@@ -343,7 +342,8 @@ func sun() {
 			}
 		}
 	}
-
+	rand.Seed(time.Now().UnixNano())
+	dir := rand.Intn(4)
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	itemBatch := pixel.NewBatch(&pixel.TrianglesData{}, animations.ItemImage)
@@ -440,13 +440,13 @@ func sun() {
 			ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
 			ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
 			bl,_,yl := lev1.GetPosOfNextTile (int((ll.X)/TileSize),int((ll.Y)/TileSize),pixel.V(0,dist))
-			br,xr,yr := lev1.GetPosOfNextTile (int((ur.X)/TileSize),int((ll.Y)/TileSize),pixel.V(0,dist))
+			br,_,yr := lev1.GetPosOfNextTile (int((ur.X)/TileSize),int((ll.Y)/TileSize),pixel.V(0,dist))
 			if !bl && !br {
 				whiteBomberman.Move(pixel.V(0,dist))  
 				whiteBomberman.Ani().SetView(Down)
 				keypressed = true
 			} else {
-				fmt.Println(br,xr,yr)
+				//fmt.Println(br,xr,yr)
 				if bl && (yl>=yr || yr==-1) {
 					if ll.Y +dist < float64((yl+1)*TileSize) {
 						dist = float64((yl+1)*TileSize)-ll.Y+0.1
@@ -456,7 +456,7 @@ func sun() {
 						dist = float64((yr+1)*TileSize)-ll.Y+0.1
 					}
 				}
-				fmt.Println(dist,ll.Y,float64((yr)*TileSize))
+				//fmt.Println(dist,ll.Y,float64((yr)*TileSize))
 				whiteBomberman.Move(pixel.V(0,dist))  
 				whiteBomberman.Ani().SetView(Down)
 				keypressed = true
@@ -476,7 +476,52 @@ func sun() {
 		}
 
 		/////////////////////////////////////ToDO Moving Enemys ///////////////////////////////////////////////////////////
-
+		dist := monster[0].GetSpeed() * dt
+		//fmt.Println(dir)
+		pb := monster[0].GetPosBox()
+		ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
+		ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
+		if dir == 0 {
+			bl, xl, _ := lev1.GetPosOfNextTile(int(ll.X/TileSize), int(ll.Y/TileSize), pixel.V(-TileSize, 0))
+			bu, xu, _ := lev1.GetPosOfNextTile(int(ll.X/TileSize), int(ur.Y/TileSize), pixel.V(-TileSize, 0))
+			fmt.Println(dir,":",bl, bu, xl, xu)
+			if !bl && !bu {
+				monster[0].Move(pixel.V(-dist, 0))
+				monster[0].Ani().SetView(Left)
+			}else{
+				dir = 2
+			}
+		}else if dir == 1 {
+			bl, xl, _ := lev1.GetPosOfNextTile(int(ll.X/TileSize), int(ll.Y/TileSize), pixel.V(TileSize, 0))
+			bu, xu, _ := lev1.GetPosOfNextTile(int(ll.X/TileSize), int(ur.Y/TileSize), pixel.V(TileSize, 0))
+			fmt.Println(dir,":",bl, bu, xl, xu)
+			if !bl && !bu {
+				monster[0].Move(pixel.V(dist, 0))
+				monster[0].Ani().SetView(Right)
+			}else{
+				dir = 3
+			}
+		}else if dir == 2 {
+			bl, xl, _ := lev1.GetPosOfNextTile(int(ll.X/TileSize), int(ll.Y/TileSize), pixel.V(0,TileSize))
+			bu, xu, _ := lev1.GetPosOfNextTile(int(ll.X/TileSize), int(ur.Y/TileSize), pixel.V(0,TileSize))
+			fmt.Println(dir,":",bl, bu, xl, xu)
+			if !bl && !bu {
+				monster[0].Move(pixel.V(0,dist))
+				monster[0].Ani().SetView(Up)
+			}else{
+				dir = 1
+			}
+		}else if dir == 3 {
+			bl, xl, _ := lev1.GetPosOfNextTile(int(ll.X/TileSize), int(ll.Y/TileSize), pixel.V(0,-TileSize))
+			bu, xu, _ := lev1.GetPosOfNextTile(int(ll.X/TileSize), int(ur.Y/TileSize), pixel.V(0,-TileSize))
+			fmt.Println(dir,":",bl, bu, xl, xu)
+			if !bl && !bu {
+				monster[0].Move(pixel.V(0,-dist))
+				monster[0].Ani().SetView(Down)
+			}else{
+				dir = 0
+			}
+		}
 		/*
 			for _,m := range(monster) {
 				xx,yy := turfNtreesArena.GetFieldCoord(m.GetPos())
