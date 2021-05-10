@@ -25,13 +25,12 @@ func run() {
 	bar.SetPlayers(4)
 	var playerOneLifes uint8 = 3
 	var playerTwoLifes uint8 = 1
-	var playerThreeLifes uint8 = 3
+	var playerThreeLifes uint8 = 0
 	var playerFourLifes uint8 = 5
 	bar.SetLifePointers(&playerOneLifes, &playerTwoLifes, &playerThreeLifes, &playerFourLifes)
 	var points uint32 = 1243
 	bar.SetPointsPointer(&points)
 	go bar.Manager()
-	bar.Draw(win)
 	bar.SetSeconds(5 * 60)
 	bar.StartCountdown()
 	win.Update()

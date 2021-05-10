@@ -29,6 +29,11 @@ type (
 		SetLifePointers(lifePointers ...*uint8)
 
 		// Vor.: -
+		// Erg.: Setzt die interne Matrix für das Verschieben und Skalieren des
+		//       Canvas-Elements.
+		SetMatrix(matrix pixel.Matrix)
+
+		// Vor.: -
 		// Erg.: Legt die Anzahl der anzuzeigenden Spieler fest. Ist der übergebene Wert
 		//		 kleiner als 1 oder größer als 4, dann geschieht nichts.
 		SetPlayers(uint8)

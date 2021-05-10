@@ -159,7 +159,8 @@ func (c *character) Draw(win *pixelgl.Window) {
 func (c *character) GetBaselineCenter() pixel.Vec {
 	return c.collisionbox.Min.Add(pixel.V(c.size.X/2, 0))
 }
-func (c *character) GetLife() *uint8 { return &c.life }
+func (c *character) GetLife() uint8         { return c.life }
+func (c *character) GetLifePointer() *uint8 { return &c.life }
 func (c *character) GetMatrix() pixel.Matrix {
 	return (*c).matrix
 }
