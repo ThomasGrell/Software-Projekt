@@ -270,6 +270,102 @@ func getGrantedDirections(c characters.Character) [4]bool {
 	return b
 }
 
+func moveCharacter (c characters.Character, dt float64, dir uint8) {
+	switch dir {
+		case Left:
+			dist := -c.GetSpeed()*dt
+			if dist <= -TileSize {
+				dist=-TileSize+0.1
+			}
+			pb := c.GetPosBox()
+			ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
+			ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
+			bl,xl,_ := lev1.GetPosOfNextTile (int(ll.X/TileSize),int(ll.Y/TileSize),pixel.V(-TileSize,0))
+			bu,xu,_ := lev1.GetPosOfNextTile (int(ll.X/TileSize),int(ur.Y/TileSize),pixel.V(-TileSize,0))
+			if bl || bu {
+				if bl && (xl>=xu || xu==-1) {
+					if ll.X +dist < float64((xl+1)*TileSize) {
+						dist = float64((xl+1)*TileSize)-ll.X+0.1
+					}
+				} else if bu && (xu>=xl || xl==-1) {
+					if ll.X +dist < float64((xu+1)*TileSize) {
+						dist = float64((xu+1)*TileSize)-ll.X+0.1
+					}
+				} 
+			}
+			c.Move(pixel.V(dist, 0))
+		case Right: 
+			dist := c.GetSpeed()*dt
+			if dist >=TileSize {
+				dist=TileSize-0.1
+			}
+			pb := c.GetPosBox()
+			ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
+			ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
+			bl,xl,_ := lev1.GetPosOfNextTile (int((ur.X)/TileSize),int(ll.Y/TileSize),pixel.V(TileSize,0))
+			bu,xu,_ := lev1.GetPosOfNextTile (int((ur.X)/TileSize),int(ur.Y/TileSize),pixel.V(TileSize,0))
+			if bl || bu {
+				if bl && (xl<=xu || xu==-1) {
+					if ur.X +dist > float64((xl)*TileSize) {
+						dist = float64((xl)*TileSize)-ur.X-0.1
+					}
+				} else if bu && (xu<=xl || xl==-1) {
+					if ur.X +dist > float64((xu)*TileSize) {
+						dist = float64((xu)*TileSize)-ur.X-0.1
+					}
+				}
+			}
+			c.Move(pixel.V(dist, 0))
+		case Up:
+			dist := c.GetSpeed()*dt
+			if dist >=TileSize {
+				dist=TileSize-0.1
+			}
+			pb := c.GetPosBox()
+			ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
+			ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
+			bl,_,yl := lev1.GetPosOfNextTile (int((ll.X)/TileSize),int((ur.Y)/TileSize),pixel.V(0,TileSize))
+			br,_,yr := lev1.GetPosOfNextTile (int((ur.X)/TileSize),int((ur.Y)/TileSize),pixel.V(0,TileSize))
+			if bl || br {
+				if bl && (yl<=yr || yr==-1) {
+					if ur.Y +dist > float64((yl)*TileSize) {
+						dist = float64((yl)*TileSize)-ur.Y-0.1
+					}
+				} else if br && (yr<=yl || yl==-1) {
+					if ur.Y +dist > float64((yr)*TileSize) {
+						dist = float64((yr)*TileSize)-ur.Y-0.1
+					}
+				}
+			}
+			c.Move(pixel.V(0,dist))
+		case Down:
+			dist := -c.GetSpeed()*dt
+			if dist <= -TileSize {
+				dist=-TileSize+0.1
+			}
+			pb := c.GetPosBox()
+			ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
+			ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
+			bl,_,yl := lev1.GetPosOfNextTile (int((ll.X)/TileSize),int((ll.Y)/TileSize),pixel.V(0,-TileSize))
+			br,xr,yr := lev1.GetPosOfNextTile (int((ur.X)/TileSize),int((ll.Y)/TileSize),pixel.V(0,-TileSize))
+			if bl || br {
+				fmt.Println(br,xr,yr)
+				if bl && (yl>=yr || yr==-1) {
+					if ll.Y +dist < float64((yl+1)*TileSize) {
+						dist = float64((yl+1)*TileSize)-ll.Y+0.1
+					}
+				} else if br && (yr>=yl || yl==-1) {
+					if ll.Y +dist < float64((yr+1)*TileSize) {
+						dist = float64((yr+1)*TileSize)-ll.Y+0.1
+					}
+				}
+				fmt.Println(dist,ll.Y,float64((yr)*TileSize))
+			}
+			c.Move(pixel.V(0,dist))
+	}
+	c.Ani().SetView(dir)
+}
+
 func sun() {
 	const zoomFactor = 3
 	const typ = 2
@@ -356,128 +452,20 @@ func sun() {
 		dt = time.Since(last).Seconds()
 		last = time.Now()
 		if win.Pressed(pixelgl.KeyLeft) {
-			dist := -whiteBomberman.GetSpeed()*dt
-			if dist <= -TileSize {
-				dist=-TileSize+0.1
-			}
-			pb := whiteBomberman.GetPosBox()
-			ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
-			ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
-			bl,xl,yl := lev1.GetPosOfNextTile (int(ll.X/TileSize),int(ll.Y/TileSize),pixel.V(-TileSize,0))
-			bu,xu,yu := lev1.GetPosOfNextTile (int(ll.X/TileSize),int(ur.Y/TileSize),pixel.V(-TileSize,0))
-			fmt.Println(dist)
-			fmt.Println("Unten: ",bl,xl,yl)
-			fmt.Println(int(ll.X/TileSize),int(ll.Y/TileSize))
-			fmt.Println("Oben: ",bu,xu,yu)
-			fmt.Println(int(ll.X/TileSize),int(ur.Y/TileSize))
-			fmt.Println()
-			if !bl && !bu {
-				whiteBomberman.Move(pixel.V(dist, 0))  //
-				whiteBomberman.Ani().SetView(Left)
-				keypressed = true
-			} else {
-				if bl && (xl>=xu || xu==-1) {
-					if ll.X +dist < float64((xl+1)*TileSize) {
-						dist = float64((xl+1)*TileSize)-ll.X+0.1
-					}
-				} else if bu && (xu>=xl || xl==-1) {
-					if ll.X +dist < float64((xu+1)*TileSize) {
-						dist = float64((xu+1)*TileSize)-ll.X+0.1
-					}
-				}
-				whiteBomberman.Move(pixel.V(dist, 0)) 
-				whiteBomberman.Ani().SetView(Left)
-				keypressed = true
-			}
+			moveCharacter(whiteBomberman,dt,Left)
+			keypressed = true
 		}
 		if win.Pressed(pixelgl.KeyRight){
-			dist := whiteBomberman.GetSpeed()*dt
-			if dist >=TileSize {
-				dist=TileSize-0.1
-			}
-			pb := whiteBomberman.GetPosBox()
-			ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
-			ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
-			bl,xl,_ := lev1.GetPosOfNextTile (int((ur.X)/TileSize),int(ll.Y/TileSize),pixel.V(TileSize,0))
-			bu,xu,_ := lev1.GetPosOfNextTile (int((ur.X)/TileSize),int(ur.Y/TileSize),pixel.V(TileSize,0))
-			if !bl && !bu {
-				whiteBomberman.Move(pixel.V(dist, 0)) 
-				whiteBomberman.Ani().SetView(Right)
-				keypressed = true
-			} else {
-				if bl && (xl<=xu || xu==-1) {
-					if ur.X +dist > float64((xl)*TileSize) {
-						dist = float64((xl)*TileSize)-ur.X-0.1
-					}
-				} else if bu && (xu<=xl || xl==-1) {
-					if ur.X +dist > float64((xu)*TileSize) {
-						dist = float64((xu)*TileSize)-ur.X-0.1
-					}
-				}
-				whiteBomberman.Move(pixel.V(dist, 0)) 
-				whiteBomberman.Ani().SetView(Right)
-				keypressed = true
-			}
+			moveCharacter(whiteBomberman,dt,Right)
+			keypressed = true
 		}
 		if win.Pressed(pixelgl.KeyUp) { 
-			dist := whiteBomberman.GetSpeed()*dt
-			if dist >=TileSize {
-				dist=TileSize-0.1
-			}
-			pb := whiteBomberman.GetPosBox()
-			ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
-			ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
-			bl,_,yl := lev1.GetPosOfNextTile (int((ll.X)/TileSize),int((ur.Y)/TileSize),pixel.V(0,TileSize))
-			br,_,yr := lev1.GetPosOfNextTile (int((ur.X)/TileSize),int((ur.Y)/TileSize),pixel.V(0,TileSize))
-			if !bl && !br {
-				whiteBomberman.Move(pixel.V(0,dist)) 
-				whiteBomberman.Ani().SetView(Up)
-				keypressed = true
-			} else {
-				if bl && (yl<=yr || yr==-1) {
-					if ur.Y +dist > float64((yl)*TileSize) {
-						dist = float64((yl)*TileSize)-ur.Y-0.1
-					}
-				} else if br && (yr<=yl || yl==-1) {
-					if ur.Y +dist > float64((yr)*TileSize) {
-						dist = float64((yr)*TileSize)-ur.Y-0.1
-					}
-				}
-				whiteBomberman.Move(pixel.V(0,dist)) 
-				whiteBomberman.Ani().SetView(Up)
-				keypressed = true
-			}
+			moveCharacter(whiteBomberman,dt,Up)
+			keypressed = true
 		}
 		if win.Pressed(pixelgl.KeyDown) { 
-			dist := -whiteBomberman.GetSpeed()*dt
-			if dist <= -TileSize {
-				dist=-TileSize+0.1
-			}
-			pb := whiteBomberman.GetPosBox()
-			ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
-			ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
-			bl,_,yl := lev1.GetPosOfNextTile (int((ll.X)/TileSize),int((ll.Y)/TileSize),pixel.V(0,-TileSize))
-			br,xr,yr := lev1.GetPosOfNextTile (int((ur.X)/TileSize),int((ll.Y)/TileSize),pixel.V(0,-TileSize))
-			if !bl && !br {
-				whiteBomberman.Move(pixel.V(0,dist))  
-				whiteBomberman.Ani().SetView(Down)
-				keypressed = true
-			} else {
-				fmt.Println(br,xr,yr)
-				if bl && (yl>=yr || yr==-1) {
-					if ll.Y +dist < float64((yl+1)*TileSize) {
-						dist = float64((yl+1)*TileSize)-ll.Y+0.1
-					}
-				} else if br && (yr>=yl || yl==-1) {
-					if ll.Y +dist < float64((yr+1)*TileSize) {
-						dist = float64((yr+1)*TileSize)-ll.Y+0.1
-					}
-				}
-				fmt.Println(dist,ll.Y,float64((yr)*TileSize))
-				whiteBomberman.Move(pixel.V(0,dist))  
-				whiteBomberman.Ani().SetView(Down)
-				keypressed = true
-			}
+			moveCharacter(whiteBomberman,dt,Down)
+			keypressed = true
 		}
 		if !keypressed {
 			whiteBomberman.Ani().SetView(Stay)
