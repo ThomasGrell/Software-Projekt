@@ -21,10 +21,9 @@ type titlebarStruct struct {
 	sprite     *pixel.Sprite
 	background *imdraw.IMDraw
 	mutex      sync.Mutex
-	timeLeft   uint16 // Muss wegen des Timers durch ein Mutex geschützt werden!!!
-	level      uint8
-	points     uint32 // max. 4 Spieler
-	life       [4]uint8
+	timeLeft   uint16  // Muss wegen des Timers durch ein Mutex geschützt werden!!!
+	points     *uint32 // max. 4 Spieler
+	life       [4]*uint8
 	command    chan uint8 // Sendet Befehle an den Watchdog-Prozess
 	width      float64
 	players    uint8 // Anzahl der Spieler
@@ -51,9 +50,7 @@ func New(width uint16) Titlebar {
 	t.background.Push(t.canvas.Bounds().Min)
 	t.background.Push(t.canvas.Bounds().Max)
 	t.background.Rectangle(0)
-	t.level = 1
 	t.players = 1
-	t.life = [4]uint8{3, 3, 3, 3}
 
 	// Gepufferter Channel für die nebenläufige Steuerung des Titlebars.
 	// Kommandos sind oben über Konstanten definiert.
@@ -83,62 +80,36 @@ func New(width uint16) Titlebar {
 	return t
 }
 
-func (t *titlebarStruct) DecLife(i uint8) {
-	if i <= 4 {
-		if t.life[i-1] > 0 {
-			t.life[i-1]--
-		}
-	}
-}
-
 func (t *titlebarStruct) Draw(target pixel.Target) {
 	t.canvas.Draw(target, pixel.IM)
 }
 
 func (t *titlebarStruct) GetSeconds() uint16 {
-	return t.timeLeft
+	return t.timeLeft << 1
 }
 
-func (t *titlebarStruct) IncLevel() {
-	t.level++
-}
-
-func (t *titlebarStruct) IncLife(i uint8) {
-	if i <= 4 && t.life[i-1] < 9 {
-		t.life[i-1]++
-	}
-}
-
-func (t *titlebarStruct) SetLevel(level uint8) {
-	t.level = level
-}
-
-func (t *titlebarStruct) SetLife(lifes ...uint8) {
-	for i, val := range lifes {
+func (t *titlebarStruct) SetLifePointers(lifePointers ...*uint8) {
+	for i, val := range lifePointers {
 		if i > 3 {
 			break
 		}
-		if val < 10 {
-			t.life[i] = val
-		} else {
-			t.life[i] = 9
-		}
+		t.life[i] = val
 	}
 }
 
 func (t *titlebarStruct) SetPlayers(numberOfPlayers uint8) {
-	if numberOfPlayers <= 4 {
+	if numberOfPlayers <= 4 && numberOfPlayers > 0 {
 		t.players = numberOfPlayers
 	}
 }
 
-func (t *titlebarStruct) SetPoints(points uint32) {
-	t.points = points
+func (t *titlebarStruct) SetPointsPointer(pointPointer *uint32) {
+	t.points = pointPointer
 }
 
 func (t *titlebarStruct) SetSeconds(seconds uint16) {
 	t.mutex.Lock()
-	t.timeLeft = seconds
+	t.timeLeft = seconds >> 1
 	t.mutex.Unlock()
 }
 
@@ -194,10 +165,10 @@ func (t *titlebarStruct) Update() {
 	// Zeichne Rahmen des Punktestands
 	t.sprite.Set(animations.ItemImage, t.score)
 	t.sprite.Draw(t.batch, pixel.IM.Moved(pixel.V(x, 8)).Moved(t.score.Size().Scaled(0.5)))
-	x = x + 8
+	x = x + 16
 
 	// Punktestand anzeigen
-	punkte := digits(t.points)
+	punkte := digits(*t.points)
 	for i, val := range punkte {
 		if i > 5 {
 			break
@@ -205,7 +176,7 @@ func (t *titlebarStruct) Update() {
 		t.sprite.Set(animations.ItemImage, t.num[val])
 		t.sprite.Draw(t.batch, pixel.IM.Moved(pixel.V(x+(5-float64(i))*8, 8)).Moved(pixel.V(4, 8)))
 	}
-	x = x + 4*16
+	x = x + 3*16 + 8
 
 	// Uhr zeichnen
 	t.sprite.Set(animations.ItemImage, t.clock)
@@ -239,14 +210,14 @@ func (t *titlebarStruct) Update() {
 	x = x + 8
 	// Anzeige der Leben der einzelnen Spieler
 	for i := 0; i < int(t.players); i++ {
-		if t.life[i] == 0 {
+		if *t.life[i] == 0 {
 			t.sprite.Set(animations.ItemImage, t.sadHeads[i])
 		} else {
 			t.sprite.Set(animations.ItemImage, t.heads[i])
 		}
 		t.sprite.Draw(t.batch, pixel.IM.Moved(pixel.V(x, 8)).Moved(t.heads[i].Size().Scaled(0.5)))
 		x = x + 16
-		t.sprite.Set(animations.ItemImage, t.num[t.life[i]])
+		t.sprite.Set(animations.ItemImage, t.num[*t.life[i]])
 		t.sprite.Draw(t.batch, pixel.IM.Moved(pixel.V(x, 8)).Moved(pixel.V(4, 8)))
 		x = x + 16
 	}

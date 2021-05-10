@@ -159,19 +159,24 @@ func (c *character) Draw(win *pixelgl.Window) {
 func (c *character) GetBaselineCenter() pixel.Vec {
 	return c.collisionbox.Min.Add(pixel.V(c.size.X/2, 0))
 }
-func (c *character) GetPoints() uint32 { return c.points }
-func (c *character) GetPos() pixel.Vec { return c.collisionbox.Min }
-func (c *character) GetPosBox() pixel.Rect {
-	return c.collisionbox
+func (c *character) GetLife() *uint8 { return &c.life }
+func (c *character) GetMatrix() pixel.Matrix {
+	return (*c).matrix
 }
 func (c *character) GetMovedPos() pixel.Vec {
 	return c.GetBaselineCenter().Add(c.ani.ToBaseline())
 }
-func (c *character) GetSpeed() float64 { return c.speed }
+func (c *character) GetPoints() uint32         { return c.points }
+func (c *character) GetPointsPointer() *uint32 { return &c.points }
+func (c *character) GetPos() pixel.Vec         { return c.collisionbox.Min }
+func (c *character) GetPosBox() pixel.Rect {
+	return c.collisionbox
+}
 func (c *character) GetSize() pixel.Vec {
 	return c.size
 }
-func (c *character) IncSpeed() { c.speed += 10 }
+func (c *character) GetSpeed() float64 { return c.speed }
+func (c *character) IncSpeed()         { c.speed += 10 }
 func (c *character) IsAlife() bool {
 	return c.life > 0
 }
@@ -181,10 +186,6 @@ func (c *character) IsMortal() bool {
 }
 func (c *character) IsWallghost() bool   { return c.wallghost }
 func (c *character) SetBombghost(b bool) { c.bombghost = b }
-
-func (c *character) GetMatrix() pixel.Matrix {
-	return (*c).matrix
-}
 
 /*
 

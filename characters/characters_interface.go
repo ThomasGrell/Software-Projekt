@@ -20,7 +20,7 @@ type Player interface {
 	GetWins() uint8
 	IncLife()
 	IncMaxBombs()
-	IncPower ()
+	IncPower()
 	IncWins()
 	ResetWins()
 	SetLife(uint8)
@@ -38,8 +38,6 @@ type Character interface {
 
 	DecLife()
 	DecSpeed()
-	
-	GetMatrix () pixel.Matrix
 
 	// Vor.: keine
 	// Eff.: Zeichnet den Sprite in das Fenster. Dabei sind die Mitten der Grundlinien
@@ -50,11 +48,27 @@ type Character interface {
 	// Eff.: Die Koordinaten der Mitte der Grundlinie der Kollisionsbox werden geliefert.
 	GetBaselineCenter() pixel.Vec
 
+	GetLife() *uint8
+
+	GetMatrix() pixel.Matrix
+
+	// Vor.: keine
+	// Eff.: Liefert einen Vektor der die Koordinaten für das Zeichnen des Sprites enthält,
+	//		 damit die Kollisionsbox und der Sprite bzgl. der Mitte ihrer jeweilien Grundlinie
+	//       ausgerichtet sind.
+	GetMovedPos() pixel.Vec
+
 	// Vor.: keine
 	// Eff.: Bei einem Bomberman werden die gesammelten Punkte geliefert.
 	//       Bei einem Enemy werden die Punkte geliefert, die man beim
 	//       töten des Enemys verdient.
 	GetPoints() uint32
+
+	// Vor.: keine
+	// Eff.: Bei einem Bomberman wird ein Pointer auf die gesammelten Punkte geliefert.
+	//       Bei einem Enemy wird ein Pointer auf die Punkte geliefert, die man beim
+	//       töten des Enemys verdient.
+	GetPointsPointer() *uint32
 
 	// Vor.: keine
 	// Eff.: Liefert einen Vektor der die Koordinaten der linken unteren Ecke
@@ -66,12 +80,6 @@ type Character interface {
 	GetPosBox() pixel.Rect
 
 	// Vor.: keine
-	// Eff.: Liefert einen Vektor der die Koordinaten für das Zeichnen des Sprites enthält,
-	//		 damit die Kollisionsbox und der Sprite bzgl. der Mitte ihrer jeweilien Grundlinie
-	//       ausgerichtet sind.
-	GetMovedPos() pixel.Vec
-
-	// Vor.: keine
 	// Eff.: Breite und Höhe der Kollisionsbox werden als pixel.Vec zurückgegeben.
 	GetSize() pixel.Vec
 
@@ -81,7 +89,6 @@ type Character interface {
 	IsBombghost() bool
 	IsMortal() bool
 	IsWallghost() bool
-	SetBombghost(bool)
 
 	// Vor.: keine
 	// Eff.: Die Kollisionsbox ist um den Vektor delta verschoben worden.
@@ -91,4 +98,6 @@ type Character interface {
 	// Eff.: Die Kollisionsbox wurde an die Position pos verschoben bzgl.
 	//       der linken unteren Ecke
 	MoveTo(pos pixel.Vec)
+
+	SetBombghost(bool)
 }
