@@ -73,7 +73,7 @@ func NewEnemy(t uint8) *enemy {
 	c := new(enemy)
 	*c = *en
 	c.ani = animations.NewAnimation(t)
-	c.size = pixel.V(16, 16)
+	c.size = pixel.V(15, 15)
 	c.collisionbox = pixel.R(-c.size.X/2, -c.size.Y/2, c.size.X/2, c.size.Y/2)
 	c.matrix = pixel.IM.Moved(c.GetMovedPos())
 	switch t {
@@ -218,7 +218,7 @@ func init() {
 	bm.life = 3
 	bm.maxBombs = 1
 	bm.power = 1
-	bm.speed = 200
+	bm.speed = 100
 	bm.kick = false
 	bm.mortal = true
 	bm.wallghost = false
@@ -234,6 +234,6 @@ func init() {
 	en.wallghost = false
 	en.bombghost = false
 	en.follow = false
-	en.size = pixel.V(12, 12)
+	en.size = pixel.V(1, 1)
 	en.collisionbox = pixel.Rect{pixel.Vec{0, 0}, en.size}
 }

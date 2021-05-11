@@ -11,11 +11,12 @@ import (
 	"fmt"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
-	//"golang.org/x/image/colornames"
 	"math"
 	"math/rand"
 	"time"
 )
+
+var dirEn = make([]int,0)
 
 var bombs []tiles.Bombe
 var turfNtreesArena arena.Arena
@@ -266,8 +267,104 @@ func getGrantedDirections(c characters.Character) [4]bool {
 	if lev1.IsTile(int(ll.X/TileSize), int((ll.Y-1)/TileSize)) || lev1.IsTile(int(ur.X/TileSize), int((ll.Y-1)/TileSize)) || ll.Y-1 < 0 {
 		b[3] = false
 	}
-
 	return b
+}
+
+func moveCharacter (aniType string, c characters.Character, dt float64, dir uint8) /*(moved bool)*/{
+	switch dir {
+		case Left:
+			dist := -c.GetSpeed()*dt
+			if dist <= -TileSize {
+				dist=-TileSize+0.1
+			}
+			pb := c.GetPosBox()
+			ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
+			ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
+			bl,xl,_ := lev1.GetPosOfNextTile (int(ll.X/TileSize),int(ll.Y/TileSize),pixel.V(-TileSize,0))
+			bu,xu,_ := lev1.GetPosOfNextTile (int(ll.X/TileSize),int(ur.Y/TileSize),pixel.V(-TileSize,0))
+			if bl || bu {
+				if bl && (xl>=xu || xu==-1) {
+					if ll.X +dist < float64((xl+1)*TileSize) {
+						dist = float64((xl+1)*TileSize)-ll.X+0.1
+					}
+				} else if bu && (xu>=xl || xl==-1) {
+					if ll.X +dist < float64((xu+1)*TileSize) {
+						dist = float64((xu+1)*TileSize)-ll.X+0.1
+					}
+				} 
+			}
+			c.Move(pixel.V(dist, 0))
+		case Right: 
+			dist := c.GetSpeed()*dt
+			if dist >=TileSize {
+				dist=TileSize-0.1
+			}
+			pb := c.GetPosBox()
+			ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
+			ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
+			bl,xl,_ := lev1.GetPosOfNextTile (int((ur.X)/TileSize),int(ll.Y/TileSize),pixel.V(TileSize,0))
+			bu,xu,_ := lev1.GetPosOfNextTile (int((ur.X)/TileSize),int(ur.Y/TileSize),pixel.V(TileSize,0))
+			if bl || bu {
+				if bl && (xl<=xu || xu==-1) {
+					if ur.X +dist > float64((xl)*TileSize) {
+						dist = float64((xl)*TileSize)-ur.X-0.1
+					}
+				} else if bu && (xu<=xl || xl==-1) {
+					if ur.X +dist > float64((xu)*TileSize) {
+						dist = float64((xu)*TileSize)-ur.X-0.1
+					}
+				}
+			}
+			c.Move(pixel.V(dist, 0))
+		case Up:
+			dist := c.GetSpeed()*dt
+			if dist >=TileSize {
+				dist=TileSize-0.1
+			}
+			pb := c.GetPosBox()
+			ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
+			ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
+			bl,_,yl := lev1.GetPosOfNextTile (int((ll.X)/TileSize),int((ur.Y)/TileSize),pixel.V(0,TileSize))
+			br,_,yr := lev1.GetPosOfNextTile (int((ur.X)/TileSize),int((ur.Y)/TileSize),pixel.V(0,TileSize))
+			if bl || br {
+				if bl && (yl<=yr || yr==-1) {
+					if ur.Y +dist > float64((yl)*TileSize) {
+						dist = float64((yl)*TileSize)-ur.Y-0.1
+					}
+				} else if br && (yr<=yl || yl==-1) {
+					if ur.Y +dist > float64((yr)*TileSize) {
+						dist = float64((yr)*TileSize)-ur.Y-0.1
+					}
+				}
+			}
+			c.Move(pixel.V(0,dist))
+		case Down:
+			dist := -c.GetSpeed()*dt
+			if dist <= -TileSize {
+				dist=-TileSize+0.1
+			}
+			pb := c.GetPosBox()
+			ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
+			ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
+			bl,_,yl := lev1.GetPosOfNextTile (int((ll.X)/TileSize),int((ll.Y)/TileSize),pixel.V(0,-TileSize))
+			br,_,yr := lev1.GetPosOfNextTile (int((ur.X)/TileSize),int((ll.Y)/TileSize),pixel.V(0,-TileSize))
+			if bl || br {
+				if bl && (yl>=yr || yr==-1) {
+					if ll.Y +dist < float64((yl+1)*TileSize) {
+						dist = float64((yl+1)*TileSize)-ll.Y+0.1
+					}
+				} else if br && (yr>=yl || yl==-1) {
+					if ll.Y +dist < float64((yr+1)*TileSize) {
+						dist = float64((yr+1)*TileSize)-ll.Y+0.1
+					}
+				}
+			}
+			c.Move(pixel.V(0,dist))
+	}
+	if !(aniType == "noDirAni") {
+		c.Ani().SetView(dir)
+	}
+	return
 }
 
 func sun() {
@@ -299,30 +396,12 @@ func sun() {
 	//whiteBomberman.IncPower()
 
 	// 2 Enemys
-
 	monster = append(monster, characters.NewEnemy(YellowPopEye))
+	dirEn = append(dirEn,0)
 	monster = append(monster, characters.NewEnemy(Drop))
+	dirEn = append(dirEn, 0)
 
-	// not a real random number
-
-	rand.Seed(42)
-
-	// Put character at free space with at least two free neighbours in a row
-	/*
-		A:
-			for i := 2 * turfNtreesArena.GetWidth(); i < len(turfNtreesArena.GetPassability())-2*turfNtreesArena.GetWidth(); i++ { // Einschränkung des Wertebereichs von i um index out of range Probleme zu vermeiden
-				if turfNtreesArena.GetPassability()[i] && turfNtreesArena.GetPassability()[i-1] && turfNtreesArena.GetPassability()[i-2] || // checke links, rechts, oben, unten
-					turfNtreesArena.GetPassability()[i] && turfNtreesArena.GetPassability()[i+1] && turfNtreesArena.GetPassability()[i+2] ||
-					turfNtreesArena.GetPassability()[i] && turfNtreesArena.GetPassability()[i+turfNtreesArena.GetWidth()] &&
-						turfNtreesArena.GetPassability()[i+2*turfNtreesArena.GetWidth()] ||
-					turfNtreesArena.GetPassability()[i] && turfNtreesArena.GetPassability()[i-turfNtreesArena.GetWidth()] &&
-						turfNtreesArena.GetPassability()[i-2*turfNtreesArena.GetWidth()] {
-					whiteBomberman.MoveTo(turfNtreesArena.GetLowerLeft().Add(pixel.V(float64(i%turfNtreesArena.GetWidth())*
-						TileSize, float64(i/turfNtreesArena.GetWidth())*TileSize)))
-					break A
-				}
-			}
-	*/
+	rand.Seed(time.Now().UnixNano())
 
 	// Bomberman is in lowleft Corner
 	whiteBomberman.MoveTo(turfNtreesArena.GetLowerLeft().Add(pixel.V(0, 0)))
@@ -334,7 +413,7 @@ func sun() {
 		for {
 			i := rand.Intn(turfNtreesArena.GetWidth())
 			j := rand.Intn(turfNtreesArena.GetHeight())
-			if !turfNtreesArena.IsTile(i, j) && xx != i && yy != j {
+			if !lev1.IsTile(i, j) && xx != i && yy != j {
 				m.MoveTo(turfNtreesArena.GetLowerLeft().Add(pixel.V(float64(i)*
 					TileSize, float64(j)*TileSize)))
 				m.Ani().SetVisible(true)
@@ -342,8 +421,7 @@ func sun() {
 			}
 		}
 	}
-	rand.Seed(time.Now().UnixNano())
-	dir := rand.Intn(4)
+
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	itemBatch := pixel.NewBatch(&pixel.TrianglesData{}, animations.ItemImage)
@@ -357,128 +435,20 @@ func sun() {
 		dt = time.Since(last).Seconds()
 		last = time.Now()
 		if win.Pressed(pixelgl.KeyLeft) {
-			dist := -whiteBomberman.GetSpeed()*dt
-			if dist <= -TileSize {
-				dist=-TileSize+0.1
-			}
-			pb := whiteBomberman.GetPosBox()
-			ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
-			ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
-			bl,xl,yl := lev1.GetPosOfNextTile (int(ll.X/TileSize),int(ll.Y/TileSize),pixel.V(-TileSize,0))
-			bu,xu,yu := lev1.GetPosOfNextTile (int(ll.X/TileSize),int(ur.Y/TileSize),pixel.V(-TileSize,0))
-			fmt.Println(dist)
-			fmt.Println("Unten: ",bl,xl,yl)
-			fmt.Println(int(ll.X/TileSize),int(ll.Y/TileSize))
-			fmt.Println("Oben: ",bu,xu,yu)
-			fmt.Println(int(ll.X/TileSize),int(ur.Y/TileSize))
-			fmt.Println()
-			if !bl && !bu {
-				whiteBomberman.Move(pixel.V(dist, 0))  //
-				whiteBomberman.Ani().SetView(Left)
-				keypressed = true
-			} else {
-				if bl && (xl>=xu || xu==-1) {
-					if ll.X +dist < float64((xl+1)*TileSize) {
-						dist = float64((xl+1)*TileSize)-ll.X+0.1
-					}
-				} else if bu && (xu>=xl || xl==-1) {
-					if ll.X +dist < float64((xu+1)*TileSize) {
-						dist = float64((xu+1)*TileSize)-ll.X+0.1
-					}
-				}
-				whiteBomberman.Move(pixel.V(dist, 0)) 
-				whiteBomberman.Ani().SetView(Left)
-				keypressed = true
-			}
+			moveCharacter("",whiteBomberman,dt,Left)
+			keypressed = true
 		}
 		if win.Pressed(pixelgl.KeyRight){
-			dist := whiteBomberman.GetSpeed()*dt
-			if dist >=TileSize {
-				dist=TileSize-0.1
-			}
-			pb := whiteBomberman.GetPosBox()
-			ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
-			ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
-			bl,xl,_ := lev1.GetPosOfNextTile (int((ur.X)/TileSize),int(ll.Y/TileSize),pixel.V(TileSize,0))
-			bu,xu,_ := lev1.GetPosOfNextTile (int((ur.X)/TileSize),int(ur.Y/TileSize),pixel.V(TileSize,0))
-			if !bl && !bu {
-				whiteBomberman.Move(pixel.V(dist, 0)) 
-				whiteBomberman.Ani().SetView(Right)
-				keypressed = true
-			} else {
-				if bl && (xl<=xu || xu==-1) {
-					if ur.X +dist > float64((xl)*TileSize) {
-						dist = float64((xl)*TileSize)-ur.X-0.1
-					}
-				} else if bu && (xu<=xl || xl==-1) {
-					if ur.X +dist > float64((xu)*TileSize) {
-						dist = float64((xu)*TileSize)-ur.X-0.1
-					}
-				}
-				whiteBomberman.Move(pixel.V(dist, 0)) 
-				whiteBomberman.Ani().SetView(Right)
-				keypressed = true
-			}
+			moveCharacter("",whiteBomberman,dt,Right)
+			keypressed = true
 		}
 		if win.Pressed(pixelgl.KeyUp) { 
-			dist := whiteBomberman.GetSpeed()*dt
-			if dist >=TileSize {
-				dist=TileSize-0.1
-			}
-			pb := whiteBomberman.GetPosBox()
-			ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
-			ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
-			bl,_,yl := lev1.GetPosOfNextTile (int((ll.X)/TileSize),int((ur.Y)/TileSize),pixel.V(0,TileSize))
-			br,_,yr := lev1.GetPosOfNextTile (int((ur.X)/TileSize),int((ur.Y)/TileSize),pixel.V(0,TileSize))
-			if !bl && !br {
-				whiteBomberman.Move(pixel.V(0,dist)) 
-				whiteBomberman.Ani().SetView(Up)
-				keypressed = true
-			} else {
-				if bl && (yl<=yr || yr==-1) {
-					if ur.Y +dist > float64((yl)*TileSize) {
-						dist = float64((yl)*TileSize)-ur.Y-0.1
-					}
-				} else if br && (yr<=yl || yl==-1) {
-					if ur.Y +dist > float64((yr)*TileSize) {
-						dist = float64((yr)*TileSize)-ur.Y-0.1
-					}
-				}
-				whiteBomberman.Move(pixel.V(0,dist)) 
-				whiteBomberman.Ani().SetView(Up)
-				keypressed = true
-			}
+			moveCharacter("",whiteBomberman,dt,Up)
+			keypressed = true
 		}
 		if win.Pressed(pixelgl.KeyDown) { 
-			dist := -whiteBomberman.GetSpeed()*dt
-			if dist <= -TileSize {
-				dist=-TileSize+0.1
-			}
-			pb := whiteBomberman.GetPosBox()
-			ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
-			ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
-			bl,_,yl := lev1.GetPosOfNextTile (int((ll.X)/TileSize),int((ll.Y)/TileSize),pixel.V(0,-TileSize))
-			br,_,yr := lev1.GetPosOfNextTile (int((ur.X)/TileSize),int((ll.Y)/TileSize),pixel.V(0,-TileSize))
-			if !bl && !br {
-				whiteBomberman.Move(pixel.V(0,dist))  
-				whiteBomberman.Ani().SetView(Down)
-				keypressed = true
-			} else {
-				//fmt.Println(br,xr,yr)
-				if bl && (yl>=yr || yr==-1) {
-					if ll.Y +dist < float64((yl+1)*TileSize) {
-						dist = float64((yl+1)*TileSize)-ll.Y+0.1
-					}
-				} else if br && (yr>=yl || yl==-1) {
-					if ll.Y +dist < float64((yr+1)*TileSize) {
-						dist = float64((yr+1)*TileSize)-ll.Y+0.1
-					}
-				}
-				//fmt.Println(dist,ll.Y,float64((yr)*TileSize))
-				whiteBomberman.Move(pixel.V(0,dist))  
-				whiteBomberman.Ani().SetView(Down)
-				keypressed = true
-			}
+			moveCharacter("",whiteBomberman,dt,Down)
+			keypressed = true
 		}
 		if !keypressed {
 			whiteBomberman.Ani().SetView(Stay)
@@ -493,53 +463,24 @@ func sun() {
 			}
 		}
 
-		/////////////////////////////////////ToDO Moving Enemys ///////////////////////////////////////////////////////////
-		dist := monster[0].GetSpeed() * dt
-		//fmt.Println(dir)
-		pb := monster[0].GetPosBox()
-		ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
-		ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
-		if dir == 0 {
-			bl, xl, _ := lev1.GetPosOfNextTile(int(ll.X/TileSize), int(ll.Y/TileSize), pixel.V(-TileSize, 0))
-			bu, xu, _ := lev1.GetPosOfNextTile(int(ll.X/TileSize), int(ur.Y/TileSize), pixel.V(-TileSize, 0))
-			fmt.Println(dir,":",bl, bu, xl, xu)
-			if !bl && !bu {
-				monster[0].Move(pixel.V(-dist, 0))
-				monster[0].Ani().SetView(Left)
-			}else{
-				dir = 2
+		/////////////////////////////////////Moving Enemys ///////////////////////////////////////////////////////////
+		for i := range monster {
+			pos1 := fmt.Sprintf("%.1f",monster[i].GetPos().X + monster[i].GetPos().Y)	// Zu string konvertiert, um Anzahl der Nachkommastellen steuern zu können.
+			if dirEn[i] == 0 {
+				moveCharacter("noDirAni",monster[i], dt, Left)
+			} else if dirEn[i] == 1 {
+				moveCharacter("noDirAni",monster[i], dt, Right)
+			} else if dirEn[i] == 2 {
+				moveCharacter("noDirAni",monster[i], dt, Up)
+			} else if dirEn[i] == 3 {
+				moveCharacter("noDirAni",monster[i], dt, Down)
 			}
-		}else if dir == 1 {
-			bl, xl, _ := lev1.GetPosOfNextTile(int(ll.X/TileSize), int(ll.Y/TileSize), pixel.V(TileSize, 0))
-			bu, xu, _ := lev1.GetPosOfNextTile(int(ll.X/TileSize), int(ur.Y/TileSize), pixel.V(TileSize, 0))
-			fmt.Println(dir,":",bl, bu, xl, xu)
-			if !bl && !bu {
-				monster[0].Move(pixel.V(dist, 0))
-				monster[0].Ani().SetView(Right)
-			}else{
-				dir = 3
-			}
-		}else if dir == 2 {
-			bl, xl, _ := lev1.GetPosOfNextTile(int(ll.X/TileSize), int(ll.Y/TileSize), pixel.V(0,TileSize))
-			bu, xu, _ := lev1.GetPosOfNextTile(int(ll.X/TileSize), int(ur.Y/TileSize), pixel.V(0,TileSize))
-			fmt.Println(dir,":",bl, bu, xl, xu)
-			if !bl && !bu {
-				monster[0].Move(pixel.V(0,dist))
-				monster[0].Ani().SetView(Up)
-			}else{
-				dir = 1
-			}
-		}else if dir == 3 {
-			bl, xl, _ := lev1.GetPosOfNextTile(int(ll.X/TileSize), int(ll.Y/TileSize), pixel.V(0,-TileSize))
-			bu, xu, _ := lev1.GetPosOfNextTile(int(ll.X/TileSize), int(ur.Y/TileSize), pixel.V(0,-TileSize))
-			fmt.Println(dir,":",bl, bu, xl, xu)
-			if !bl && !bu {
-				monster[0].Move(pixel.V(0,-dist))
-				monster[0].Ani().SetView(Down)
-			}else{
-				dir = 0
+			pos2 := fmt.Sprintf("%.1f",monster[i].GetPos().X + monster[i].GetPos().Y)
+			if pos1 == pos2 {	// monster konnte sich nicht bewegen --> neue Richtung probieren
+				dirEn[i] = rand.Intn(4)
 			}
 		}
+
 		/*
 			for _,m := range(monster) {
 				xx,yy := turfNtreesArena.GetFieldCoord(m.GetPos())
@@ -548,8 +489,8 @@ func sun() {
 					whiteBomberman.DecLife()
 				}
 				if !m.IsFollowing() {
-					dir := rand.Intn(4)
-					switch dir {
+					dirEn := rand.Intn(4)
+					switch dirEn {
 						case 0:									// l
 							if !turfNtreesArena.IsTile(xx-1,yy) {
 								m.Move(pixel.V(-stepSize,0))
@@ -585,8 +526,6 @@ func sun() {
 
 		itemBatch.Clear()
 
-		//lev.DrawItems(win)
-		//lev.DrawTiles(win)
 		for i := 0; i < pitchHeight; i++ {
 			lev1.DrawColumn(i, itemBatch)
 		}
@@ -601,7 +540,6 @@ func sun() {
 		tempAniSlice = clearExplosions(tempAniSlice)
 
 		whiteBomberman.Draw(win)
-
 		for _, m := range monster {
 			m.Draw(win)
 		}
