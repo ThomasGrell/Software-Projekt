@@ -10,7 +10,6 @@ import (
 	"../animations"
 	. "../constants"
 	"github.com/faiface/pixel"
-	"github.com/faiface/pixel/pixelgl"
 	//	"golang.org/x/image/colornames"
 )
 
@@ -38,17 +37,16 @@ type enemy struct {
 	follow bool // Folgt einem Spieler
 }
 type character struct {
-	collisionbox pixel.Rect // Kollisionsbox
-	size         pixel.Vec  // Größe der Kollisionsbox
-	bombghost    bool       // kann durch Bomben laufen
-	mortal       bool       // Sterblichkeit
-	wallghost    bool       // kann durch Wände laufen
-	life         uint8      // verbleibende Anzahl der Leben
-	points       uint32     // Punkte
-	speed        float64
 	ani          animations.Animation
+	bombghost    bool       // kann durch Bomben laufen
+	collisionbox pixel.Rect // Kollisionsbox
+	life         uint8      // verbleibende Anzahl der Leben
 	matrix       pixel.Matrix
-	//	scale     float64
+	mortal       bool      // Sterblichkeit
+	points       uint32    // Punkte
+	size         pixel.Vec // Größe der Kollisionsbox
+	speed        float64
+	wallghost    bool // kann durch Wände laufen
 }
 
 func NewPlayer(t uint8) *player {
@@ -150,28 +148,34 @@ func (c *character) DecSpeed() {
 		c.speed -= 10
 	}
 }
-func (c *character) Draw(win *pixelgl.Window) {
+func (c *character) Draw(target pixel.Target) {
 	c.ani.Update()
 	if c.ani.IsVisible() {
-		c.ani.GetSprite().Draw(win, c.matrix)
+		c.ani.GetSprite().Draw(target, c.matrix)
 	}
 }
 func (c *character) GetBaselineCenter() pixel.Vec {
 	return c.collisionbox.Min.Add(pixel.V(c.size.X/2, 0))
 }
-func (c *character) GetPoints() uint32 { return c.points }
-func (c *character) GetPos() pixel.Vec { return c.collisionbox.Min }
-func (c *character) GetPosBox() pixel.Rect {
-	return c.collisionbox
+func (c *character) GetLife() uint8         { return c.life }
+func (c *character) GetLifePointer() *uint8 { return &c.life }
+func (c *character) GetMatrix() pixel.Matrix {
+	return (*c).matrix
 }
 func (c *character) GetMovedPos() pixel.Vec {
 	return c.GetBaselineCenter().Add(c.ani.ToBaseline())
 }
-func (c *character) GetSpeed() float64 { return c.speed }
+func (c *character) GetPoints() uint32         { return c.points }
+func (c *character) GetPointsPointer() *uint32 { return &c.points }
+func (c *character) GetPos() pixel.Vec         { return c.collisionbox.Min }
+func (c *character) GetPosBox() pixel.Rect {
+	return c.collisionbox
+}
 func (c *character) GetSize() pixel.Vec {
 	return c.size
 }
-func (c *character) IncSpeed() { c.speed += 10 }
+func (c *character) GetSpeed() float64 { return c.speed }
+func (c *character) IncSpeed()         { c.speed += 10 }
 func (c *character) IsAlife() bool {
 	return c.life > 0
 }
@@ -179,28 +183,7 @@ func (c *character) IsBombghost() bool { return c.bombghost }
 func (c *character) IsMortal() bool {
 	return c.mortal
 }
-func (c *character) IsWallghost() bool   { return c.wallghost }
-func (c *character) SetBombghost(b bool) { c.bombghost = b }
-
-func (c *character) GetMatrix() pixel.Matrix {
-	return (*c).matrix
-}
-
-/*
-
-Wofür ist das gut? Skaliert wird das Fenster, nicht die Charaktere.
-
-func (c *character) SetScale(s float64) {
-	(*c).scale = s
-	(*c).matrix = ((*c).matrix).ScaledXY((*c).minPos, pixel.V(s, s))
-
-	(*c).size = c.size.Scaled(s)
-
-
-	//(*c).minPos = pixel.V(math.Round(c.minPos.X - (s-1) * c.size.X/2), math.Round(c.minPos.Y - (s-1) * c.size.Y/2))
-}
-*/
-
+func (c *character) IsWallghost() bool { return c.wallghost }
 func (c *character) Move(delta pixel.Vec) {
 	c.collisionbox = c.collisionbox.Moved(delta)
 	c.matrix = c.matrix.Moved(delta)
@@ -209,6 +192,7 @@ func (c *character) MoveTo(pos pixel.Vec) {
 	c.collisionbox = pixel.Rect{pos, pos.Add(c.size)}
 	c.matrix = pixel.IM.Moved(c.GetMovedPos())
 }
+func (c *character) SetBombghost(b bool) { c.bombghost = b }
 
 // init() wird beim Import dieses Packets automatisch ausgeführt.
 func init() {
