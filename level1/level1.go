@@ -121,7 +121,7 @@ func (l *lv) SetRandomTilesAndItems(numberTiles, numberItems int) {
 		fmt.Println("Es werden nur ", len(freeTiles), " Tiele zufällig platziert.")
 		numberTiles = len(freeTiles)
 	}
-	t = 120 + rand.Intn(19)
+	t = 122//120 + rand.Intn(19)
 	var nt tiles.Tile
 	for i < numberTiles {
 		index = rand.Intn(len(freeTiles))

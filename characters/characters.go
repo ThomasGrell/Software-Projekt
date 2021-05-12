@@ -213,7 +213,7 @@ func init() {
 	// Monster Prototyp
 	en = new(enemy)
 	en.life = 1
-	en.speed = 20
+	en.speed = 30
 	en.mortal = true
 	en.wallghost = false
 	en.bombghost = false

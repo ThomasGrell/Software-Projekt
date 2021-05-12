@@ -243,6 +243,60 @@ func isThereABomb(v pixel.Vec) (bool, tiles.Bombe) {
 	return false, nil
 }
 
+// Vor.: /
+// Erg.: Die neue Bewegungsrichtung des i-ten Monsters ist zurückgegeben.
+//		 Kann es sich nicht bewegen, ist die neue Bewegungsrichtung die alte (dann zittert es, weil die Bewegung auf 1 Pixel eingeschränkt ist).
+//		 Gibt es nur die Möglichkeit zurück zu laufen, läuft es zurück,
+//		 gibt es nur die Möglichkeit weiter oder zurück zu laufen, läuft es weiter,
+//		 gibt es mehr als zwei Möglichkeiten, wird eine zufällige, nicht rückwärtsgewandte, Richtung zurückgegeben.
+//		 links:0,rechts:1,oben:2,unten:3
+func dirChoice(monster []characters.Enemy, dirEn []int, i int) (dir int){
+	grDir := getGrantedDirections(monster[i])
+	var grDirInt = make([]int,0)
+	var goingBack int
+	var n int
+	for j := range grDir {
+		if grDir[j] {
+			n++
+			switch dirEn[i] {
+			case 0:
+				if j != 1 {
+					grDirInt = append(grDirInt, j)
+				}else{
+					goingBack = 1
+				}
+			case 1:
+				if j != 0 {
+					grDirInt = append(grDirInt, j)
+				}else{
+					goingBack = 0
+				}
+			case 2:
+				if j != 3 {
+					grDirInt = append(grDirInt, j)
+				}else{
+					goingBack = 3
+				}
+			case 3:
+				if j != 2 {
+					grDirInt = append(grDirInt, j)
+				}else{
+					goingBack = 2
+				}
+			}
+		}
+	}
+	if n > 2 {
+		choice := rand.Intn(len(grDirInt))
+		dir = grDirInt[choice]
+	}else if n == 1 {
+		dir = goingBack
+	}else{
+		dir = dirEn[i]
+	}
+	return
+}
+
 func getGrantedDirections(c characters.Character) [4]bool {
 	var b [4]bool
 	b[0] = true
@@ -481,6 +535,7 @@ func sun() {
 
 		/////////////////////////////////////Moving Enemys ///////////////////////////////////////////////////////////
 		for i := range monster {
+			dirEn[i] = dirChoice(monster,dirEn,i)
 			pos1 := fmt.Sprintf("%.1f",monster[i].GetPos().X + monster[i].GetPos().Y)	// Zu string konvertiert, um Anzahl der Nachkommastellen steuern zu können.
 			if dirEn[i] == 0 {
 				moveCharacter("noDirAni",monster[i], dt, Left)
@@ -492,7 +547,8 @@ func sun() {
 				moveCharacter("noDirAni",monster[i], dt, Down)
 			}
 			pos2 := fmt.Sprintf("%.1f",monster[i].GetPos().X + monster[i].GetPos().Y)
-			if pos1 == pos2 {	// monster konnte sich nicht bewegen --> neue Richtung probieren
+			if pos1 == pos2 {	// monster konnte sich nicht bewegen --> neue Richtung probieren.
+				// Dadurch zittert es in der Falle bzw. biegt in Ecken ab oder läuft zurück.
 				dirEn[i] = rand.Intn(4)
 			}
 		}
