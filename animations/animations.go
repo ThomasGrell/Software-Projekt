@@ -1243,6 +1243,9 @@ func (c *basicAnimation) IsVisible() bool {
 	return c.visible
 }
 func (c *basicAnimation) SetView(view uint8) {
+	if c.view == view {
+		return
+	}
 	// SetView() setzt den View neu.
 	// Mögliche Eingabewerte sind Stay, Left, Right, Up, Down, Dead, Intro.
 	if view == Intro {

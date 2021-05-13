@@ -256,26 +256,26 @@ func dirChoice(monster characters.Enemy) (dir uint8) {
 		if grDir[j] {
 			n++
 			switch monster.GetDirection() {
-			case 0:
-				if j != 1 {
+			case Left:
+				if j != Right {
 					grDirInt = append(grDirInt, uint8(j))
 				} else {
 					goingBack = 1
 				}
-			case 1:
-				if j != 0 {
+			case Right:
+				if j != Left {
 					grDirInt = append(grDirInt, uint8(j))
 				} else {
 					goingBack = 0
 				}
-			case 2:
-				if j != 3 {
+			case Up:
+				if j != Down {
 					grDirInt = append(grDirInt, uint8(j))
 				} else {
 					goingBack = 3
 				}
-			case 3:
-				if j != 2 {
+			case Down:
+				if j != Up {
 					grDirInt = append(grDirInt, uint8(j))
 				} else {
 					goingBack = 2
@@ -338,7 +338,7 @@ func moveCharacter(c characters.Character, dt float64, dir uint8) (moved bool) {
 	ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
 
 	switch dir {
-	case 0:
+	case Left:
 		dist = -dist
 		bl, xl, _ := lev1.GetPosOfNextTile(int(ll.X/TileSize), int(ll.Y/TileSize), pixel.V(-TileSize, 0))
 		bu, xu, _ := lev1.GetPosOfNextTile(int(ll.X/TileSize), int(ur.Y/TileSize), pixel.V(-TileSize, 0))
@@ -354,7 +354,7 @@ func moveCharacter(c characters.Character, dt float64, dir uint8) (moved bool) {
 			}
 		}
 		c.Move(pixel.V(dist, 0))
-	case 1:
+	case Right:
 		bl, xl, _ := lev1.GetPosOfNextTile(int((ur.X)/TileSize), int(ll.Y/TileSize), pixel.V(TileSize, 0))
 		bu, xu, _ := lev1.GetPosOfNextTile(int((ur.X)/TileSize), int(ur.Y/TileSize), pixel.V(TileSize, 0))
 		if bl || bu {
@@ -369,7 +369,7 @@ func moveCharacter(c characters.Character, dt float64, dir uint8) (moved bool) {
 			}
 		}
 		c.Move(pixel.V(dist, 0))
-	case 2:
+	case Up:
 		bl, _, yl := lev1.GetPosOfNextTile(int((ll.X)/TileSize), int((ur.Y)/TileSize), pixel.V(0, TileSize))
 		br, _, yr := lev1.GetPosOfNextTile(int((ur.X)/TileSize), int((ur.Y)/TileSize), pixel.V(0, TileSize))
 		if bl || br {
@@ -384,7 +384,7 @@ func moveCharacter(c characters.Character, dt float64, dir uint8) (moved bool) {
 			}
 		}
 		c.Move(pixel.V(0, dist))
-	case 3:
+	case Down:
 		dist = -dist
 		bl, _, yl := lev1.GetPosOfNextTile(int((ll.X)/TileSize), int((ll.Y)/TileSize), pixel.V(0, -TileSize))
 		br, _, yr := lev1.GetPosOfNextTile(int((ur.X)/TileSize), int((ll.Y)/TileSize), pixel.V(0, -TileSize))
@@ -403,18 +403,7 @@ func moveCharacter(c characters.Character, dt float64, dir uint8) (moved bool) {
 		}
 		c.Move(pixel.V(0, dist))
 	}
-	if dir == 0 {
-		c.Ani().SetView(Left)
-	}
-	if dir == 1 {
-		c.Ani().SetView(Right)
-	}
-	if dir == 2 {
-		c.Ani().SetView(Up)
-	}
-	if dir == 3 {
-		c.Ani().SetView(Down)
-	}
+	c.Ani().SetView(dir)
 	return
 }
 

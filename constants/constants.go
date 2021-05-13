@@ -74,11 +74,11 @@ const (
 	Littlesnowrock = 138
 
 	// Bewegung bzw. Zustand eines Characters
-	Stay  = 0
-	Up    = 1
-	Down  = 2
-	Left  = 3
-	Right = 4
+	Stay  = 4
+	Up    = 2
+	Down  = 3
+	Left  = 0
+	Right = 1
 	Dead  = 5
 	Intro = 6
 
