@@ -322,7 +322,7 @@ func getGrantedDirections(c characters.Character) [4]bool {
 	return b
 }
 
-func moveCharacter(aniType string, c characters.Character, dt float64, dir uint8) /*(moved bool)*/ {
+func moveCharacter(c characters.Character, dt float64, dir uint8) /*(moved bool)*/ {
 	switch dir {
 	case Left:
 		dist := -c.GetSpeed() * dt
@@ -415,9 +415,7 @@ func moveCharacter(aniType string, c characters.Character, dt float64, dir uint8
 		}
 		c.Move(pixel.V(0, dist))
 	}
-	if !(aniType == "noDirAni") {
-		c.Ani().SetView(dir)
-	}
+	c.Ani().SetView(dir)
 	return
 }
 
@@ -500,19 +498,19 @@ func sun() {
 		dt = time.Since(last).Seconds()
 		last = time.Now()
 		if win.Pressed(pixelgl.KeyLeft) {
-			moveCharacter("", whiteBomberman, dt, Left)
+			moveCharacter(whiteBomberman, dt, Left)
 			keypressed = true
 		}
 		if win.Pressed(pixelgl.KeyRight) {
-			moveCharacter("", whiteBomberman, dt, Right)
+			moveCharacter(whiteBomberman, dt, Right)
 			keypressed = true
 		}
 		if win.Pressed(pixelgl.KeyUp) {
-			moveCharacter("", whiteBomberman, dt, Up)
+			moveCharacter(whiteBomberman, dt, Up)
 			keypressed = true
 		}
 		if win.Pressed(pixelgl.KeyDown) {
-			moveCharacter("", whiteBomberman, dt, Down)
+			moveCharacter(whiteBomberman, dt, Down)
 			keypressed = true
 		}
 		if !keypressed {
@@ -521,7 +519,7 @@ func sun() {
 		if win.JustPressed(pixelgl.KeyB) {
 			pb := whiteBomberman.GetPosBox()
 			loleft := turfNtreesArena.GetLowerLeft()
-			b, _ := isThereABomb(pixel.Vec{math.Round(pb.Center().X/TileSize) * TileSize, math.Round(pb.Center().Y/TileSize) * TileSize})
+			b, _ := isThereABomb(pixel.Vec{X: math.Round(pb.Center().X/TileSize) * TileSize, Y: math.Round(pb.Center().Y/TileSize) * TileSize})
 			c := lev1.IsTile(int((pb.Min.X-loleft.X)/TileSize), int((pb.Min.Y-loleft.Y)/TileSize))
 			if !b && !c {
 				bombs = append(bombs, tiles.NewBomb(whiteBomberman))
@@ -533,13 +531,13 @@ func sun() {
 			m.SetDirection(dirChoice(m))
 			pos1 := math.Round(10*(m.GetPos().X+m.GetPos().Y)) / 10 // Auf eine Nachkommastelle runden.
 			if m.GetDirection() == 0 {
-				moveCharacter("noDirAni", m, dt, Left)
+				moveCharacter(m, dt, Left)
 			} else if m.GetDirection() == 1 {
-				moveCharacter("noDirAni", m, dt, Right)
+				moveCharacter(m, dt, Right)
 			} else if m.GetDirection() == 2 {
-				moveCharacter("noDirAni", m, dt, Up)
+				moveCharacter(m, dt, Up)
 			} else if m.GetDirection() == 3 {
-				moveCharacter("noDirAni", m, dt, Down)
+				moveCharacter(m, dt, Down)
 			}
 
 			pos2 := math.Round(10*(m.GetPos().X+m.GetPos().Y)) / 10
