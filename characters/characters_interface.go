@@ -47,6 +47,8 @@ type Character interface {
 	// Eff.: Die Koordinaten der Mitte der Grundlinie der Kollisionsbox werden geliefert.
 	GetBaselineCenter() pixel.Vec
 
+	GetDirection() uint8
+
 	GetLife() uint8
 
 	GetLifePointer() *uint8
@@ -101,4 +103,6 @@ type Character interface {
 	MoveTo(pos pixel.Vec)
 
 	SetBombghost(bool)
+
+	SetDirection(dir uint8)
 }

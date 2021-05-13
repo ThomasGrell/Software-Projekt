@@ -9,15 +9,12 @@ import (
 	"./sounds"
 	"./tiles"
 	"./titlebar"
-	"fmt"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	"math"
 	"math/rand"
 	"time"
 )
-
-var dirEn = make([]int,0)
 
 var bombs []tiles.Bombe
 var turfNtreesArena arena.Arena
@@ -244,43 +241,43 @@ func isThereABomb(v pixel.Vec) (bool, tiles.Bombe) {
 }
 
 // Vor.: /
-// Erg.: Die neue Bewegungsrichtung des i-ten Monsters ist zurückgegeben.
+// Erg.: Die neue Bewegungsrichtung des Monsters ist zurückgegeben.
 //		 Kann es sich nicht bewegen, ist die neue Bewegungsrichtung die alte (dann zittert es, weil die Bewegung auf 1 Pixel eingeschränkt ist).
 //		 Gibt es nur die Möglichkeit zurück zu laufen, läuft es zurück,
 //		 gibt es nur die Möglichkeit weiter oder zurück zu laufen, läuft es weiter,
 //		 gibt es mehr als zwei Möglichkeiten, wird eine zufällige, nicht rückwärtsgewandte, Richtung zurückgegeben.
 //		 links:0,rechts:1,oben:2,unten:3
-func dirChoice(monster []characters.Enemy, dirEn []int, i int) (dir int){
-	grDir := getGrantedDirections(monster[i])
-	var grDirInt = make([]int,0)
-	var goingBack int
-	var n int
+func dirChoice(monster characters.Enemy) (dir uint8) {
+	grDir := getGrantedDirections(monster)
+	var grDirInt = make([]uint8, 0)
+	var goingBack uint8
+	var n uint8
 	for j := range grDir {
 		if grDir[j] {
 			n++
-			switch dirEn[i] {
+			switch monster.GetDirection() {
 			case 0:
 				if j != 1 {
-					grDirInt = append(grDirInt, j)
-				}else{
+					grDirInt = append(grDirInt, uint8(j))
+				} else {
 					goingBack = 1
 				}
 			case 1:
 				if j != 0 {
-					grDirInt = append(grDirInt, j)
-				}else{
+					grDirInt = append(grDirInt, uint8(j))
+				} else {
 					goingBack = 0
 				}
 			case 2:
 				if j != 3 {
-					grDirInt = append(grDirInt, j)
-				}else{
+					grDirInt = append(grDirInt, uint8(j))
+				} else {
 					goingBack = 3
 				}
 			case 3:
 				if j != 2 {
-					grDirInt = append(grDirInt, j)
-				}else{
+					grDirInt = append(grDirInt, uint8(j))
+				} else {
 					goingBack = 2
 				}
 			}
@@ -289,10 +286,10 @@ func dirChoice(monster []characters.Enemy, dirEn []int, i int) (dir int){
 	if n > 2 {
 		choice := rand.Intn(len(grDirInt))
 		dir = grDirInt[choice]
-	}else if n == 1 {
+	} else if n == 1 {
 		dir = goingBack
-	}else{
-		dir = dirEn[i]
+	} else {
+		dir = monster.GetDirection()
 	}
 	return
 }
@@ -325,7 +322,7 @@ func getGrantedDirections(c characters.Character) [4]bool {
 	return b
 }
 
-func moveCharacter (aniType string, c characters.Character, dt float64, dir uint8) /*(moved bool)*/{
+func moveCharacter(aniType string, c characters.Character, dt float64, dir uint8) /*(moved bool)*/ {
 	switch dir {
 	case Left:
 		dist := -c.GetSpeed() * dt
@@ -467,9 +464,7 @@ func sun() {
 
 	// 2 Enemys
 	monster = append(monster, characters.NewEnemy(YellowPopEye))
-	dirEn = append(dirEn,0)
 	monster = append(monster, characters.NewEnemy(Drop))
-	dirEn = append(dirEn, 0)
 
 	rand.Seed(time.Now().UnixNano())
 
@@ -505,19 +500,19 @@ func sun() {
 		dt = time.Since(last).Seconds()
 		last = time.Now()
 		if win.Pressed(pixelgl.KeyLeft) {
-			moveCharacter("",whiteBomberman,dt,Left)
+			moveCharacter("", whiteBomberman, dt, Left)
 			keypressed = true
 		}
-		if win.Pressed(pixelgl.KeyRight){
-			moveCharacter("",whiteBomberman,dt,Right)
+		if win.Pressed(pixelgl.KeyRight) {
+			moveCharacter("", whiteBomberman, dt, Right)
 			keypressed = true
 		}
-		if win.Pressed(pixelgl.KeyUp) { 
-			moveCharacter("",whiteBomberman,dt,Up)
+		if win.Pressed(pixelgl.KeyUp) {
+			moveCharacter("", whiteBomberman, dt, Up)
 			keypressed = true
 		}
-		if win.Pressed(pixelgl.KeyDown) { 
-			moveCharacter("",whiteBomberman,dt,Down)
+		if win.Pressed(pixelgl.KeyDown) {
+			moveCharacter("", whiteBomberman, dt, Down)
 			keypressed = true
 		}
 		if !keypressed {
@@ -534,22 +529,23 @@ func sun() {
 		}
 
 		/////////////////////////////////////Moving Enemys ///////////////////////////////////////////////////////////
-		for i := range monster {
-			dirEn[i] = dirChoice(monster,dirEn,i)
-			pos1 := fmt.Sprintf("%.1f",monster[i].GetPos().X + monster[i].GetPos().Y)	// Zu string konvertiert, um Anzahl der Nachkommastellen steuern zu können.
-			if dirEn[i] == 0 {
-				moveCharacter("noDirAni",monster[i], dt, Left)
-			} else if dirEn[i] == 1 {
-				moveCharacter("noDirAni",monster[i], dt, Right)
-			} else if dirEn[i] == 2 {
-				moveCharacter("noDirAni",monster[i], dt, Up)
-			} else if dirEn[i] == 3 {
-				moveCharacter("noDirAni",monster[i], dt, Down)
+		for _, m := range monster {
+			m.SetDirection(dirChoice(m))
+			pos1 := math.Round(10*(m.GetPos().X+m.GetPos().Y)) / 10 // Auf eine Nachkommastelle runden.
+			if m.GetDirection() == 0 {
+				moveCharacter("noDirAni", m, dt, Left)
+			} else if m.GetDirection() == 1 {
+				moveCharacter("noDirAni", m, dt, Right)
+			} else if m.GetDirection() == 2 {
+				moveCharacter("noDirAni", m, dt, Up)
+			} else if m.GetDirection() == 3 {
+				moveCharacter("noDirAni", m, dt, Down)
 			}
-			pos2 := fmt.Sprintf("%.1f",monster[i].GetPos().X + monster[i].GetPos().Y)
-			if pos1 == pos2 {	// monster konnte sich nicht bewegen --> neue Richtung probieren.
+
+			pos2 := math.Round(10*(m.GetPos().X+m.GetPos().Y)) / 10
+			if pos1 == pos2 { // monster konnte sich nicht bewegen --> neue Richtung probieren.
 				// Dadurch zittert es in der Falle bzw. biegt in Ecken ab oder läuft zurück.
-				dirEn[i] = rand.Intn(4)
+				m.SetDirection(uint8(rand.Intn(4)))
 			}
 		}
 
@@ -589,7 +585,6 @@ func sun() {
 		*/
 
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////7
-
 
 		turfNtreesArena.GetCanvas().Draw(win, *(turfNtreesArena.GetMatrix()))
 

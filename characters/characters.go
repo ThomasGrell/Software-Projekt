@@ -24,6 +24,8 @@ Animationen sind teilweise von Bewegungsrichtung abhängig.
 var bm *player
 var en *enemy
 
+const cBoxSize = 14
+
 type player struct {
 	character
 	bombs    uint8 // Anzahl der aktuell gelegten Bomben
@@ -40,11 +42,11 @@ type character struct {
 	ani          animations.Animation
 	bombghost    bool       // kann durch Bomben laufen
 	collisionbox pixel.Rect // Kollisionsbox
-	life         uint8      // verbleibende Anzahl der Leben
+	direction    uint8
+	life         uint8 // verbleibende Anzahl der Leben
 	matrix       pixel.Matrix
-	mortal       bool      // Sterblichkeit
-	points       uint32    // Punkte
-	size         pixel.Vec // Größe der Kollisionsbox
+	mortal       bool   // Sterblichkeit
+	points       uint32 // Punkte
 	speed        float64
 	wallghost    bool // kann durch Wände laufen
 }
@@ -54,8 +56,7 @@ func NewPlayer(t uint8) *player {
 	switch t {
 	case WhiteBomberman, BlackBomberman, BlueBomberman, RedBomberman:
 		*c = *bm
-		c.size = pixel.V(14, 14)
-		c.collisionbox = pixel.R(-c.size.X/2, -c.size.Y*3/4, c.size.X/2, c.size.Y/4)
+		c.collisionbox = pixel.R(-cBoxSize/2, -cBoxSize*3/4, cBoxSize/2, cBoxSize/4)
 	case WhiteBattleman, BlackBattleman, BlueBattleman, RedBattleman:
 		*c = *bm
 		c.life = 1
@@ -71,8 +72,7 @@ func NewEnemy(t uint8) *enemy {
 	c := new(enemy)
 	*c = *en
 	c.ani = animations.NewAnimation(t)
-	c.size = pixel.V(15, 15)
-	c.collisionbox = pixel.R(-c.size.X/2, -c.size.Y/2, c.size.X/2, c.size.Y/2)
+	c.collisionbox = pixel.R(-cBoxSize/2, -cBoxSize/2, cBoxSize/2, cBoxSize/2)
 	c.matrix = pixel.IM.Moved(c.GetMovedPos())
 	switch t {
 	case Balloon:
@@ -155,8 +155,9 @@ func (c *character) Draw(target pixel.Target) {
 	}
 }
 func (c *character) GetBaselineCenter() pixel.Vec {
-	return c.collisionbox.Min.Add(pixel.V(c.size.X/2, 0))
+	return c.collisionbox.Min.Add(pixel.V(c.collisionbox.Size().X/2, 0))
 }
+func (c *character) GetDirection() uint8    { return c.direction }
 func (c *character) GetLife() uint8         { return c.life }
 func (c *character) GetLifePointer() *uint8 { return &c.life }
 func (c *character) GetMatrix() pixel.Matrix {
@@ -172,7 +173,7 @@ func (c *character) GetPosBox() pixel.Rect {
 	return c.collisionbox
 }
 func (c *character) GetSize() pixel.Vec {
-	return c.size
+	return c.collisionbox.Size()
 }
 func (c *character) GetSpeed() float64 { return c.speed }
 func (c *character) IncSpeed()         { c.speed += 10 }
@@ -189,10 +190,15 @@ func (c *character) Move(delta pixel.Vec) {
 	c.matrix = c.matrix.Moved(delta)
 }
 func (c *character) MoveTo(pos pixel.Vec) {
-	c.collisionbox = pixel.Rect{pos, pos.Add(c.size)}
+	c.collisionbox = pixel.Rect{Min: pos, Max: pos.Add(c.collisionbox.Size())}
 	c.matrix = pixel.IM.Moved(c.GetMovedPos())
 }
 func (c *character) SetBombghost(b bool) { c.bombghost = b }
+func (c *character) SetDirection(dir uint8) {
+	if dir <= 4 {
+		c.direction = dir
+	}
+}
 
 // init() wird beim Import dieses Packets automatisch ausgeführt.
 func init() {
@@ -207,8 +213,7 @@ func init() {
 	bm.mortal = true
 	bm.wallghost = false
 	bm.bombghost = false
-	bm.size = pixel.V(12, 12)
-	bm.collisionbox = pixel.Rect{pixel.Vec{0, 0}, bm.size}
+	bm.collisionbox = pixel.Rect{Min: pixel.Vec{}, Max: pixel.Vec{X: cBoxSize, Y: cBoxSize}}
 
 	// Monster Prototyp
 	en = new(enemy)
@@ -218,6 +223,5 @@ func init() {
 	en.wallghost = false
 	en.bombghost = false
 	en.follow = false
-	en.size = pixel.V(1, 1)
-	en.collisionbox = pixel.Rect{pixel.Vec{0, 0}, en.size}
+	en.collisionbox = pixel.Rect{Min: pixel.Vec{}, Max: pixel.Vec{X: cBoxSize, Y: cBoxSize}}
 }

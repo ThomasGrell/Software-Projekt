@@ -1341,6 +1341,8 @@ func (c *enhancedAnimation) getSpriteCoords() pixel.Rect {
 	return pixel.R(v.X, v.Y, v.X+width.X, v.Y+width.Y)
 }
 func (c *enhancedAnimation) SetView(view uint8) {
+
+	// Dieses "if" ist notwendig, damit eine Figur in der aktuellen Blickrichtung verharrt.
 	if view == Stay {
 		switch c.view {
 		case Left:
@@ -1365,6 +1367,7 @@ func (c *enhancedAnimation) SetView(view uint8) {
 			}
 		}
 	}
+
 	if view == Intro {
 		if c.hasIntro {
 			c.introFinished = false
@@ -1373,6 +1376,7 @@ func (c *enhancedAnimation) SetView(view uint8) {
 			view = Stay
 		}
 	}
+
 	if c.view != view {
 		c.view = view
 		c.count = 1
