@@ -1,7 +1,7 @@
 package constants
 
-// Definition der Charaktertypen
 const (
+	// Charactertypen
 	WhiteBomberman = 1 // Spielfiguren im Single Player Mode
 	BlackBomberman = 2
 	BlueBomberman  = 3
@@ -72,9 +72,8 @@ const (
 	Perl3          = 136
 	Perl4          = 137
 	Littlesnowrock = 138
-)
 
-const (
+	// Bewegung bzw. Zustand eines Characters
 	Stay  = 0
 	Up    = 1
 	Down  = 2
@@ -82,21 +81,26 @@ const (
 	Right = 4
 	Dead  = 5
 	Intro = 6
-)
 
-const (
+	// Musik
 	ThroughSpace = 1
 
+	//Sounds
 	Deathflash = 100
-)
 
-// Arena Details
-const (
-	TileSize = 16
-	WallWidth = 32
+	// Arena Details
+	TileSize   = 16
+	WallWidth  = 32
 	WallHeight = 16
-// Arenas
-	MfS = 0
+
+	// Arenas
+	MfS        = 0
 	TurfNtrees = 1
-	Castle = 2
+	Castle     = 2
+
+	// Eigenschaften einer Position im Spielfeld (Tile)
+	Free          = 0
+	Undestroyable = 1
+	Destroyable   = 2
+	Blocked       = 3
 )

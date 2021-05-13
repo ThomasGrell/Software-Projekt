@@ -37,6 +37,10 @@ type Animation interface {
 	GetSprite() *pixel.Sprite
 
 	//  Vor.: keine
+	//	Eff.: Liefert die aktuelle Sicht. (Stay, Left, Right, Up, Down, Dead, Intro)
+	GetView() uint8
+
+	//  Vor.: keine
 	//	Eff.: Hat die Animation eine Introsequenz, so liefert die Funktion false, solange die Sequenz nicht beendet ist.
 	//		  In allen anderen Fällen wird true geliefert.
 	IntroFinished() bool

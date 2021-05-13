@@ -97,8 +97,8 @@ type Character interface {
 	GetBaselineCenter() pixel.Vec
 
 	// Vor.: -
-	// Eff.: Liefert die aktuelle Bewegungsrichtung des Characters entsprechend der
-	//       in constants.go definierten Konstanten Left, Right etc.
+	// Eff.: Liefert die aktuelle Bewegungsrichtung des Characters
+	//       0 -> Left, 1 -> Right, 2 -> Up, 3 -> Down
 	GetDirection() uint8
 
 	// Vor.: -
@@ -183,6 +183,7 @@ type Character interface {
 	SetBombghost(bool)
 
 	// Vor.: -
-	// Eff.: Legt die aktuelle Bewegungsrichtung des Characters fest (Left, Right, Up, Down, Stay)
+	// Eff.: Legt die aktuelle Bewegungsrichtung des Characters fest
+	//       0 -> Left, 1 -> Right, 2 -> Up, 3 -> Down
 	SetDirection(dir uint8)
 }

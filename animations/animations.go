@@ -1066,6 +1066,7 @@ func (c *explosionAnimation) GetSprite() *pixel.Sprite {
 	// GetSprite() liefert den aktuell zu zeichnenden Sprite.
 	return c.sprite
 }
+func (c *explosionAnimation) GetView() uint8       { return 0 }
 func (c *explosionAnimation) IntroFinished() bool  { return true }
 func (c *explosionAnimation) IsVisible() bool      { return c.visible }
 func (c *explosionAnimation) SetView(uint8)        {}
@@ -1236,6 +1237,7 @@ func (c *basicAnimation) getSpriteCoords() pixel.Rect {
 
 	return pixel.R(v.X, v.Y, v.X+width.X, v.Y+width.Y)
 }
+func (c *basicAnimation) GetView() uint8      { return c.view }
 func (c *basicAnimation) IntroFinished() bool { return c.introFinished }
 func (c *basicAnimation) IsVisible() bool {
 	return c.visible

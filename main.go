@@ -322,16 +322,24 @@ func getGrantedDirections(c characters.Character) [4]bool {
 	return b
 }
 
-func moveCharacter(c characters.Character, dt float64, dir uint8) /*(moved bool)*/ {
+func moveCharacter(c characters.Character, dt float64, dir uint8) (moved bool) {
+
+	// Ist der Character Unsichtbar? Dann ist nichts zu bewegen.
+	if !c.Ani().IsVisible() || c.Ani().GetView() == Dead || c.Ani().GetView() == Intro {
+		return false
+	}
+
+	dist := c.GetSpeed() * dt
+	if dist >= TileSize {
+		dist = TileSize - 0.1
+	}
+	pb := c.GetPosBox()
+	ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
+	ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
+
 	switch dir {
-	case Left:
-		dist := -c.GetSpeed() * dt
-		if dist <= -TileSize {
-			dist = -TileSize + 0.1
-		}
-		pb := c.GetPosBox()
-		ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
-		ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
+	case 0:
+		dist = -dist
 		bl, xl, _ := lev1.GetPosOfNextTile(int(ll.X/TileSize), int(ll.Y/TileSize), pixel.V(-TileSize, 0))
 		bu, xu, _ := lev1.GetPosOfNextTile(int(ll.X/TileSize), int(ur.Y/TileSize), pixel.V(-TileSize, 0))
 		if bl || bu {
@@ -346,14 +354,7 @@ func moveCharacter(c characters.Character, dt float64, dir uint8) /*(moved bool)
 			}
 		}
 		c.Move(pixel.V(dist, 0))
-	case Right:
-		dist := c.GetSpeed() * dt
-		if dist >= TileSize {
-			dist = TileSize - 0.1
-		}
-		pb := c.GetPosBox()
-		ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
-		ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
+	case 1:
 		bl, xl, _ := lev1.GetPosOfNextTile(int((ur.X)/TileSize), int(ll.Y/TileSize), pixel.V(TileSize, 0))
 		bu, xu, _ := lev1.GetPosOfNextTile(int((ur.X)/TileSize), int(ur.Y/TileSize), pixel.V(TileSize, 0))
 		if bl || bu {
@@ -368,14 +369,7 @@ func moveCharacter(c characters.Character, dt float64, dir uint8) /*(moved bool)
 			}
 		}
 		c.Move(pixel.V(dist, 0))
-	case Up:
-		dist := c.GetSpeed() * dt
-		if dist >= TileSize {
-			dist = TileSize - 0.1
-		}
-		pb := c.GetPosBox()
-		ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
-		ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
+	case 2:
 		bl, _, yl := lev1.GetPosOfNextTile(int((ll.X)/TileSize), int((ur.Y)/TileSize), pixel.V(0, TileSize))
 		br, _, yr := lev1.GetPosOfNextTile(int((ur.X)/TileSize), int((ur.Y)/TileSize), pixel.V(0, TileSize))
 		if bl || br {
@@ -390,14 +384,8 @@ func moveCharacter(c characters.Character, dt float64, dir uint8) /*(moved bool)
 			}
 		}
 		c.Move(pixel.V(0, dist))
-	case Down:
-		dist := -c.GetSpeed() * dt
-		if dist <= -TileSize {
-			dist = -TileSize + 0.1
-		}
-		pb := c.GetPosBox()
-		ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
-		ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
+	case 3:
+		dist = -dist
 		bl, _, yl := lev1.GetPosOfNextTile(int((ll.X)/TileSize), int((ll.Y)/TileSize), pixel.V(0, -TileSize))
 		br, _, yr := lev1.GetPosOfNextTile(int((ur.X)/TileSize), int((ll.Y)/TileSize), pixel.V(0, -TileSize))
 		if bl || br {
@@ -415,7 +403,18 @@ func moveCharacter(c characters.Character, dt float64, dir uint8) /*(moved bool)
 		}
 		c.Move(pixel.V(0, dist))
 	}
-	c.Ani().SetView(dir)
+	if dir == 0 {
+		c.Ani().SetView(Left)
+	}
+	if dir == 1 {
+		c.Ani().SetView(Right)
+	}
+	if dir == 2 {
+		c.Ani().SetView(Up)
+	}
+	if dir == 3 {
+		c.Ani().SetView(Down)
+	}
 	return
 }
 
@@ -467,8 +466,7 @@ func sun() {
 	rand.Seed(time.Now().UnixNano())
 
 	// Bomberman is in lowleft Corner
-	whiteBomberman.MoveTo(turfNtreesArena.GetLowerLeft().Add(pixel.V(0, 0)))
-
+	whiteBomberman.MoveTo(turfNtreesArena.GetLowerLeft())
 	///////////////////////// ToDo Enyemys should be a Part of Level //////////////////////////////////////////////
 	xx, yy := turfNtreesArena.GetFieldCoord(whiteBomberman.GetPos())
 
@@ -498,19 +496,19 @@ func sun() {
 		dt = time.Since(last).Seconds()
 		last = time.Now()
 		if win.Pressed(pixelgl.KeyLeft) {
-			moveCharacter(whiteBomberman, dt, Left)
+			moveCharacter(whiteBomberman, dt, 0)
 			keypressed = true
 		}
 		if win.Pressed(pixelgl.KeyRight) {
-			moveCharacter(whiteBomberman, dt, Right)
+			moveCharacter(whiteBomberman, dt, 1)
 			keypressed = true
 		}
 		if win.Pressed(pixelgl.KeyUp) {
-			moveCharacter(whiteBomberman, dt, Up)
+			moveCharacter(whiteBomberman, dt, 2)
 			keypressed = true
 		}
 		if win.Pressed(pixelgl.KeyDown) {
-			moveCharacter(whiteBomberman, dt, Down)
+			moveCharacter(whiteBomberman, dt, 3)
 			keypressed = true
 		}
 		if !keypressed {
@@ -530,20 +528,11 @@ func sun() {
 		for _, m := range monster {
 			m.SetDirection(dirChoice(m))
 			pos1 := math.Round(10*(m.GetPos().X+m.GetPos().Y)) / 10 // Auf eine Nachkommastelle runden.
-			if m.GetDirection() == 0 {
-				moveCharacter(m, dt, Left)
-			} else if m.GetDirection() == 1 {
-				moveCharacter(m, dt, Right)
-			} else if m.GetDirection() == 2 {
-				moveCharacter(m, dt, Up)
-			} else if m.GetDirection() == 3 {
-				moveCharacter(m, dt, Down)
-			}
-
+			moveCharacter(m, dt, m.GetDirection())
 			pos2 := math.Round(10*(m.GetPos().X+m.GetPos().Y)) / 10
 			if pos1 == pos2 { // monster konnte sich nicht bewegen --> neue Richtung probieren.
 				// Dadurch zittert es in der Falle bzw. biegt in Ecken ab oder läuft zurück.
-				m.SetDirection(uint8(rand.Intn(4)))
+				m.SetDirection(uint8(rand.Intn(4) + 1))
 			}
 		}
 

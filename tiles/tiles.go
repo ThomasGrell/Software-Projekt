@@ -115,6 +115,12 @@ func (it *tile) IsVisible() bool {
 
 func (it *tile) Draw(win pixel.Target) {
 	((*it).ani).Update()
+	if !it.ani.IsVisible() {
+		return
+	}
+	if it.ani.GetView() == Dead {
+		it.matrix = pixel.IM.Moved(it.pos.Add(pixel.V(0, it.ani.GetSize().Y/4)))
+	}
 	if it.ani.IsVisible() {
 		(((*it).ani).GetSprite()).Draw(win, (*it).matrix)
 	}

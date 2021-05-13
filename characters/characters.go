@@ -195,7 +195,7 @@ func (c *character) MoveTo(pos pixel.Vec) {
 }
 func (c *character) SetBombghost(b bool) { c.bombghost = b }
 func (c *character) SetDirection(dir uint8) {
-	if dir <= 4 {
+	if dir <= 3 {
 		c.direction = dir
 	}
 }
