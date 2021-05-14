@@ -19,9 +19,12 @@ import (
 
 var dirEn = make([]int,0)
 
+
 var bombs []tiles.Bombe
-var turfNtreesArena arena.Arena
+var tb titlebar.Titlebar
+var arena1 arena.Arena
 var lev1 level1.Level
+
 var tempAniSlice [][]interface{} // [Animation][Matrix]
 var monster []characters.Enemy
 var whiteBomberman characters.Player
@@ -40,7 +43,7 @@ func checkForExplosions() {
 
 			item.Ani().Die()
 
-			x, y := turfNtreesArena.GetFieldCoord(item.GetPos())
+			x, y := arena1.GetFieldCoord(item.GetPos())
 			power := int(item.GetPower())
 			l, r, u, d := power, power, power, power
 
@@ -48,14 +51,14 @@ func checkForExplosions() {
 			if l > x {
 				l = x
 			}
-			if turfNtreesArena.GetWidth()-1-r < x {
-				r = turfNtreesArena.GetWidth() - 1 - x
+			if arena1.GetWidth()-1-r < x {
+				r = arena1.GetWidth() - 1 - x
 			}
 			if d > y {
 				d = y
 			}
-			if turfNtreesArena.GetHeight()-1-u < y {
-				u = turfNtreesArena.GetHeight() - 1 - y
+			if arena1.GetHeight()-1-u < y {
+				u = arena1.GetHeight() - 1 - y
 			}
 
 			// Falls es Hindernisse gibt, die zerstörbar oder unzerstörbar sind
@@ -95,48 +98,88 @@ func checkForExplosions() {
 			// falls sich ein Monster oder Player im Explosionsradius befindet
 
 		A:
-			for i := 1; i <= l; i++ {
-				for _, m := range monster {
-					xx, yy := turfNtreesArena.GetFieldCoord(m.GetPos())
+			for i := 0; i <= l; i++ {
+				for j, m := range monster {
+					xx, yy := arena1.GetFieldCoord(m.GetPos())
 					if x-i == xx && y == yy {
 						l = i
 						m.Ani().Die()
+						monster[j], monster[len(monster)-1] = monster[len(monster)-1], monster[j]
+						monster = monster[:len(monster)-1]
+						whiteBomberman.AddPoints(m.GetPoints()+100)
+						break A
+					}
+					bmX, bmY := arena1.GetFieldCoord(whiteBomberman.GetPos())
+					if x-i == bmX && y == bmY {
+						l = i
+						whiteBomberman.DecLife()
+						if whiteBomberman.GetLife() == 0 {whiteBomberman.Ani().Die()}
 						break A
 					}
 				}
 			}
 
 		B:
-			for i := 1; i <= r; i++ {
-				for _, m := range monster {
-					xx, yy := turfNtreesArena.GetFieldCoord(m.GetPos())
+			for i := 0; i <= r; i++ {
+				for j, m := range monster {
+					xx, yy := arena1.GetFieldCoord(m.GetPos())
 					if x+i == xx && y == yy {
 						r = i
 						m.Ani().Die()
+						monster[j], monster[len(monster)-1] = monster[len(monster)-1], monster[j]
+						monster = monster[:len(monster)-1]
+						whiteBomberman.AddPoints(m.GetPoints()+100)
+						break B
+					}
+					bmX, bmY := arena1.GetFieldCoord(whiteBomberman.GetPos())
+					if x+i == bmX && y == bmY {
+						r = i
+						whiteBomberman.DecLife()
+						if whiteBomberman.GetLife() == 0 {whiteBomberman.Ani().Die()}
 						break B
 					}
 				}
 			}
 
 		C:
-			for i := 1; i <= u; i++ {
-				for _, m := range monster {
-					xx, yy := turfNtreesArena.GetFieldCoord(m.GetPos())
+			for i := 0; i <= u; i++ {
+				for j, m := range monster {
+					xx, yy := arena1.GetFieldCoord(m.GetPos())
 					if y+i == yy && x == xx {
 						u = i
 						m.Ani().Die()
+						monster[j], monster[len(monster)-1] = monster[len(monster)-1], monster[j]
+						monster = monster[:len(monster)-1]
+						whiteBomberman.AddPoints(m.GetPoints()+100)
+						break C
+					}
+					bmX, bmY := arena1.GetFieldCoord(whiteBomberman.GetPos())
+					if x == bmX && y+i == bmY {
+						u = i
+						whiteBomberman.DecLife()
+						if whiteBomberman.GetLife() == 0 {whiteBomberman.Ani().Die()}
 						break C
 					}
 				}
 			}
 
 		D:
-			for i := 1; i <= d; i++ {
-				for _, m := range monster {
-					xx, yy := turfNtreesArena.GetFieldCoord(m.GetPos())
+			for i := 0; i <= d; i++ {
+				for j, m := range monster {
+					xx, yy := arena1.GetFieldCoord(m.GetPos())
 					if y-i == yy && x == xx {
 						d = i
 						m.Ani().Die()
+						monster[j], monster[len(monster)-1] = monster[len(monster)-1], monster[j]
+						monster = monster[:len(monster)-1]
+						whiteBomberman.AddPoints(m.GetPoints()+100)
+						break D
+					}
+					bmX, bmY := arena1.GetFieldCoord(whiteBomberman.GetPos())
+					if x == bmX && y-i == bmY {
+						d = i
+						whiteBomberman.DecLife()
+						if whiteBomberman.GetLife() == 0 {whiteBomberman.Ani().Die()}
 						break D
 					}
 				}
@@ -304,17 +347,17 @@ func getGrantedDirections(c characters.Character) [4]bool {
 	b[2] = true
 	b[3] = true
 	pb := c.GetPosBox()
-	ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
-	ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
+	ll := pb.Min.Sub(arena1.GetLowerLeft())
+	ur := pb.Max.Sub(arena1.GetLowerLeft())
 	if lev1.IsTile(int((ll.X-1)/TileSize), int(ll.Y/TileSize)) || lev1.IsTile(int((ll.X-1)/TileSize), int(ur.Y/TileSize)) || ll.X-1 < 0 {
 		b[0] = false
 	}
-	if int((ur.X+1)/TileSize) > turfNtreesArena.GetWidth()-1 {
+	if int((ur.X+1)/TileSize) > arena1.GetWidth()-1 {
 		b[1] = false
 	} else if lev1.IsTile(int((ur.X+1)/TileSize), int(ll.Y/TileSize)) || lev1.IsTile(int((ur.X+1)/TileSize), int(ur.Y/TileSize)) {
 		b[1] = false
 	}
-	if int((ur.Y+1)/TileSize) > turfNtreesArena.GetHeight()-1 {
+	if int((ur.Y+1)/TileSize) > arena1.GetHeight()-1 {
 		b[2] = false
 	} else if lev1.IsTile(int(ll.X/TileSize), int((ur.Y+1)/TileSize)) || lev1.IsTile(int(ur.X/TileSize), int((ur.Y+1)/TileSize)) {
 		b[2] = false
@@ -333,8 +376,8 @@ func moveCharacter (aniType string, c characters.Character, dt float64, dir uint
 			dist = -TileSize + 0.1
 		}
 		pb := c.GetPosBox()
-		ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
-		ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
+		ll := pb.Min.Sub(arena1.GetLowerLeft())
+		ur := pb.Max.Sub(arena1.GetLowerLeft())
 		bl, xl, _ := lev1.GetPosOfNextTile(int(ll.X/TileSize), int(ll.Y/TileSize), pixel.V(-TileSize, 0))
 		bu, xu, _ := lev1.GetPosOfNextTile(int(ll.X/TileSize), int(ur.Y/TileSize), pixel.V(-TileSize, 0))
 		if bl || bu {
@@ -355,8 +398,8 @@ func moveCharacter (aniType string, c characters.Character, dt float64, dir uint
 			dist = TileSize - 0.1
 		}
 		pb := c.GetPosBox()
-		ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
-		ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
+		ll := pb.Min.Sub(arena1.GetLowerLeft())
+		ur := pb.Max.Sub(arena1.GetLowerLeft())
 		bl, xl, _ := lev1.GetPosOfNextTile(int((ur.X)/TileSize), int(ll.Y/TileSize), pixel.V(TileSize, 0))
 		bu, xu, _ := lev1.GetPosOfNextTile(int((ur.X)/TileSize), int(ur.Y/TileSize), pixel.V(TileSize, 0))
 		if bl || bu {
@@ -377,8 +420,8 @@ func moveCharacter (aniType string, c characters.Character, dt float64, dir uint
 			dist = TileSize - 0.1
 		}
 		pb := c.GetPosBox()
-		ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
-		ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
+		ll := pb.Min.Sub(arena1.GetLowerLeft())
+		ur := pb.Max.Sub(arena1.GetLowerLeft())
 		bl, _, yl := lev1.GetPosOfNextTile(int((ll.X)/TileSize), int((ur.Y)/TileSize), pixel.V(0, TileSize))
 		br, _, yr := lev1.GetPosOfNextTile(int((ur.X)/TileSize), int((ur.Y)/TileSize), pixel.V(0, TileSize))
 		if bl || br {
@@ -399,8 +442,8 @@ func moveCharacter (aniType string, c characters.Character, dt float64, dir uint
 			dist = -TileSize + 0.1
 		}
 		pb := c.GetPosBox()
-		ll := pb.Min.Sub(turfNtreesArena.GetLowerLeft())
-		ur := pb.Max.Sub(turfNtreesArena.GetLowerLeft())
+		ll := pb.Min.Sub(arena1.GetLowerLeft())
+		ur := pb.Max.Sub(arena1.GetLowerLeft())
 		bl, _, yl := lev1.GetPosOfNextTile(int((ll.X)/TileSize), int((ll.Y)/TileSize), pixel.V(0, -TileSize))
 		br, _, yr := lev1.GetPosOfNextTile(int((ur.X)/TileSize), int((ll.Y)/TileSize), pixel.V(0, -TileSize))
 		if bl || br {
@@ -445,17 +488,17 @@ func sun() {
 	s1 := sounds.NewSound(ThroughSpace)
 	go s1.PlaySound()
 
-	turfNtreesArena = arena.NewArena(typ, pitchWidth, pitchHeight)
+	arena1 = arena.NewArena(typ, pitchWidth, pitchHeight)
 
-	lev1 = level1.NewBlankLevel(turfNtreesArena, 1)
+	lev1 = level1.NewBlankLevel(arena1, 1)
 	lev1.SetRandomTilesAndItems(40, 10)
 
 	whiteBomberman = characters.NewPlayer(WhiteBomberman)
 	whiteBomberman.Ani().Show()
-	//whiteBomberman.IncPower()
-	//whiteBomberman.IncPower()
+	whiteBomberman.IncPower()
+	whiteBomberman.IncPower()
 
-	tb := titlebar.New((3 + pitchWidth) * TileSize)
+	tb = titlebar.New((3 + pitchWidth) * TileSize)
 	tb.SetMatrix(pixel.IM.Moved(pixel.V((3+pitchWidth)*TileSize/2, (1+pitchHeight)*TileSize+16)))
 	tb.SetLifePointers(whiteBomberman.GetLifePointer())
 	tb.SetPointsPointer(whiteBomberman.GetPointsPointer())
@@ -474,17 +517,17 @@ func sun() {
 	rand.Seed(time.Now().UnixNano())
 
 	// Bomberman is in lowleft Corner
-	whiteBomberman.MoveTo(turfNtreesArena.GetLowerLeft().Add(pixel.V(0, 0)))
+	whiteBomberman.MoveTo(arena1.GetLowerLeft().Add(pixel.V(0, 0)))
 
 	///////////////////////// ToDo Enyemys should be a Part of Level //////////////////////////////////////////////
-	xx, yy := turfNtreesArena.GetFieldCoord(whiteBomberman.GetPos())
+	xx, yy := arena1.GetFieldCoord(whiteBomberman.GetPos())
 
 	for _, m := range monster {
 		for {
-			i := rand.Intn(turfNtreesArena.GetWidth())
-			j := rand.Intn(turfNtreesArena.GetHeight())
+			i := rand.Intn(arena1.GetWidth())
+			j := rand.Intn(arena1.GetHeight())
 			if !lev1.IsTile(i, j) && xx != i && yy != j {
-				m.MoveTo(turfNtreesArena.GetLowerLeft().Add(pixel.V(float64(i)*
+				m.MoveTo(arena1.GetLowerLeft().Add(pixel.V(float64(i)*
 					TileSize, float64(j)*TileSize)))
 				m.Ani().SetVisible(true)
 				break
@@ -504,37 +547,47 @@ func sun() {
 		keypressed := false
 		dt = time.Since(last).Seconds()
 		last = time.Now()
-		if win.Pressed(pixelgl.KeyLeft) {
-			moveCharacter("",whiteBomberman,dt,Left)
-			keypressed = true
-		}
-		if win.Pressed(pixelgl.KeyRight){
-			moveCharacter("",whiteBomberman,dt,Right)
-			keypressed = true
-		}
-		if win.Pressed(pixelgl.KeyUp) { 
-			moveCharacter("",whiteBomberman,dt,Up)
-			keypressed = true
-		}
-		if win.Pressed(pixelgl.KeyDown) { 
-			moveCharacter("",whiteBomberman,dt,Down)
-			keypressed = true
-		}
-		if !keypressed {
-			whiteBomberman.Ani().SetView(Stay)
-		}
-		if win.JustPressed(pixelgl.KeyB) {
-			pb := whiteBomberman.GetPosBox()
-			loleft := turfNtreesArena.GetLowerLeft()
-			b, _ := isThereABomb(pixel.Vec{math.Round(pb.Center().X/TileSize) * TileSize, math.Round(pb.Center().Y/TileSize) * TileSize})
-			c := lev1.IsTile(int((pb.Min.X-loleft.X)/TileSize), int((pb.Min.Y-loleft.Y)/TileSize))
-			if !b && !c {
-				bombs = append(bombs, tiles.NewBomb(whiteBomberman))
+		if whiteBomberman.IsAlife() {
+			if win.Pressed(pixelgl.KeyLeft) {
+				moveCharacter("", whiteBomberman, dt, Left)
+				keypressed = true
+			}
+			if win.Pressed(pixelgl.KeyRight) {
+				moveCharacter("", whiteBomberman, dt, Right)
+				keypressed = true
+			}
+			if win.Pressed(pixelgl.KeyUp) {
+				moveCharacter("", whiteBomberman, dt, Up)
+				keypressed = true
+			}
+			if win.Pressed(pixelgl.KeyDown) {
+				moveCharacter("", whiteBomberman, dt, Down)
+				keypressed = true
+			}
+			if !keypressed {
+				whiteBomberman.Ani().SetView(Stay)
+			}
+			if win.JustPressed(pixelgl.KeyB) {
+				pb := whiteBomberman.GetPosBox()
+				loleft := arena1.GetLowerLeft()
+				b, _ := isThereABomb(pixel.Vec{math.Round(pb.Center().X/TileSize) * TileSize, math.Round(pb.Center().Y/TileSize) * TileSize})
+				c := lev1.IsTile(int((pb.Min.X-loleft.X)/TileSize), int((pb.Min.Y-loleft.Y)/TileSize))
+				if !b && !c {
+					bombs = append(bombs, tiles.NewBomb(whiteBomberman))
+				}
 			}
 		}
 
 		/////////////////////////////////////Moving Enemys ///////////////////////////////////////////////////////////
 		for i := range monster {
+			xx,yy := arena1.GetFieldCoord(monster[i].GetPos())
+			x,y := arena1.GetFieldCoord(whiteBomberman.GetPos())
+			if x == xx && y == yy {
+				whiteBomberman.DecLife()
+				if whiteBomberman.GetLife() == 0 {
+					whiteBomberman.Ani().Die()
+				}
+			}
 			dirEn[i] = dirChoice(monster,dirEn,i)
 			pos1 := fmt.Sprintf("%.1f",monster[i].GetPos().X + monster[i].GetPos().Y)	// Zu string konvertiert, um Anzahl der Nachkommastellen steuern zu können.
 			if dirEn[i] == 0 {
@@ -555,31 +608,26 @@ func sun() {
 
 		/*
 			for _,m := range(monster) {
-				xx,yy := turfNtreesArena.GetFieldCoord(m.GetPos())
-				x,y := turfNtreesArena.GetFieldCoord(whiteBomberman.GetPos())
-				if x == xx && y == yy {
-					whiteBomberman.DecLife()
-				}
 				if !m.IsFollowing() {
 					dirEn := rand.Intn(4)
 					switch dirEn {
 						case 0:									// l
-							if !turfNtreesArena.IsTile(xx-1,yy) {
+							if !arena1.IsTile(xx-1,yy) {
 								m.Move(pixel.V(-stepSize,0))
 								m.Ani().SetView(Left)
 							}
 						case 1:									// r
-							if !turfNtreesArena.IsTile(xx+1,yy) {
+							if !arena1.IsTile(xx+1,yy) {
 								m.Move(pixel.V(stepSize,0))
 								m.Ani().SetView(Right)
 							}
 						case 2:									// up
-							if !turfNtreesArena.IsTile(xx,yy+1) {
+							if !arena1.IsTile(xx,yy+1) {
 								m.Move(pixel.V(0,stepSize))
 								m.Ani().SetView(Up)
 							}
 						case 3:
-							if	!turfNtreesArena.IsTile(xx,yy-1) {
+							if	!arena1.IsTile(xx,yy-1) {
 								m.Move(pixel.V(0,-stepSize))
 								m.Ani().SetView(Down)
 							}
@@ -591,7 +639,7 @@ func sun() {
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////7
 
 
-		turfNtreesArena.GetCanvas().Draw(win, *(turfNtreesArena.GetMatrix()))
+		arena1.GetCanvas().Draw(win, *(arena1.GetMatrix()))
 
 		checkForExplosions()
 		bombs = removeExplodedBombs(bombs)
