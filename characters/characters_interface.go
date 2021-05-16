@@ -98,8 +98,9 @@ type Character interface {
 
 	// Vor.: -
 	// Eff.: Liefert die aktuelle Bewegungsrichtung des Characters
-	//       0 -> Left, 1 -> Right, 2 -> Up, 3 -> Down
 	GetDirection() uint8
+
+	GetFieldNo() int
 
 	// Vor.: -
 	// Eff.: Liefert die Anzahl der verbleibenden Leben eines Characters.
@@ -186,4 +187,6 @@ type Character interface {
 	// Eff.: Legt die aktuelle Bewegungsrichtung des Characters fest
 	//       0 -> Left, 1 -> Right, 2 -> Up, 3 -> Down
 	SetDirection(dir uint8)
+
+	SetFieldNo(no int)
 }

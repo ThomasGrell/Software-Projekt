@@ -43,10 +43,11 @@ type character struct {
 	bombghost    bool       // kann durch Bomben laufen
 	collisionbox pixel.Rect // Kollisionsbox
 	direction    uint8
-	life         uint8      // verbleibende Anzahl der Leben
+	fieldNo      int
+	life         uint8 // verbleibende Anzahl der Leben
 	matrix       pixel.Matrix
-	mortal       bool      // Sterblichkeit
-	points       uint32    // Punkte
+	mortal       bool   // Sterblichkeit
+	points       uint32 // Punkte
 	speed        float64
 	wallghost    bool // kann durch Wände laufen
 }
@@ -72,7 +73,7 @@ func NewEnemy(t uint8) *enemy {
 	c := new(enemy)
 	*c = *en
 	c.ani = animations.NewAnimation(t)
-	c.collisionbox = pixel.R(-7.5, -7.5, 7.5, 7.5)
+	c.collisionbox = pixel.R(-cBoxSize/2, -cBoxSize/2, cBoxSize/2, cBoxSize/2)
 	c.matrix = pixel.IM.Moved(c.GetMovedPos())
 	switch t {
 	case Balloon:
@@ -158,6 +159,7 @@ func (c *character) GetBaselineCenter() pixel.Vec {
 	return c.collisionbox.Min.Add(pixel.V(c.collisionbox.Size().X/2, 0))
 }
 func (c *character) GetDirection() uint8    { return c.direction }
+func (c *character) GetFieldNo() int        { return c.fieldNo }
 func (c *character) GetLife() uint8         { return c.life }
 func (c *character) GetLifePointer() *uint8 { return &c.life }
 func (c *character) GetMatrix() pixel.Matrix {
@@ -195,9 +197,12 @@ func (c *character) MoveTo(pos pixel.Vec) {
 }
 func (c *character) SetBombghost(b bool) { c.bombghost = b }
 func (c *character) SetDirection(dir uint8) {
-	if dir >= 1 && dir <= 4 {
+	if dir >= 0 && dir <= 4 {
 		c.direction = dir
 	}
+}
+func (c *character) SetFieldNo(no int) {
+	c.fieldNo = no
 }
 
 // init() wird beim Import dieses Packets automatisch ausgeführt.
@@ -213,7 +218,7 @@ func init() {
 	bm.mortal = true
 	bm.wallghost = false
 	bm.bombghost = false
-	bm.collisionbox = pixel.Rect{pixel.Vec{},pixel.Vec{cBoxSize,cBoxSize}}
+	bm.collisionbox = pixel.Rect{pixel.Vec{}, pixel.Vec{cBoxSize, cBoxSize}}
 
 	// Monster Prototyp
 	en = new(enemy)
@@ -224,5 +229,5 @@ func init() {
 	en.wallghost = false
 	en.bombghost = false
 	en.follow = false
-	en.collisionbox = pixel.Rect{pixel.Vec{},pixel.Vec{cBoxSize,cBoxSize}}
+	en.collisionbox = pixel.Rect{pixel.Vec{}, pixel.Vec{cBoxSize, cBoxSize}}
 }

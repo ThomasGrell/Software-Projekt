@@ -16,7 +16,6 @@ import (
 	"time"
 )
 
-
 var bombs []tiles.Bombe
 var tb titlebar.Titlebar
 var arena1 arena.Arena
@@ -100,17 +99,19 @@ func checkForExplosions() {
 					xx, yy := arena1.GetFieldCoord(m.GetPos())
 					if x-i == xx && y == yy {
 						l = i
-						m.Ani().Die()	// ToDo: wird so nicht gezeigt, vmtl, weil die Monster sofort aus dem Monsterslice entfernt werden. Ändern.
+						m.Ani().Die() // ToDo: wird so nicht gezeigt, vmtl, weil die Monster sofort aus dem Monsterslice entfernt werden. Ändern.
 						monster[j], monster[len(monster)-1] = monster[len(monster)-1], monster[j]
 						monster = monster[:len(monster)-1]
-						whiteBomberman.AddPoints(m.GetPoints()+100)	// ToDo: Monster mit Killprämien belegen
+						whiteBomberman.AddPoints(m.GetPoints() + 100) // ToDo: Monster mit Killprämien belegen
 						break A
 					}
 					bmX, bmY := arena1.GetFieldCoord(whiteBomberman.GetPos())
 					if x-i == bmX && y == bmY {
 						l = i
 						whiteBomberman.DecLife()
-						if whiteBomberman.GetLife() == 0 {whiteBomberman.Ani().Die()}
+						if whiteBomberman.GetLife() == 0 {
+							whiteBomberman.Ani().Die()
+						}
 						break A
 					}
 				}
@@ -125,14 +126,16 @@ func checkForExplosions() {
 						m.Ani().Die()
 						monster[j], monster[len(monster)-1] = monster[len(monster)-1], monster[j]
 						monster = monster[:len(monster)-1]
-						whiteBomberman.AddPoints(m.GetPoints()+100)
+						whiteBomberman.AddPoints(m.GetPoints() + 100)
 						break B
 					}
 					bmX, bmY := arena1.GetFieldCoord(whiteBomberman.GetPos())
 					if x+i == bmX && y == bmY {
 						r = i
 						whiteBomberman.DecLife()
-						if whiteBomberman.GetLife() == 0 {whiteBomberman.Ani().Die()}
+						if whiteBomberman.GetLife() == 0 {
+							whiteBomberman.Ani().Die()
+						}
 						break B
 					}
 				}
@@ -147,14 +150,16 @@ func checkForExplosions() {
 						m.Ani().Die()
 						monster[j], monster[len(monster)-1] = monster[len(monster)-1], monster[j]
 						monster = monster[:len(monster)-1]
-						whiteBomberman.AddPoints(m.GetPoints()+100)
+						whiteBomberman.AddPoints(m.GetPoints() + 100)
 						break C
 					}
 					bmX, bmY := arena1.GetFieldCoord(whiteBomberman.GetPos())
 					if x == bmX && y+i == bmY {
 						u = i
 						whiteBomberman.DecLife()
-						if whiteBomberman.GetLife() == 0 {whiteBomberman.Ani().Die()}
+						if whiteBomberman.GetLife() == 0 {
+							whiteBomberman.Ani().Die()
+						}
 						break C
 					}
 				}
@@ -169,14 +174,16 @@ func checkForExplosions() {
 						m.Ani().Die()
 						monster[j], monster[len(monster)-1] = monster[len(monster)-1], monster[j]
 						monster = monster[:len(monster)-1]
-						whiteBomberman.AddPoints(m.GetPoints()+100)
+						whiteBomberman.AddPoints(m.GetPoints() + 100)
 						break D
 					}
 					bmX, bmY := arena1.GetFieldCoord(whiteBomberman.GetPos())
 					if x == bmX && y-i == bmY {
 						d = i
 						whiteBomberman.DecLife()
-						if whiteBomberman.GetLife() == 0 {whiteBomberman.Ani().Die()}
+						if whiteBomberman.GetLife() == 0 {
+							whiteBomberman.Ani().Die()
+						}
 						break D
 					}
 				}
@@ -282,6 +289,8 @@ func isThereABomb(v pixel.Vec) (bool, tiles.Bombe) {
 	}
 	return false, nil
 }
+
+/*
 // Herkunftsrichtung
 func homeDir(dir uint8) (hdir uint8) {
 	switch dir {
@@ -292,6 +301,9 @@ func homeDir(dir uint8) (hdir uint8) {
 	}
 	return
 }
+*/
+
+/*
 // Vor.: /
 // Erg.: Die neue Bewegungsrichtung des Monsters ist zurückgegeben.
 //		 Kann es sich nicht bewegen, ist die neue Bewegungsrichtung die alte (dann zittert es, weil die Bewegung auf 1 Pixel eingeschränkt ist).
@@ -334,6 +346,188 @@ func dirChoice(m characters.Enemy) (dir uint8){
 	}
 	return
 }
+*/
+func getPossibleDirections(x, y int) (possibleDir [4]uint8, n uint8) {
+	if x != 0 && !lev1.IsTile(x-1, y) {
+		possibleDir[n] = Left
+		n++
+	}
+	if x != arena1.GetWidth()-1 && !lev1.IsTile(x+1, y) {
+		possibleDir[n] = Right
+		n++
+	}
+	if y != 0 && !lev1.IsTile(x, y-1) {
+		possibleDir[n] = Down
+		n++
+	}
+	if y != arena1.GetHeight()-1 && !lev1.IsTile(x, y+1) {
+		possibleDir[n] = Up
+		n++
+	}
+	return
+}
+
+func getNextPosition(c interface{}, dt float64) pixel.Rect {
+	dir := c.(characters.Character).GetDirection()
+	box := transformRect(dir, c.(characters.Character).GetPosBox())
+	return transformRectBack(dir, box.Moved(pixel.Vec{X: 0, Y: c.(characters.Character).GetSpeed()}.Scaled(dt)))
+}
+
+// Bewegungen in die 4 Richtungen sind formal identisch, müssen aber
+// programmtechnisch unterschiedlich behandelt werden. Die Idee von
+// transformRect und transformVec ist es nun, die Koordinaten so zu transformieren, dass
+// man alle Berechnungen so ausführen kann, als ob der Character
+// aufwärts läuft. Mit transformRectBack und transformVecBack transformiert man alles zurück.
+func transformRect(dir uint8, box pixel.Rect) pixel.Rect {
+	switch dir {
+	case Left:
+		return pixel.Rect{Min: pixel.Vec{X: box.Min.Y, Y: -box.Max.X}, Max: pixel.Vec{X: box.Max.Y, Y: -box.Min.X}}
+	case Right:
+		return pixel.Rect{Min: pixel.Vec{X: -box.Max.Y, Y: box.Min.X}, Max: pixel.Vec{X: -box.Min.Y, Y: box.Max.X}}
+	case Down:
+		return pixel.Rect{Min: box.Max.Scaled(-1), Max: box.Min.Scaled(-1)}
+	default:
+		return box
+	}
+}
+
+func transformRectBack(dir uint8, box pixel.Rect) pixel.Rect {
+	switch dir {
+	case Right:
+		return pixel.Rect{Min: pixel.Vec{X: box.Min.Y, Y: -box.Max.X}, Max: pixel.Vec{X: box.Max.Y, Y: -box.Min.X}}
+	case Left:
+		return pixel.Rect{Min: pixel.Vec{X: -box.Max.Y, Y: box.Min.X}, Max: pixel.Vec{X: -box.Min.Y, Y: box.Max.X}}
+	case Down:
+		return pixel.Rect{Min: box.Max.Scaled(-1), Max: box.Min.Scaled(-1)}
+	default:
+		return box
+	}
+}
+
+func transformVec(dir uint8, v pixel.Vec) pixel.Vec {
+	switch dir {
+	case Left:
+		return pixel.Vec{X: v.Y, Y: -v.X}
+	case Right:
+		return pixel.Vec{X: -v.Y, Y: v.X}
+	case Down:
+		return pixel.Vec{X: -v.X, Y: -v.Y}
+	default:
+		return v
+	}
+}
+
+func transformVecBack(dir uint8, v pixel.Vec) pixel.Vec {
+	switch dir {
+	case Right:
+		return pixel.Vec{X: v.Y, Y: -v.X}
+	case Left:
+		return pixel.Vec{X: -v.Y, Y: v.X}
+	case Down:
+		return pixel.Vec{X: -v.X, Y: -v.Y}
+	default:
+		return v
+	}
+}
+
+func moveCharacter2(c interface{}, dt float64) {
+	nextPos := getNextPosition(c, dt)
+	var newDirChoice bool = false
+	chr := c.(characters.Character)
+
+	// Blickt man in Bewegungsrichtung, so werden von der hinteren linken Ecke (Min) der PosBox die
+	// ganzzahligen Koordinaten im Spielfeld berechnet.
+	xnow, ynow := arena1.GetFieldCoord(transformVecBack(chr.GetDirection(), transformRect(chr.GetDirection(), chr.GetPosBox()).Min))
+
+	// Aus den Koordinaten wird nun eine Spielfeldnummer berechnet.
+	newFieldNo := xnow + ynow*arena1.GetWidth()
+
+	if !chr.IsAlife() {
+		return
+	}
+
+	switch chr.GetDirection() {
+	case Left:
+		x1, y1 := arena1.GetFieldCoord(nextPos.Min)
+		if lev1.IsTile(x1, y1) || x1 < 0 {
+			newDirChoice = true
+		}
+		x1, y1 = arena1.GetFieldCoord(pixel.Vec{nextPos.Min.X, nextPos.Max.Y})
+		if lev1.IsTile(x1, y1) {
+			newDirChoice = true
+		}
+	case Right:
+		x1, y1 := arena1.GetFieldCoord(nextPos.Max)
+		if lev1.IsTile(x1, y1) {
+			newDirChoice = true
+		}
+		x1, y1 = arena1.GetFieldCoord(pixel.Vec{nextPos.Max.X, nextPos.Min.Y})
+		if lev1.IsTile(x1, y1) {
+			newDirChoice = true
+		}
+	case Up:
+		x1, y1 := arena1.GetFieldCoord(nextPos.Max)
+		if lev1.IsTile(x1, y1) || y1 > arena1.GetHeight() {
+			newDirChoice = true
+		}
+		x1, y1 = arena1.GetFieldCoord(pixel.Vec{nextPos.Min.X, nextPos.Max.Y})
+		if lev1.IsTile(x1, y1) {
+			newDirChoice = true
+		}
+	case Down:
+		x1, y1 := arena1.GetFieldCoord(nextPos.Min)
+		if lev1.IsTile(x1, y1) || y1 < 0 {
+			newDirChoice = true
+		}
+		x1, y1 = arena1.GetFieldCoord(pixel.Vec{nextPos.Max.X, nextPos.Min.Y})
+		if lev1.IsTile(x1, y1) {
+			newDirChoice = true
+		}
+	}
+
+	switch c.(type) {
+	case characters.Enemy:
+
+		if !newDirChoice {
+			if newFieldNo != chr.GetFieldNo() {
+				// Ein neues Feld wurde vollständig betreten.
+				// Jetzt ist es Zeit zu überprüfen, ob die Bewegungsrichtung
+				// geändert werden kann.
+				newDirChoice = true
+			}
+		}
+
+		if newDirChoice {
+			possibleDirections, n := getPossibleDirections(arena1.GetFieldCoord(chr.GetPosBox().Center()))
+			if n == 0 { // keine erlaubte Richtung
+				chr.SetDirection(Stay) // Stay
+			} else if n == 1 { // 1 erlaubte Richtung --> lauf sie
+				chr.SetDirection(possibleDirections[0])
+			} else if n == 2 { //	2 erlaubte Richtungen
+				// Wenn es nur vor oder zurück geht, dann lauf weiter
+				if chr.GetDirection() != possibleDirections[0] && chr.GetDirection() != possibleDirections[1] {
+					// Wenn du abbiegen kannst, tu das oder lauf zurück
+					chr.SetDirection(possibleDirections[rand.Intn(2)])
+				}
+			} else { // drei oder vier erlaubte Richtungen
+				// wähle eine zufällige
+				chr.SetDirection(possibleDirections[rand.Intn(int(n))])
+			}
+		}
+
+	case characters.Player:
+		if newDirChoice {
+			return
+		}
+	}
+	if chr.GetDirection() != Stay {
+		chr.Move(transformVecBack(chr.GetDirection(), pixel.Vec{Y: chr.GetSpeed() * dt}))
+		chr.SetFieldNo(newFieldNo)
+	}
+	chr.Ani().SetView(chr.GetDirection())
+}
+
+/*
 func getGrantedDirections(c characters.Character) [4]bool {
 	var b [4]bool
 	b[0] = true
@@ -446,7 +640,7 @@ func moveCharacter(c characters.Character, dt float64, dir uint8) (moved bool) {
 	c.Ani().SetView(dir)
 	return
 }
-
+*/
 func sun() {
 	const zoomFactor = 3
 	const typ = 2
@@ -527,19 +721,23 @@ func sun() {
 		last = time.Now()
 
 		if win.Pressed(pixelgl.KeyLeft) {
-			moveCharacter(whiteBomberman, dt, Left)
+			whiteBomberman.SetDirection(Left)
+			moveCharacter2(whiteBomberman, dt)
 			keypressed = true
 		}
 		if win.Pressed(pixelgl.KeyRight) {
-			moveCharacter(whiteBomberman, dt, Right)
+			whiteBomberman.SetDirection(Right)
+			moveCharacter2(whiteBomberman, dt)
 			keypressed = true
 		}
 		if win.Pressed(pixelgl.KeyUp) {
-			moveCharacter(whiteBomberman, dt, Up)
+			whiteBomberman.SetDirection(Up)
+			moveCharacter2(whiteBomberman, dt)
 			keypressed = true
 		}
 		if win.Pressed(pixelgl.KeyDown) {
-			moveCharacter(whiteBomberman, dt, Down)
+			whiteBomberman.SetDirection(Down)
+			moveCharacter2(whiteBomberman, dt)
 			keypressed = true
 		}
 		if !keypressed {
@@ -558,23 +756,34 @@ func sun() {
 		/////////////////////////////////////Moving Enemys ///////////////////////////////////////////////////////////
 
 		for _, m := range monster {
-			xx,yy := arena1.GetFieldCoord(m.GetPos())
-			x,y := arena1.GetFieldCoord(whiteBomberman.GetPos())
-			if x == xx && y == yy {	// wenn Monster und Bomberman auf dem gleichen Feld sind, wird dem Bm ein Leben abgezogen
+			if whiteBomberman.GetPosBox().Intersects(m.GetPosBox()) {
 				whiteBomberman.DecLife()
-				if whiteBomberman.GetLife() == 0 {
-					whiteBomberman.Ani().Die()	// ToDo: funktioniert nicht (mehr) - Bm bleibt sichtbar und bewegbar
+				if !whiteBomberman.IsAlife() {
+					whiteBomberman.Ani().Die() // ToDo: funktioniert nicht (mehr) - Bm bleibt sichtbar und bewegbar
 				}
 			}
-			m.SetDirection(dirChoice(m))
-			pos1 := math.Round(10*(m.GetPos().X+m.GetPos().Y)) / 10 // Auf eine Nachkommastelle runden.
-			moveCharacter(m, dt, m.GetDirection())	// in die gewählte Richtung laufen
-			//fmt.Println("d:",d,"m.GetDir",m.GetDirection(),"moved",b)
-			pos2 := math.Round(10*(m.GetPos().X+m.GetPos().Y)) / 10
-			if pos1 == pos2 { // monster konnte sich nicht bewegen --> neue Richtung probieren.
-				// Dadurch zittert es in der Falle bzw. biegt in Ecken ab oder läuft zurück.
-				m.SetDirection(uint8(rand.Intn(4) + 1))
-			}
+			moveCharacter2(m, dt)
+
+			/*
+				xx,yy := arena1.GetFieldCoord(m.GetPos())
+				x,y := arena1.GetFieldCoord(whiteBomberman.GetPos())
+				if x == xx && y == yy {	// wenn Monster und Bomberman auf dem gleichen Feld sind, wird dem Bm ein Leben abgezogen
+					whiteBomberman.DecLife()
+					if !whiteBomberman.IsAlife() {
+						whiteBomberman.Ani().Die()	// ToDo: funktioniert nicht (mehr) - Bm bleibt sichtbar und bewegbar
+					}
+				}
+
+				m.SetDirection(dirChoice(m))
+				pos1 := math.Round(10*(m.GetPos().X+m.GetPos().Y)) / 10 // Auf eine Nachkommastelle runden.
+				moveCharacter(m, dt, m.GetDirection())	// in die gewählte Richtung laufen
+				//fmt.Println("d:",d,"m.GetDir",m.GetDirection(),"moved",b)
+				pos2 := math.Round(10*(m.GetPos().X+m.GetPos().Y)) / 10
+				if pos1 == pos2 { // monster konnte sich nicht bewegen --> neue Richtung probieren.
+					// Dadurch zittert es in der Falle bzw. biegt in Ecken ab oder läuft zurück.
+					m.SetDirection(uint8(rand.Intn(4) + 1))
+				}
+			*/
 		}
 
 		/*

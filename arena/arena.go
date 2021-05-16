@@ -52,9 +52,13 @@ func (a *data) GetCanvas() *pixelgl.Canvas {
 	return a.canvas
 }
 func (a *data) GetFieldCoord(v pixel.Vec) (x, y int) {
-	x = int(math.Trunc((v.X-a.lowerLeft.X)/TileSize)) % (a.w + 1)
-	y = int(math.Trunc((v.Y-a.lowerLeft.Y)/TileSize)) % (a.h + 1)
-	return
+	v = v.Sub(a.lowerLeft).Scaled(1 / float64(TileSize))
+	return int(math.Floor(v.X)), int(math.Floor(v.Y))
+	/*
+		x = int(math.Trunc((v.X-a.lowerLeft.X)/TileSize)) % (a.w + 1)
+		y = int(math.Trunc((v.Y-a.lowerLeft.Y)/TileSize)) % (a.h + 1)
+		return
+	*/
 }
 func (a *data) GetHeight() int {
 	return a.h
