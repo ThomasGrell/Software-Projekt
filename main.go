@@ -9,15 +9,12 @@ import (
 	"./sounds"
 	"./tiles"
 	"./titlebar"
-	"fmt"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	"math"
 	"math/rand"
 	"time"
 )
-
-var dirEn = make([]int,0)
 
 
 var bombs []tiles.Bombe
@@ -285,61 +282,136 @@ func isThereABomb(v pixel.Vec) (bool, tiles.Bombe) {
 	}
 	return false, nil
 }
-
+// Herkunftsrichtung
+func homeDir(dir uint8) (hdir uint8) {
+	switch dir {
+	case Up: hdir = Down
+	case Down: hdir = Up
+	case Left: hdir = Right
+	case Right: hdir = Left
+	}
+	return
+}
 // Vor.: /
-// Erg.: Die neue Bewegungsrichtung des i-ten Monsters ist zurückgegeben.
+// Erg.: Die neue Bewegungsrichtung des Monsters ist zurückgegeben.
 //		 Kann es sich nicht bewegen, ist die neue Bewegungsrichtung die alte (dann zittert es, weil die Bewegung auf 1 Pixel eingeschränkt ist).
 //		 Gibt es nur die Möglichkeit zurück zu laufen, läuft es zurück,
 //		 gibt es nur die Möglichkeit weiter oder zurück zu laufen, läuft es weiter,
 //		 gibt es mehr als zwei Möglichkeiten, wird eine zufällige, nicht rückwärtsgewandte, Richtung zurückgegeben.
 //		 links:0,rechts:1,oben:2,unten:3
-func dirChoice(monster []characters.Enemy, dirEn []int, i int) (dir int){
-	grDir := getGrantedDirections(monster[i])
-	var grDirInt = make([]int,0)
-	var goingBack int
-	var n int
-	for j := range grDir {
-		if grDir[j] {
+func dirChoice(m characters.Enemy) (dir uint8){
+	var grDirBool [4]bool = getGrantedDirections(m) // Wahrheitswerte der erlaubten Richtungen
+	//fmt.Println("grDirBool",grDirBool)
+	var grDirUint8 = make([]uint8,0)	// Zahlenwerte der erlaubten Richtungen (constants)
+	var n int	// Zählvariable um festzustellen, wie viele mögliche Richtungen es gibt
+	for j := range grDirBool {
+		if grDirBool[j] {
 			n++
-			switch dirEn[i] {
-			case 0:
-				if j != 1 {
-					grDirInt = append(grDirInt, j)
-				}else{
-					goingBack = 1
-				}
-			case 1:
-				if j != 0 {
-					grDirInt = append(grDirInt, j)
-				}else{
-					goingBack = 0
-				}
-			case 2:
-				if j != 3 {
-					grDirInt = append(grDirInt, j)
-				}else{
-					goingBack = 3
-				}
-			case 3:
-				if j != 2 {
-					grDirInt = append(grDirInt, j)
-				}else{
-					goingBack = 2
-				}
-			}
+			grDirUint8 = append(grDirUint8, uint8(j+1))
 		}
 	}
-	if n > 2 {
-		choice := rand.Intn(len(grDirInt))
-		dir = grDirInt[choice]
-	}else if n == 1 {
-		dir = goingBack
+	if n == 0 {
+		dir = 0
+	}else if n == 1{
+		dir = grDirUint8[0]
+	}else if n == 2 {
+		for _,d := range grDirUint8{
+			if d == m.GetDirection() {
+				dir = d
+				return
+			}
+		}
+		choice := rand.Intn(len(grDirUint8))
+		dir = grDirUint8[choice]
 	}else{
-		dir = dirEn[i]
+		for i, d := range grDirUint8{
+			if d == homeDir(m.GetDirection()) {	// verhindert das Zurücklaufen bei mehr als zwei erlaubten Wegen
+				grDirUint8[i] = grDirUint8[len(grDirUint8)-1]
+				grDirUint8 = grDirUint8[:len(grDirUint8)-1]
+			}
+		}
+		choice := rand.Intn(len(grDirUint8))
+		dir = grDirUint8[choice]
 	}
 	return
 }
-
+//func dirChoice(monster characters.Enemy) (dir uint8) {
+//	grDir := getGrantedDirections(monster)
+//	var grDirInt = make([]uint8, 0)
+//	var goingBack uint8
+//	var n uint8
+//	for j := range grDir {
+//		if grDir[j] {
+//			n++
+//			switch monster.GetDirection() {
+//			case Left:
+//				if j != Right {
+//					grDirInt = append(grDirInt, uint8(j))
+//				} else {
+//					goingBack = 1
+//				}
+//			case Right:
+//				if j != Left {
+//					grDirInt = append(grDirInt, uint8(j))
+//				} else {
+//					goingBack = 0
+//				}
+//			case Up:
+//				if j != Down {
+//					grDirInt = append(grDirInt, uint8(j))
+//				} else {
+//					goingBack = 3
+//				}
+//			case Down:
+//				if j != Up {
+//					grDirInt = append(grDirInt, uint8(j))
+//				} else {
+//					goingBack = 2
+//				}
+//			}
+//		}
+//	}
+//	if n > 2 {
+//		choice := rand.Intn(len(grDirInt))
+//		dir = grDirInt[choice]
+//	} else if n == 1 {
+//		dir = goingBack
+//	} else {
+//		dir = monster.GetDirection()
+//	}
+//	return
+//}
+//func getGrantedDirections(c characters.Character) [4]bool {
+//	var b [4]bool
+//	b[0] = true
+//	b[1] = true
+//	b[2] = true
+//	b[3] = true
+//	pb := c.GetPosBox()
+//	xll,yll := arena1.GetFieldCoord(pb.Min)
+//	xur,yur := arena1.GetFieldCoord(pb.Max)
+//	ll := pixel.V(float64(xll*TileSize),float64(yll*TileSize)).Sub(pixel.V(0,2))
+//	ur := pixel.V(float64(xur*TileSize),float64(yur*TileSize)).Sub(pixel.V(0,2))
+//	x,y := arena1.GetFieldCoord(c.GetPos())
+//	fmt.Println("Coords",x,y,"Laut PosBox ll",ll.X/TileSize,ll.Y/TileSize,"ur",ur.X/TileSize,ur.Y/TileSize )
+//	if lev1.IsTile(int((ll.X-1)/TileSize), int(ll.Y/TileSize)) || lev1.IsTile(int((ll.X-1)/TileSize), int(ur.Y/TileSize)) || ll.X-1 < 0 {
+//		b[2] = false
+//	}
+//	if int((ur.X+1)/TileSize) > arena1.GetWidth()-1 {
+//		b[3] = false
+//	} else if lev1.IsTile(int((ur.X+1)/TileSize), int(ll.Y/TileSize)) || lev1.IsTile(int((ur.X+1)/TileSize), int(ur.Y/TileSize)) {
+//		b[3] = false
+//	}
+//	if int((ur.Y+1)/TileSize) > arena1.GetHeight()-1 {
+//		b[0] = false
+//	} else if lev1.IsTile(int(ll.X/TileSize), int((ur.Y+1)/TileSize)) || lev1.IsTile(int(ur.X/TileSize), int((ur.Y+1)/TileSize)) {
+//		b[0] = false
+//	}
+//	if lev1.IsTile(int(ll.X/TileSize), int((ll.Y-1)/TileSize)) || lev1.IsTile(int(ur.X/TileSize), int((ll.Y-1)/TileSize)) || ll.Y-1 < 0 {
+//		b[1] = false
+//	}
+//	return b
+//}
 func getGrantedDirections(c characters.Character) [4]bool {
 	var b [4]bool
 	b[0] = true
@@ -350,34 +422,42 @@ func getGrantedDirections(c characters.Character) [4]bool {
 	ll := pb.Min.Sub(arena1.GetLowerLeft())
 	ur := pb.Max.Sub(arena1.GetLowerLeft())
 	if lev1.IsTile(int((ll.X-1)/TileSize), int(ll.Y/TileSize)) || lev1.IsTile(int((ll.X-1)/TileSize), int(ur.Y/TileSize)) || ll.X-1 < 0 {
-		b[0] = false
+		b[2] = false
 	}
 	if int((ur.X+1)/TileSize) > arena1.GetWidth()-1 {
-		b[1] = false
+		b[3] = false
 	} else if lev1.IsTile(int((ur.X+1)/TileSize), int(ll.Y/TileSize)) || lev1.IsTile(int((ur.X+1)/TileSize), int(ur.Y/TileSize)) {
-		b[1] = false
+		b[3] = false
 	}
 	if int((ur.Y+1)/TileSize) > arena1.GetHeight()-1 {
-		b[2] = false
+		b[0] = false
 	} else if lev1.IsTile(int(ll.X/TileSize), int((ur.Y+1)/TileSize)) || lev1.IsTile(int(ur.X/TileSize), int((ur.Y+1)/TileSize)) {
-		b[2] = false
+		b[0] = false
 	}
 	if lev1.IsTile(int(ll.X/TileSize), int((ll.Y-1)/TileSize)) || lev1.IsTile(int(ur.X/TileSize), int((ll.Y-1)/TileSize)) || ll.Y-1 < 0 {
-		b[3] = false
+		b[1] = false
 	}
 	return b
 }
 
-func moveCharacter (aniType string, c characters.Character, dt float64, dir uint8) /*(moved bool)*/{
+func moveCharacter(c characters.Character, dt float64, dir uint8) (moved bool) {
+
+	// Ist der Character Unsichtbar? Dann ist nichts zu bewegen.
+	if !c.Ani().IsVisible() || c.Ani().GetView() == Dead || c.Ani().GetView() == Intro {
+		return false
+	}
+
+	dist := c.GetSpeed() * dt
+	if dist >= TileSize {
+		dist = TileSize - 0.1
+	}
+	pb := c.GetPosBox()
+	ll := pb.Min.Sub(arena1.GetLowerLeft())
+	ur := pb.Max.Sub(arena1.GetLowerLeft())
+
 	switch dir {
 	case Left:
-		dist := -c.GetSpeed() * dt
-		if dist <= -TileSize {
-			dist = -TileSize + 0.1
-		}
-		pb := c.GetPosBox()
-		ll := pb.Min.Sub(arena1.GetLowerLeft())
-		ur := pb.Max.Sub(arena1.GetLowerLeft())
+		dist = -dist
 		bl, xl, _ := lev1.GetPosOfNextTile(int(ll.X/TileSize), int(ll.Y/TileSize), pixel.V(-TileSize, 0))
 		bu, xu, _ := lev1.GetPosOfNextTile(int(ll.X/TileSize), int(ur.Y/TileSize), pixel.V(-TileSize, 0))
 		if bl || bu {
@@ -393,13 +473,6 @@ func moveCharacter (aniType string, c characters.Character, dt float64, dir uint
 		}
 		c.Move(pixel.V(dist, 0))
 	case Right:
-		dist := c.GetSpeed() * dt
-		if dist >= TileSize {
-			dist = TileSize - 0.1
-		}
-		pb := c.GetPosBox()
-		ll := pb.Min.Sub(arena1.GetLowerLeft())
-		ur := pb.Max.Sub(arena1.GetLowerLeft())
 		bl, xl, _ := lev1.GetPosOfNextTile(int((ur.X)/TileSize), int(ll.Y/TileSize), pixel.V(TileSize, 0))
 		bu, xu, _ := lev1.GetPosOfNextTile(int((ur.X)/TileSize), int(ur.Y/TileSize), pixel.V(TileSize, 0))
 		if bl || bu {
@@ -415,13 +488,6 @@ func moveCharacter (aniType string, c characters.Character, dt float64, dir uint
 		}
 		c.Move(pixel.V(dist, 0))
 	case Up:
-		dist := c.GetSpeed() * dt
-		if dist >= TileSize {
-			dist = TileSize - 0.1
-		}
-		pb := c.GetPosBox()
-		ll := pb.Min.Sub(arena1.GetLowerLeft())
-		ur := pb.Max.Sub(arena1.GetLowerLeft())
 		bl, _, yl := lev1.GetPosOfNextTile(int((ll.X)/TileSize), int((ur.Y)/TileSize), pixel.V(0, TileSize))
 		br, _, yr := lev1.GetPosOfNextTile(int((ur.X)/TileSize), int((ur.Y)/TileSize), pixel.V(0, TileSize))
 		if bl || br {
@@ -437,13 +503,7 @@ func moveCharacter (aniType string, c characters.Character, dt float64, dir uint
 		}
 		c.Move(pixel.V(0, dist))
 	case Down:
-		dist := -c.GetSpeed() * dt
-		if dist <= -TileSize {
-			dist = -TileSize + 0.1
-		}
-		pb := c.GetPosBox()
-		ll := pb.Min.Sub(arena1.GetLowerLeft())
-		ur := pb.Max.Sub(arena1.GetLowerLeft())
+		dist = -dist
 		bl, _, yl := lev1.GetPosOfNextTile(int((ll.X)/TileSize), int((ll.Y)/TileSize), pixel.V(0, -TileSize))
 		br, _, yr := lev1.GetPosOfNextTile(int((ur.X)/TileSize), int((ll.Y)/TileSize), pixel.V(0, -TileSize))
 		if bl || br {
@@ -461,9 +521,7 @@ func moveCharacter (aniType string, c characters.Character, dt float64, dir uint
 		}
 		c.Move(pixel.V(0, dist))
 	}
-	if !(aniType == "noDirAni") {
-		c.Ani().SetView(dir)
-	}
+	c.Ani().SetView(dir)
 	return
 }
 
@@ -510,14 +568,12 @@ func sun() {
 
 	// 2 Enemys
 	monster = append(monster, characters.NewEnemy(YellowPopEye))
-	dirEn = append(dirEn,0)
-	monster = append(monster, characters.NewEnemy(Drop))
-	dirEn = append(dirEn, 0)
+	//monster = append(monster, characters.NewEnemy(Drop))
 
 	rand.Seed(time.Now().UnixNano())
 
 	// Bomberman is in lowleft Corner
-	whiteBomberman.MoveTo(arena1.GetLowerLeft().Add(pixel.V(0, 0)))
+	whiteBomberman.MoveTo(arena1.GetLowerLeft())
 
 	///////////////////////// ToDo Enyemys should be a Part of Level //////////////////////////////////////////////
 	xx, yy := arena1.GetFieldCoord(whiteBomberman.GetPos())
@@ -547,62 +603,48 @@ func sun() {
 		keypressed := false
 		dt = time.Since(last).Seconds()
 		last = time.Now()
-		if whiteBomberman.IsAlife() {
-			if win.Pressed(pixelgl.KeyLeft) {
-				moveCharacter("", whiteBomberman, dt, Left)
-				keypressed = true
-			}
-			if win.Pressed(pixelgl.KeyRight) {
-				moveCharacter("", whiteBomberman, dt, Right)
-				keypressed = true
-			}
-			if win.Pressed(pixelgl.KeyUp) {
-				moveCharacter("", whiteBomberman, dt, Up)
-				keypressed = true
-			}
-			if win.Pressed(pixelgl.KeyDown) {
-				moveCharacter("", whiteBomberman, dt, Down)
-				keypressed = true
-			}
-			if !keypressed {
-				whiteBomberman.Ani().SetView(Stay)
-			}
-			if win.JustPressed(pixelgl.KeyB) {
-				pb := whiteBomberman.GetPosBox()
-				loleft := arena1.GetLowerLeft()
-				b, _ := isThereABomb(pixel.Vec{math.Round(pb.Center().X/TileSize) * TileSize, math.Round(pb.Center().Y/TileSize) * TileSize})
-				c := lev1.IsTile(int((pb.Min.X-loleft.X)/TileSize), int((pb.Min.Y-loleft.Y)/TileSize))
-				if !b && !c {
-					bombs = append(bombs, tiles.NewBomb(whiteBomberman))
-				}
+
+		if win.Pressed(pixelgl.KeyLeft) {
+			moveCharacter(whiteBomberman, dt, Left)
+			keypressed = true
+		}
+		if win.Pressed(pixelgl.KeyRight) {
+			moveCharacter(whiteBomberman, dt, Right)
+			keypressed = true
+		}
+		if win.Pressed(pixelgl.KeyUp) {
+			moveCharacter(whiteBomberman, dt, Up)
+			keypressed = true
+		}
+		if win.Pressed(pixelgl.KeyDown) {
+			moveCharacter(whiteBomberman, dt, Down)
+			keypressed = true
+		}
+		if !keypressed {
+			whiteBomberman.Ani().SetView(Stay)
+		}
+		if win.JustPressed(pixelgl.KeyB) {
+			pb := whiteBomberman.GetPosBox()
+			loleft := arena1.GetLowerLeft()
+			b, _ := isThereABomb(pixel.Vec{X: math.Round(pb.Center().X/TileSize) * TileSize, Y: math.Round(pb.Center().Y/TileSize) * TileSize})
+			c := lev1.IsTile(int((pb.Min.X-loleft.X)/TileSize), int((pb.Min.Y-loleft.Y)/TileSize))
+			if !b && !c {
+				bombs = append(bombs, tiles.NewBomb(whiteBomberman))
 			}
 		}
 
 		/////////////////////////////////////Moving Enemys ///////////////////////////////////////////////////////////
-		for i := range monster {
-			xx,yy := arena1.GetFieldCoord(monster[i].GetPos())
-			x,y := arena1.GetFieldCoord(whiteBomberman.GetPos())
-			if x == xx && y == yy {
-				whiteBomberman.DecLife()
-				if whiteBomberman.GetLife() == 0 {
-					whiteBomberman.Ani().Die()
-				}
-			}
-			dirEn[i] = dirChoice(monster,dirEn,i)
-			pos1 := fmt.Sprintf("%.1f",monster[i].GetPos().X + monster[i].GetPos().Y)	// Zu string konvertiert, um Anzahl der Nachkommastellen steuern zu können.
-			if dirEn[i] == 0 {
-				moveCharacter("noDirAni",monster[i], dt, Left)
-			} else if dirEn[i] == 1 {
-				moveCharacter("noDirAni",monster[i], dt, Right)
-			} else if dirEn[i] == 2 {
-				moveCharacter("noDirAni",monster[i], dt, Up)
-			} else if dirEn[i] == 3 {
-				moveCharacter("noDirAni",monster[i], dt, Down)
-			}
-			pos2 := fmt.Sprintf("%.1f",monster[i].GetPos().X + monster[i].GetPos().Y)
-			if pos1 == pos2 {	// monster konnte sich nicht bewegen --> neue Richtung probieren.
+
+		for _, m := range monster {
+			var d uint8 = dirChoice(m)
+			m.SetDirection(d)
+			pos1 := math.Round(10*(m.GetPos().X+m.GetPos().Y)) / 10 // Auf eine Nachkommastelle runden.
+			moveCharacter(m, dt, m.GetDirection())
+			//fmt.Println("d:",d,"m.GetDir",m.GetDirection(),"moved",b)
+			pos2 := math.Round(10*(m.GetPos().X+m.GetPos().Y)) / 10
+			if pos1 == pos2 { // monster konnte sich nicht bewegen --> neue Richtung probieren.
 				// Dadurch zittert es in der Falle bzw. biegt in Ecken ab oder läuft zurück.
-				dirEn[i] = rand.Intn(4)
+				m.SetDirection(uint8(rand.Intn(4) + 1))
 			}
 		}
 
@@ -637,7 +679,6 @@ func sun() {
 		*/
 
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////7
-
 
 		arena1.GetCanvas().Draw(win, *(arena1.GetMatrix()))
 

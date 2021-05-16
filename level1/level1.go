@@ -2,16 +2,13 @@ package level1
 
 import (
 	"../arena"
+	. "../constants"
 	"../tiles"
 	"fmt"
 	"github.com/faiface/pixel"
 	"math/rand"
 	"time"
-	//"math"
-	/*
-		"../characters"
-		. "../constants"
-	*/)
+)
 
 type lv struct {
 	tileMatrix    [][][]tiles.Tile
@@ -35,40 +32,40 @@ func NewBlankLevel(ar arena.Arena, anzPlayer uint8) *lv {
 	for y := 0; y < (*l).height; y++ {
 		for x := 0; x < (*l).width; x++ {
 			if ar.IsTile(x, y) {
-				(*l).freePos[y][x] = 1
+				(*l).freePos[y][x] = Undestroyable
 			}
 		}
 	}
 	(*l).anzPlayer = anzPlayer
-	(*l).freePos[0][0] = 3
-	(*l).freePos[0][1] = 3
-	(*l).freePos[1][0] = 3
+	(*l).freePos[0][0] = Blocked
+	(*l).freePos[0][1] = Blocked
+	(*l).freePos[1][0] = Blocked
 	switch anzPlayer {
 	case 1:
 		//Defaulteinstellung: Startplatz (untenlinks) für einen Player im Spiel
 	case 2:
-		(*l).freePos[(*l).height-1][(*l).width-1] = 3
-		(*l).freePos[(*l).height-1][(*l).width-2] = 3
-		(*l).freePos[(*l).height-2][(*l).width-1] = 3
+		(*l).freePos[(*l).height-1][(*l).width-1] = Blocked
+		(*l).freePos[(*l).height-1][(*l).width-2] = Blocked
+		(*l).freePos[(*l).height-2][(*l).width-1] = Blocked
 		//Startplatz (untenlinks und obenrechts) für zwei Player im Spiel
 	case 3:
-		(*l).freePos[(*l).height-1][(*l).width-1] = 3
-		(*l).freePos[(*l).height-1][(*l).width-2] = 3
-		(*l).freePos[(*l).height-2][(*l).width-1] = 3
-		(*l).freePos[(*l).height-1][0] = 3
-		(*l).freePos[(*l).height-1][1] = 3
-		(*l).freePos[(*l).height-2][0] = 3
+		(*l).freePos[(*l).height-1][(*l).width-1] = Blocked
+		(*l).freePos[(*l).height-1][(*l).width-2] = Blocked
+		(*l).freePos[(*l).height-2][(*l).width-1] = Blocked
+		(*l).freePos[(*l).height-1][0] = Blocked
+		(*l).freePos[(*l).height-1][1] = Blocked
+		(*l).freePos[(*l).height-2][0] = Blocked
 		//Startplatz (untenlinks, obenrechts und obenlinks) für drei Player im Spiel
 	case 4:
-		(*l).freePos[(*l).height-1][(*l).width-1] = 3
-		(*l).freePos[(*l).height-1][(*l).width-1-2] = 3
-		(*l).freePos[(*l).height-2][(*l).width-1] = 3
-		(*l).freePos[(*l).height-1][0] = 3
-		(*l).freePos[(*l).height-1][1] = 3
-		(*l).freePos[(*l).height-2][0] = 3
-		(*l).freePos[0][(*l).width-1] = 3
-		(*l).freePos[0][(*l).width-2] = 3
-		(*l).freePos[1][(*l).width-1] = 3
+		(*l).freePos[(*l).height-1][(*l).width-1] = Blocked
+		(*l).freePos[(*l).height-1][(*l).width-1-2] = Blocked
+		(*l).freePos[(*l).height-2][(*l).width-1] = Blocked
+		(*l).freePos[(*l).height-1][0] = Blocked
+		(*l).freePos[(*l).height-1][1] = Blocked
+		(*l).freePos[(*l).height-2][0] = Blocked
+		(*l).freePos[0][(*l).width-1] = Blocked
+		(*l).freePos[0][(*l).width-2] = Blocked
+		(*l).freePos[1][(*l).width-1] = Blocked
 		//Startplatz (alle Ecken) für vier Player im Spiel
 	default:
 		fmt.Println("Keine oder mehr als vier Startplätze gibt es nicht.")
@@ -83,7 +80,7 @@ func (l *lv) SetRandomTilesAndItems(numberTiles, numberItems int) {
 	var freeTiles [][2]int
 	for x := 0; x < width; x++ {
 		for y := 0; y < height; y++ {
-			if (*l).freePos[y][x] == 0 {
+			if (*l).freePos[y][x] == Free {
 				freeTiles = append(freeTiles, [2]int{x, y})
 			}
 		}
@@ -121,7 +118,7 @@ func (l *lv) SetRandomTilesAndItems(numberTiles, numberItems int) {
 		fmt.Println("Es werden nur ", len(freeTiles), " Tiele zufällig platziert.")
 		numberTiles = len(freeTiles)
 	}
-	t = 122//120 + rand.Intn(19)
+	t = 122 //120 + rand.Intn(19)
 	var nt tiles.Tile
 	for i < numberTiles {
 		index = rand.Intn(len(freeTiles))
@@ -132,7 +129,7 @@ func (l *lv) SetRandomTilesAndItems(numberTiles, numberItems int) {
 			((*l).tileMatrix[y][x][0]).Ani().SetVisible(false)
 		}
 		(*l).tileMatrix[y][x] = append((*l).tileMatrix[y][x], nt)
-		(*l).freePos[y][x] = 2
+		(*l).freePos[y][x] = Destroyable
 		freeTiles = append(freeTiles[:index], freeTiles[index+1:]...)
 		i++
 	}
@@ -154,11 +151,11 @@ func (l *lv) IsTile(x, y int) bool {
 	if x >= l.width || x < 0 || y >= l.height || y < 0 {
 		return true
 	}
-	return (*l).freePos[y][x] == 1 || (*l).freePos[y][x] == 2
+	return (*l).freePos[y][x] == Undestroyable || (*l).freePos[y][x] == Destroyable
 }
 
 func (l *lv) IsDestroyableTile(x, y int) bool {
-	return (*l).freePos[y][x] == 2
+	return (*l).freePos[y][x] == Destroyable
 }
 
 func (l *lv) GetPosOfNextTile(x, y int, dir pixel.Vec) (b bool, xx, yy int) {
@@ -178,10 +175,10 @@ func (l *lv) GetPosOfNextTile(x, y int, dir pixel.Vec) (b bool, xx, yy int) {
 func (l *lv) RemoveTile(x, y int) {
 	if len((*l).tileMatrix[y][x]) == 2 {
 		(*l).tileMatrix[y][x][1].Ani().Die()
-		(*l).freePos[y][x] = 0
+		(*l).freePos[y][x] = Free
 	} else if len((*l).tileMatrix[y][x]) == 1 {
 		(*l).tileMatrix[y][x][0].Ani().Die()
-		(*l).freePos[y][x] = 0
+		(*l).freePos[y][x] = Free
 	}
 }
 

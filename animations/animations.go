@@ -1066,6 +1066,7 @@ func (c *explosionAnimation) GetSprite() *pixel.Sprite {
 	// GetSprite() liefert den aktuell zu zeichnenden Sprite.
 	return c.sprite
 }
+func (c *explosionAnimation) GetView() uint8       { return 0 }
 func (c *explosionAnimation) IntroFinished() bool  { return true }
 func (c *explosionAnimation) IsVisible() bool      { return c.visible }
 func (c *explosionAnimation) SetView(uint8)        {}
@@ -1236,11 +1237,15 @@ func (c *basicAnimation) getSpriteCoords() pixel.Rect {
 
 	return pixel.R(v.X, v.Y, v.X+width.X, v.Y+width.Y)
 }
+func (c *basicAnimation) GetView() uint8      { return c.view }
 func (c *basicAnimation) IntroFinished() bool { return c.introFinished }
 func (c *basicAnimation) IsVisible() bool {
 	return c.visible
 }
 func (c *basicAnimation) SetView(view uint8) {
+	if c.view == view {
+		return
+	}
 	// SetView() setzt den View neu.
 	// Mögliche Eingabewerte sind Stay, Left, Right, Up, Down, Dead, Intro.
 	if view == Intro {
@@ -1341,6 +1346,8 @@ func (c *enhancedAnimation) getSpriteCoords() pixel.Rect {
 	return pixel.R(v.X, v.Y, v.X+width.X, v.Y+width.Y)
 }
 func (c *enhancedAnimation) SetView(view uint8) {
+
+	// Dieses "if" ist notwendig, damit eine Figur in der aktuellen Blickrichtung verharrt.
 	if view == Stay {
 		switch c.view {
 		case Left:
@@ -1365,6 +1372,7 @@ func (c *enhancedAnimation) SetView(view uint8) {
 			}
 		}
 	}
+
 	if view == Intro {
 		if c.hasIntro {
 			c.introFinished = false
@@ -1373,6 +1381,7 @@ func (c *enhancedAnimation) SetView(view uint8) {
 			view = Stay
 		}
 	}
+
 	if c.view != view {
 		c.view = view
 		c.count = 1
