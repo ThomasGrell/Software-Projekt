@@ -100,10 +100,10 @@ func checkForExplosions() {
 					xx, yy := arena1.GetFieldCoord(m.GetPos())
 					if x-i == xx && y == yy {
 						l = i
-						m.Ani().Die()
+						m.Ani().Die()	// ToDo: wird so nicht gezeigt, vmtl, weil die Monster sofort aus dem Monsterslice entfernt werden. Ändern.
 						monster[j], monster[len(monster)-1] = monster[len(monster)-1], monster[j]
 						monster = monster[:len(monster)-1]
-						whiteBomberman.AddPoints(m.GetPoints()+100)
+						whiteBomberman.AddPoints(m.GetPoints()+100)	// ToDo: Monster mit Killprämien belegen
 						break A
 					}
 					bmX, bmY := arena1.GetFieldCoord(whiteBomberman.GetPos())
@@ -300,118 +300,40 @@ func homeDir(dir uint8) (hdir uint8) {
 //		 gibt es mehr als zwei Möglichkeiten, wird eine zufällige, nicht rückwärtsgewandte, Richtung zurückgegeben.
 //		 links:0,rechts:1,oben:2,unten:3
 func dirChoice(m characters.Enemy) (dir uint8){
-	var grDirBool [4]bool = getGrantedDirections(m) // Wahrheitswerte der erlaubten Richtungen
-	//fmt.Println("grDirBool",grDirBool)
-	var grDirUint8 = make([]uint8,0)	// Zahlenwerte der erlaubten Richtungen (constants)
+	var grDirBool [4]bool = getGrantedDirections(m) // Wahrheitswerte der erlaubten Richtungen, bei Index 0: Up, 1: Down, 2: Left, 3: Right
+	var grDirUint8 = make([]uint8,0)	// Zahlenwerte der erlaubten Richtungen (constants): Up: 1, Down: 2, Left: 3, Right: 4
 	var n int	// Zählvariable um festzustellen, wie viele mögliche Richtungen es gibt
-	for j := range grDirBool {
+	for j := range grDirBool {	// Schleife zum Zählen der erlaubten Richtungen und um sie in den Richtungsslice grDirUint8 zu schreiben
 		if grDirBool[j] {
 			n++
 			grDirUint8 = append(grDirUint8, uint8(j+1))
 		}
 	}
-	if n == 0 {
-		dir = 0
-	}else if n == 1{
+	if n == 0 {	// keine erlaubte Richtung
+		dir = 0	// Stay
+	}else if n == 1{	// 1 erlaubte Richtung --> lauf sie
 		dir = grDirUint8[0]
-	}else if n == 2 {
-		for _,d := range grDirUint8{
+	}else if n == 2 {	//	2 erlaubte Richtungen
+		for _,d := range grDirUint8{	// wenn es nur weiter oder zurück geht, lauf weiter!
 			if d == m.GetDirection() {
 				dir = d
 				return
 			}
 		}
-		choice := rand.Intn(len(grDirUint8))
+		choice := rand.Intn(len(grDirUint8)) //	wenn du abbiegen kannst, tu das oder lauf zurück
 		dir = grDirUint8[choice]
-	}else{
+	}else{	// drei oder vier erlaubte Richtungen
 		for i, d := range grDirUint8{
 			if d == homeDir(m.GetDirection()) {	// verhindert das Zurücklaufen bei mehr als zwei erlaubten Wegen
 				grDirUint8[i] = grDirUint8[len(grDirUint8)-1]
 				grDirUint8 = grDirUint8[:len(grDirUint8)-1]
 			}
 		}
-		choice := rand.Intn(len(grDirUint8))
+		choice := rand.Intn(len(grDirUint8))	// wähle eine zufällige (außer zurück)
 		dir = grDirUint8[choice]
 	}
 	return
 }
-//func dirChoice(monster characters.Enemy) (dir uint8) {
-//	grDir := getGrantedDirections(monster)
-//	var grDirInt = make([]uint8, 0)
-//	var goingBack uint8
-//	var n uint8
-//	for j := range grDir {
-//		if grDir[j] {
-//			n++
-//			switch monster.GetDirection() {
-//			case Left:
-//				if j != Right {
-//					grDirInt = append(grDirInt, uint8(j))
-//				} else {
-//					goingBack = 1
-//				}
-//			case Right:
-//				if j != Left {
-//					grDirInt = append(grDirInt, uint8(j))
-//				} else {
-//					goingBack = 0
-//				}
-//			case Up:
-//				if j != Down {
-//					grDirInt = append(grDirInt, uint8(j))
-//				} else {
-//					goingBack = 3
-//				}
-//			case Down:
-//				if j != Up {
-//					grDirInt = append(grDirInt, uint8(j))
-//				} else {
-//					goingBack = 2
-//				}
-//			}
-//		}
-//	}
-//	if n > 2 {
-//		choice := rand.Intn(len(grDirInt))
-//		dir = grDirInt[choice]
-//	} else if n == 1 {
-//		dir = goingBack
-//	} else {
-//		dir = monster.GetDirection()
-//	}
-//	return
-//}
-//func getGrantedDirections(c characters.Character) [4]bool {
-//	var b [4]bool
-//	b[0] = true
-//	b[1] = true
-//	b[2] = true
-//	b[3] = true
-//	pb := c.GetPosBox()
-//	xll,yll := arena1.GetFieldCoord(pb.Min)
-//	xur,yur := arena1.GetFieldCoord(pb.Max)
-//	ll := pixel.V(float64(xll*TileSize),float64(yll*TileSize)).Sub(pixel.V(0,2))
-//	ur := pixel.V(float64(xur*TileSize),float64(yur*TileSize)).Sub(pixel.V(0,2))
-//	x,y := arena1.GetFieldCoord(c.GetPos())
-//	fmt.Println("Coords",x,y,"Laut PosBox ll",ll.X/TileSize,ll.Y/TileSize,"ur",ur.X/TileSize,ur.Y/TileSize )
-//	if lev1.IsTile(int((ll.X-1)/TileSize), int(ll.Y/TileSize)) || lev1.IsTile(int((ll.X-1)/TileSize), int(ur.Y/TileSize)) || ll.X-1 < 0 {
-//		b[2] = false
-//	}
-//	if int((ur.X+1)/TileSize) > arena1.GetWidth()-1 {
-//		b[3] = false
-//	} else if lev1.IsTile(int((ur.X+1)/TileSize), int(ll.Y/TileSize)) || lev1.IsTile(int((ur.X+1)/TileSize), int(ur.Y/TileSize)) {
-//		b[3] = false
-//	}
-//	if int((ur.Y+1)/TileSize) > arena1.GetHeight()-1 {
-//		b[0] = false
-//	} else if lev1.IsTile(int(ll.X/TileSize), int((ur.Y+1)/TileSize)) || lev1.IsTile(int(ur.X/TileSize), int((ur.Y+1)/TileSize)) {
-//		b[0] = false
-//	}
-//	if lev1.IsTile(int(ll.X/TileSize), int((ll.Y-1)/TileSize)) || lev1.IsTile(int(ur.X/TileSize), int((ll.Y-1)/TileSize)) || ll.Y-1 < 0 {
-//		b[1] = false
-//	}
-//	return b
-//}
 func getGrantedDirections(c characters.Character) [4]bool {
 	var b [4]bool
 	b[0] = true
@@ -568,7 +490,7 @@ func sun() {
 
 	// 2 Enemys
 	monster = append(monster, characters.NewEnemy(YellowPopEye))
-	//monster = append(monster, characters.NewEnemy(Drop))
+	monster = append(monster, characters.NewEnemy(Drop))
 
 	rand.Seed(time.Now().UnixNano())
 
@@ -636,10 +558,17 @@ func sun() {
 		/////////////////////////////////////Moving Enemys ///////////////////////////////////////////////////////////
 
 		for _, m := range monster {
-			var d uint8 = dirChoice(m)
-			m.SetDirection(d)
+			xx,yy := arena1.GetFieldCoord(m.GetPos())
+			x,y := arena1.GetFieldCoord(whiteBomberman.GetPos())
+			if x == xx && y == yy {	// wenn Monster und Bomberman auf dem gleichen Feld sind, wird dem Bm ein Leben abgezogen
+				whiteBomberman.DecLife()
+				if whiteBomberman.GetLife() == 0 {
+					whiteBomberman.Ani().Die()	// ToDo: funktioniert nicht (mehr) - Bm bleibt sichtbar und bewegbar
+				}
+			}
+			m.SetDirection(dirChoice(m))
 			pos1 := math.Round(10*(m.GetPos().X+m.GetPos().Y)) / 10 // Auf eine Nachkommastelle runden.
-			moveCharacter(m, dt, m.GetDirection())
+			moveCharacter(m, dt, m.GetDirection())	// in die gewählte Richtung laufen
 			//fmt.Println("d:",d,"m.GetDir",m.GetDirection(),"moved",b)
 			pos2 := math.Round(10*(m.GetPos().X+m.GetPos().Y)) / 10
 			if pos1 == pos2 { // monster konnte sich nicht bewegen --> neue Richtung probieren.
