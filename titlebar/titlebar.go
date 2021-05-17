@@ -88,7 +88,7 @@ func (t *titlebarStruct) Draw(target pixel.Target) {
 }
 
 func (t *titlebarStruct) GetSeconds() uint16 {
-	return t.timeLeft << 1
+	return t.timeLeft
 }
 
 func (t *titlebarStruct) SetLifePointers(lifePointers ...*uint8) {
@@ -116,7 +116,7 @@ func (t *titlebarStruct) SetPointsPointer(pointPointer *uint32) {
 
 func (t *titlebarStruct) SetSeconds(seconds uint16) {
 	t.mutex.Lock()
-	t.timeLeft = seconds >> 1
+	t.timeLeft = seconds
 	t.mutex.Unlock()
 }
 
@@ -157,7 +157,7 @@ func (t *titlebarStruct) countdown() {
 		}
 		t.mutex.Unlock()
 		t.Update()
-		time.Sleep(2*time.Second - time.Since(last)) // Etwa alle 2 Sekunden wird der Countdown heruntergezählt
+		time.Sleep(time.Second - time.Since(last)) // Etwa alle 2 Sekunden wird der Countdown heruntergezählt
 		last = time.Now()
 	}
 }

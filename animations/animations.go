@@ -1066,12 +1066,12 @@ func (c *explosionAnimation) GetSprite() *pixel.Sprite {
 	// GetSprite() liefert den aktuell zu zeichnenden Sprite.
 	return c.sprite
 }
-func (c *explosionAnimation) GetView() uint8       { return 0 }
-func (c *explosionAnimation) IntroFinished() bool  { return true }
-func (c *explosionAnimation) IsVisible() bool      { return c.visible }
-func (c *explosionAnimation) SetView(uint8)        {}
-func (c *explosionAnimation) SetIntervall(i int64) { c.intervall = i }
-func (c *explosionAnimation) SetVisible(b bool)    { c.visible = b }
+func (c *explosionAnimation) GetView() uint8         { return 0 }
+func (c *explosionAnimation) IsVisible() bool        { return c.visible }
+func (c *explosionAnimation) SetView(uint8)          {}
+func (c *explosionAnimation) SetIntervall(i int64)   { c.intervall = i }
+func (c *explosionAnimation) SetVisible(b bool)      { c.visible = b }
+func (c *explosionAnimation) SequenceFinished() bool { return true }
 func (c *explosionAnimation) Show() {
 	c.visible = true
 	c.lastUpdate = time.Now().UnixNano()
@@ -1237,10 +1237,22 @@ func (c *basicAnimation) getSpriteCoords() pixel.Rect {
 
 	return pixel.R(v.X, v.Y, v.X+width.X, v.Y+width.Y)
 }
-func (c *basicAnimation) GetView() uint8      { return c.view }
+func (c *basicAnimation) GetView() uint8 { return c.view }
+
+/*
 func (c *basicAnimation) IntroFinished() bool { return c.introFinished }
+*/
 func (c *basicAnimation) IsVisible() bool {
 	return c.visible
+}
+func (c *basicAnimation) SequenceFinished() bool {
+	if c.view == Intro {
+		return c.introFinished
+	}
+	if c.view == Dead {
+		return !c.visible
+	}
+	return true
 }
 func (c *basicAnimation) SetView(view uint8) {
 	if c.view == view {
@@ -1427,6 +1439,8 @@ func init() {
 
 	bm = new(enhancedAnimation)
 	bm.visible = false
+	bm.hasIntro = false
+	bm.introFinished = true
 	bm.pos.X = 19
 	bm.pos.Y = 19
 	bm.width.X = 10
@@ -1459,6 +1473,8 @@ func init() {
 
 	// Monster Prototyp
 	en = new(enhancedAnimation)
+	en.hasIntro = false
+	en.introFinished = true
 	en.visible = false
 	en.width.X = 10
 	en.width.Y = 10
@@ -1468,8 +1484,6 @@ func init() {
 	en.count = 2
 	en.delta = 1
 	en.seesaw = true
-	en.hasIntro = false
-	en.introFinished = true
 	en.pos.X = 304
 	en.pos.Y = 368
 	en.n = 1

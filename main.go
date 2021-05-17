@@ -25,12 +25,23 @@ var tempAniSlice [][]interface{} // [Animation][Matrix]
 var monster []characters.Enemy
 var whiteBomberman characters.Player
 
+var clearingNeeded bool = false
+
+func clearMonsters() {
+	remains := make([]characters.Enemy, 0)
+	for _, m := range monster {
+		if m.IsAlife() || !m.Ani().SequenceFinished() {
+			remains = append(remains, m)
+		}
+	}
+	monster = remains[:]
+}
+
 // Vor: ...
 // Eff: Ist der Counddown der Bombe abgelaufen passiert folgendes:
 //     		- Eine neue Explosionsanimation ist erstellt und an die Position der ehemaligen bombe gesetzt.
 //      	- Es ertönt der Explosionssound.
 //      Ist der Countdown nicht abgelaufen, passiert nichts.
-
 func checkForExplosions() {
 
 	for _, item := range bombs {
@@ -93,99 +104,116 @@ func checkForExplosions() {
 
 			// falls sich ein Monster oder Player im Explosionsradius befindet
 
-		A:
+			bmX, bmY := arena1.GetFieldCoord(whiteBomberman.GetPosBox().Center())
 			for i := 0; i <= l; i++ {
-				for j, m := range monster {
-					xx, yy := arena1.GetFieldCoord(m.GetPos())
+				for _, m := range monster {
+					if !m.Ani().SequenceFinished() {
+						continue
+					}
+					xx, yy := arena1.GetFieldCoord(m.GetPosBox().Center())
 					if x-i == xx && y == yy {
 						l = i
-						m.Ani().Die() // ToDo: wird so nicht gezeigt, vmtl, weil die Monster sofort aus dem Monsterslice entfernt werden. Ändern.
-						monster[j], monster[len(monster)-1] = monster[len(monster)-1], monster[j]
-						monster = monster[:len(monster)-1]
-						whiteBomberman.AddPoints(m.GetPoints() + 100) // ToDo: Monster mit Killprämien belegen
-						break A
-					}
-					bmX, bmY := arena1.GetFieldCoord(whiteBomberman.GetPos())
-					if x-i == bmX && y == bmY {
-						l = i
-						whiteBomberman.DecLife()
-						if whiteBomberman.GetLife() == 0 {
-							whiteBomberman.Ani().Die()
+						if !m.IsAlife() {
+							clearingNeeded = true
+							continue
 						}
-						break A
+						m.DecLife()
+						if !m.IsAlife() {
+							m.Ani().Die()
+						}
+						whiteBomberman.AddPoints(m.GetPoints() + 100)
+						break
 					}
+				}
+				if x-i == bmX && y == bmY && whiteBomberman.Ani().SequenceFinished() {
+					l = i
+					whiteBomberman.DecLife()
+					whiteBomberman.Ani().Die()
+					break
 				}
 			}
 
-		B:
-			for i := 0; i <= r; i++ {
-				for j, m := range monster {
-					xx, yy := arena1.GetFieldCoord(m.GetPos())
+			for i := 1; i <= r; i++ {
+				for _, m := range monster {
+					if !m.Ani().SequenceFinished() {
+						continue
+					}
+					xx, yy := arena1.GetFieldCoord(m.GetPosBox().Center())
 					if x+i == xx && y == yy {
 						r = i
-						m.Ani().Die()
-						monster[j], monster[len(monster)-1] = monster[len(monster)-1], monster[j]
-						monster = monster[:len(monster)-1]
-						whiteBomberman.AddPoints(m.GetPoints() + 100)
-						break B
-					}
-					bmX, bmY := arena1.GetFieldCoord(whiteBomberman.GetPos())
-					if x+i == bmX && y == bmY {
-						r = i
-						whiteBomberman.DecLife()
-						if whiteBomberman.GetLife() == 0 {
-							whiteBomberman.Ani().Die()
+						if !m.IsAlife() {
+							clearingNeeded = true
+							continue
 						}
-						break B
+						m.DecLife()
+						if !m.IsAlife() {
+							m.Ani().Die()
+						}
+						whiteBomberman.AddPoints(m.GetPoints() + 100)
+						break
 					}
+				}
+				if x+i == bmX && y == bmY && whiteBomberman.Ani().SequenceFinished() {
+					r = i
+					whiteBomberman.DecLife()
+					whiteBomberman.Ani().Die()
+					break
 				}
 			}
 
-		C:
-			for i := 0; i <= u; i++ {
-				for j, m := range monster {
-					xx, yy := arena1.GetFieldCoord(m.GetPos())
+			for i := 1; i <= u; i++ {
+				for _, m := range monster {
+					if !m.Ani().SequenceFinished() {
+						continue
+					}
+					xx, yy := arena1.GetFieldCoord(m.GetPosBox().Center())
 					if y+i == yy && x == xx {
 						u = i
-						m.Ani().Die()
-						monster[j], monster[len(monster)-1] = monster[len(monster)-1], monster[j]
-						monster = monster[:len(monster)-1]
-						whiteBomberman.AddPoints(m.GetPoints() + 100)
-						break C
-					}
-					bmX, bmY := arena1.GetFieldCoord(whiteBomberman.GetPos())
-					if x == bmX && y+i == bmY {
-						u = i
-						whiteBomberman.DecLife()
-						if whiteBomberman.GetLife() == 0 {
-							whiteBomberman.Ani().Die()
+						if !m.IsAlife() {
+							clearingNeeded = true
+							continue
 						}
-						break C
+						m.DecLife()
+						if !m.IsAlife() {
+							m.Ani().Die()
+						}
+						whiteBomberman.AddPoints(m.GetPoints() + 100)
+						break
 					}
+				}
+				if x == bmX && y+i == bmY && whiteBomberman.Ani().SequenceFinished() {
+					u = i
+					whiteBomberman.DecLife()
+					whiteBomberman.Ani().Die()
+					break
 				}
 			}
 
-		D:
-			for i := 0; i <= d; i++ {
-				for j, m := range monster {
-					xx, yy := arena1.GetFieldCoord(m.GetPos())
+			for i := 1; i <= d; i++ {
+				for _, m := range monster {
+					if !m.Ani().SequenceFinished() {
+						continue
+					}
+					xx, yy := arena1.GetFieldCoord(m.GetPosBox().Center())
 					if y-i == yy && x == xx {
 						d = i
-						m.Ani().Die()
-						monster[j], monster[len(monster)-1] = monster[len(monster)-1], monster[j]
-						monster = monster[:len(monster)-1]
-						whiteBomberman.AddPoints(m.GetPoints() + 100)
-						break D
-					}
-					bmX, bmY := arena1.GetFieldCoord(whiteBomberman.GetPos())
-					if x == bmX && y-i == bmY {
-						d = i
-						whiteBomberman.DecLife()
-						if whiteBomberman.GetLife() == 0 {
-							whiteBomberman.Ani().Die()
+						if !m.IsAlife() {
+							clearingNeeded = true
+							continue
 						}
-						break D
+						m.DecLife()
+						if !m.IsAlife() {
+							m.Ani().Die()
+						}
+						whiteBomberman.AddPoints(m.GetPoints() + 100)
+						break
 					}
+				}
+				if x == bmX && y-i == bmY && whiteBomberman.Ani().SequenceFinished() {
+					d = i
+					whiteBomberman.DecLife()
+					whiteBomberman.Ani().Die()
+					break
 				}
 			}
 
@@ -244,6 +272,9 @@ func checkForExplosions() {
 			tempAniSlice = append(tempAniSlice, tempAni)
 			s2 := sounds.NewSound(Deathflash)
 			go s2.PlaySound()
+			if clearingNeeded {
+				clearMonsters()
+			}
 		}
 	}
 
@@ -434,6 +465,9 @@ func moveCharacter2(c interface{}, dt float64) {
 	nextPos := getNextPosition(c, dt)
 	var newDirChoice bool = false
 	chr := c.(characters.Character)
+	if !chr.Ani().SequenceFinished() {
+		return
+	}
 
 	// Blickt man in Bewegungsrichtung, so werden von der hinteren linken Ecke (Min) der PosBox die
 	// ganzzahligen Koordinaten im Spielfeld berechnet.
@@ -446,6 +480,8 @@ func moveCharacter2(c interface{}, dt float64) {
 		return
 	}
 
+	// Versperren Wände den Weg? Falls ja, geht es in dieser Richtung nicht weiter.
+	// Eine neue Richtung muss her, also wird newDirChoice auf true gesetzt.
 	switch chr.GetDirection() {
 	case Left:
 		x1, y1 := arena1.GetFieldCoord(nextPos.Min)
@@ -488,7 +524,9 @@ func moveCharacter2(c interface{}, dt float64) {
 	switch c.(type) {
 	case characters.Enemy:
 
+		// War kein Hindernis im Weg?
 		if !newDirChoice {
+			// Stehe ich auf einem neuen Feld?
 			if newFieldNo != chr.GetFieldNo() {
 				// Ein neues Feld wurde vollständig betreten.
 				// Jetzt ist es Zeit zu überprüfen, ob die Bewegungsrichtung
@@ -497,6 +535,7 @@ func moveCharacter2(c interface{}, dt float64) {
 			}
 		}
 
+		// Ein Richtungswechsel steht ggf. an
 		if newDirChoice {
 			possibleDirections, n := getPossibleDirections(arena1.GetFieldCoord(chr.GetPosBox().Center()))
 			if n == 0 { // keine erlaubte Richtung
@@ -516,7 +555,9 @@ func moveCharacter2(c interface{}, dt float64) {
 		}
 
 	case characters.Player:
+		// Ist ein Hindernis im Weg?
 		if newDirChoice {
+			// Und tschüss. Keine Bewegung möglich.
 			return
 		}
 	}
@@ -683,7 +724,7 @@ func sun() {
 	tb.Update()
 
 	// 2 Enemys
-	monster = append(monster, characters.NewEnemy(YellowPopEye))
+	monster = append(monster, characters.NewEnemy(Balloon))
 	monster = append(monster, characters.NewEnemy(Drop))
 
 	rand.Seed(time.Now().UnixNano())
@@ -741,7 +782,13 @@ func sun() {
 			keypressed = true
 		}
 		if !keypressed {
-			whiteBomberman.Ani().SetView(Stay)
+			if whiteBomberman.Ani().SequenceFinished() && whiteBomberman.IsAlife() {
+				if !whiteBomberman.Ani().IsVisible() {
+					whiteBomberman.Ani().SetVisible(true)
+					whiteBomberman.Ani().SetView(Down)
+				}
+				whiteBomberman.Ani().SetView(Stay)
+			}
 		}
 		if win.JustPressed(pixelgl.KeyB) {
 			pb := whiteBomberman.GetPosBox()
@@ -756,10 +803,10 @@ func sun() {
 		/////////////////////////////////////Moving Enemys ///////////////////////////////////////////////////////////
 
 		for _, m := range monster {
-			if whiteBomberman.GetPosBox().Intersects(m.GetPosBox()) {
-				whiteBomberman.DecLife()
-				if !whiteBomberman.IsAlife() {
-					whiteBomberman.Ani().Die() // ToDo: funktioniert nicht (mehr) - Bm bleibt sichtbar und bewegbar
+			if m.IsAlife() && m.Ani().SequenceFinished() {
+				if whiteBomberman.Ani().SequenceFinished() && whiteBomberman.GetPosBox().Intersects(m.GetPosBox()) {
+					whiteBomberman.DecLife()
+					whiteBomberman.Ani().Die()
 				}
 			}
 			moveCharacter2(m, dt)
@@ -770,7 +817,7 @@ func sun() {
 				if x == xx && y == yy {	// wenn Monster und Bomberman auf dem gleichen Feld sind, wird dem Bm ein Leben abgezogen
 					whiteBomberman.DecLife()
 					if !whiteBomberman.IsAlife() {
-						whiteBomberman.Ani().Die()	// ToDo: funktioniert nicht (mehr) - Bm bleibt sichtbar und bewegbar
+						whiteBomberman.Ani().Die()
 					}
 				}
 

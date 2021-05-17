@@ -24,7 +24,7 @@ Animationen sind teilweise von Bewegungsrichtung abhängig.
 var bm *player
 var en *enemy
 
-const cBoxSize = 14
+const cBoxSize = 15
 
 type player struct {
 	character
@@ -77,11 +77,13 @@ func NewEnemy(t uint8) *enemy {
 	c.matrix = pixel.IM.Moved(c.GetMovedPos())
 	switch t {
 	case Balloon:
+		c.speed = 10
 	case Teddy:
-		c.follow = true
+		c.speed = 30
 	case Ghost:
-		c.wallghost = true
+		c.speed = 30
 	case Drop:
+		c.speed = 20
 	case Pinky:
 	case BluePopEye:
 	case Jellyfish:

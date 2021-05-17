@@ -43,12 +43,18 @@ type Animation interface {
 	//  Vor.: keine
 	//	Eff.: Hat die Animation eine Introsequenz, so liefert die Funktion false, solange die Sequenz nicht beendet ist.
 	//		  In allen anderen Fällen wird true geliefert.
-	IntroFinished() bool
+	// IntroFinished() bool // Ersetzt durch SequenceFinished
 
 	//	Vor.: keine
 	//	Eff.: Liefert true wenn die Animation sichtbar ist. Am Ende einer Todessequenz wird die Sichtbarkeit stets auf
 	//		  false gesetzt. Eine neu erstellte Animation ist ebenfalls nicht sichtbar und muss mit Show() gestartet werden.
 	IsVisible() bool
+
+	//  Vor.: keine
+	//	Eff.: Durchläuft die Animation gerade eine Intro- oder Todessequenz,
+	//		  so liefert die Funktion false, solange die Sequenz nicht beendet ist.
+	//		  In allen anderen Fällen wird true geliefert.
+	SequenceFinished() bool
 
 	//	Vor.: keine
 	//	Eff.: Mittels der Konstanten Intro, Dead, Left, Right, Up, Down und Stay kann das Aussehen der Animation
