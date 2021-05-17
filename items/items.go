@@ -3,10 +3,8 @@ package items
 import (
 	"../animations"
 	"../characters"
-	. "../constants"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
-	"math"
 	"time"
 )
 
@@ -21,8 +19,8 @@ type data struct {
 	ani         animations.Animation
 	matrix      pixel.Matrix
 	pos         pixel.Vec
-	timeStamp 	time.Time
-	itemType uint8
+	timeStamp   time.Time
+	itemType    uint8
 }
 
 type bombe struct {
@@ -31,7 +29,7 @@ type bombe struct {
 
 	// Weshalb float64 und nicht uint8 ???
 	power float64 // Wirkungsradius der Bomben
-	
+
 	// Der Bombe fehlt ein Zeitstempel, wann sie gelegt wurde,
 	// damit sie nach Ablauf einer Zeitspanne explodieren kann.
 	// Auch die Zeitspanne sollte man setzen können, um ggf
@@ -48,25 +46,25 @@ func NewItem(t uint8, pos pixel.Vec) *data {
 	((*item).ani).Show()
 	(*item).matrix = pixel.IM.Moved(pos)
 	(*item).pos = pos
-	d,_:= time.ParseDuration("100m")
+	d, _ := time.ParseDuration("100m")
 	(*item).timeStamp = (time.Now()).Add(d)
 	return item
 }
 
-func NewBomb(p characters.Player) *bombe {
-	var bomb = new(bombe)
-	(*bomb).itemType = Bomb
-	(*bomb).owner = p
-	(*bomb).power = float64(p.GetPower())
-	(*bomb).ani = animations.NewAnimation(Bomb)
-	((*bomb).ani).Show()
-	//fmt.Println(p.GetPosBox().Min)
-	(*bomb).pos = pixel.Vec{math.Round(p.GetPosBox().Center().X/TileSize) * TileSize, math.Round(p.GetPosBox().Center().Y/TileSize) * TileSize}
-	(*bomb).matrix = pixel.IM.Moved(bomb.pos)
-	d,_:= time.ParseDuration("3s")
-	(*bomb).timeStamp = (time.Now()).Add(d)
-	return bomb
-}
+//func NewBomb(p characters.Player) *bombe {
+//	var bomb = new(bombe)
+//	(*bomb).itemType = Bomb
+//	(*bomb).owner = p
+//	(*bomb).power = float64(p.GetPower())
+//	(*bomb).ani = animations.NewAnimation(Bomb)
+//	((*bomb).ani).Show()
+//	//fmt.Println(p.GetPosBox().Min)
+//	(*bomb).pos = pixel.Vec{math.Round(p.GetPosBox().Center().X/TileSize) * TileSize, math.Round(p.GetPosBox().Center().Y/TileSize) * TileSize}
+//	(*bomb).matrix = pixel.IM.Moved(bomb.pos)
+//	d,_:= time.ParseDuration("3s")
+//	(*bomb).timeStamp = (time.Now()).Add(d)
+//	return bomb
+//}
 
 func (item *data) SetDestroyable(b bool) {
 	(*item).destroyable = b
@@ -103,11 +101,11 @@ func (item *data) GetPos() pixel.Vec {
 	return (*item).pos
 }
 
-func (item *data) GetTimeStamp () time.Time {
+func (item *data) GetTimeStamp() time.Time {
 	return (*item).timeStamp
 }
 
-func (item *data) SetTimeStamp (t time.Time) {
+func (item *data) SetTimeStamp(t time.Time) {
 	(*item).timeStamp = t
 }
 
@@ -134,7 +132,7 @@ func (item *bombe) GetPower() float64 {
 	return (*item).power
 }
 
-func (item *bombe) SetAnimation (newAni animations.Animation) {
+func (item *bombe) SetAnimation(newAni animations.Animation) {
 	(*item).ani = newAni
 	((*item).ani).Update()
 }

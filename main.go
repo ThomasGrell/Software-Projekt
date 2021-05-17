@@ -391,6 +391,29 @@ func dirChoice(m characters.Enemy) (dir uint8){
 }
 */
 func getPossibleDirections(x, y int) (possibleDir [4]uint8, n uint8) {
+	b, _ := isThereABomb(x-1, y)
+	if x != 0 && !lev1.IsTile(x-1, y) && !b {
+		possibleDir[n] = Left
+		n++
+	}
+	b, _ = isThereABomb(x+1, y)
+	if x != arena1.GetWidth()-1 && !lev1.IsTile(x+1, y) && !b {
+		possibleDir[n] = Right
+		n++
+	}
+	b, _ = isThereABomb(x, y-1)
+	if y != 0 && !lev1.IsTile(x, y-1) && !b {
+		possibleDir[n] = Down
+		n++
+	}
+	b, _ = isThereABomb(x, y+1)
+	if y != arena1.GetHeight()-1 && !lev1.IsTile(x, y+1) && !b {
+		possibleDir[n] = Up
+		n++
+	}
+	return
+}
+func getPossibleDirectionsBombghost(x, y int) (possibleDir [4]uint8, n uint8) {
 	if x != 0 && !lev1.IsTile(x-1, y) {
 		possibleDir[n] = Left
 		n++
@@ -553,7 +576,13 @@ func moveCharacter2(c interface{}, dt float64) {
 
 		// Ein Richtungswechsel steht ggf. an
 		if newDirChoice {
-			possibleDirections, n := getPossibleDirections(arena1.GetFieldCoord(chr.GetPosBox().Center()))
+			var possibleDirections [4]uint8
+			var n uint8
+			if !chr.IsBombghost() {
+				possibleDirections, n = getPossibleDirections(arena1.GetFieldCoord(chr.GetPosBox().Center()))
+			} else {
+				possibleDirections, n = getPossibleDirectionsBombghost(arena1.GetFieldCoord(chr.GetPosBox().Center()))
+			}
 			if n == 0 { // keine erlaubte Richtung
 				chr.SetDirection(Stay) // Stay
 			} else if n == 1 { // 1 erlaubte Richtung --> lauf sie
@@ -740,8 +769,9 @@ func sun() {
 	tb.Update()
 
 	// 2 Enemys
-	//monster = append(monster, characters.NewEnemy(Balloon))
-	//monster = append(monster, characters.NewEnemy(Drop))
+	monster = append(monster, characters.NewEnemy(Balloon))
+	monster[0].SetBombghost(true)
+	monster = append(monster, characters.NewEnemy(Drop))
 
 	rand.Seed(time.Now().UnixNano())
 
