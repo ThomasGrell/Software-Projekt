@@ -240,25 +240,25 @@ func checkForExplosions() {
 			// falls weitere Bomben im Explosionsradius liegen, werden auch gleich explodieren
 
 			for i := 1; i <= l; i++ {
-				b, bom := isThereABomb(item.GetPos().Add(pixel.V(float64(-i)*TileSize, 0)))
+				b, bom := isThereABomb(arena1.GetFieldCoord(item.GetPos().Add(pixel.V(float64(-i)*TileSize, 0))))
 				if b {
 					bom.SetTimeStamp(time.Now())
 				}
 			}
 			for i := 1; i <= r; i++ {
-				b, bom := isThereABomb(item.GetPos().Add(pixel.V(float64(i)*TileSize, 0)))
+				b, bom := isThereABomb(arena1.GetFieldCoord(item.GetPos().Add(pixel.V(float64(i)*TileSize, 0))))
 				if b {
 					bom.SetTimeStamp(time.Now())
 				}
 			}
 			for i := 1; i <= u; i++ {
-				b, bom := isThereABomb(item.GetPos().Add(pixel.V(0, float64(i)*TileSize)))
+				b, bom := isThereABomb(arena1.GetFieldCoord(item.GetPos().Add(pixel.V(0, float64(i)*TileSize))))
 				if b {
 					bom.SetTimeStamp(time.Now())
 				}
 			}
 			for i := 1; i <= d; i++ {
-				b, bom := isThereABomb(item.GetPos().Add(pixel.V(0, float64(-i)*TileSize)))
+				b, bom := isThereABomb(arena1.GetFieldCoord(item.GetPos().Add(pixel.V(0, float64(-i)*TileSize))))
 				if b {
 					bom.SetTimeStamp(time.Now())
 				}
@@ -312,6 +312,17 @@ func clearExplosions(existingExplosions [][]interface{}) (remainingExplosions []
 	return remainingExplosions
 }
 
+func isThereABomb(x, y int) (bool, tiles.Bombe) {
+	for _, item := range bombs {
+		xx, yy := arena1.GetFieldCoord(item.GetPos())
+		if xx == x && yy == y {
+			return true, item
+		}
+	}
+	return false, nil
+}
+
+/*
 func isThereABomb(v pixel.Vec) (bool, tiles.Bombe) {
 	for _, item := range bombs {
 		if item.GetPos() == v {
@@ -320,6 +331,7 @@ func isThereABomb(v pixel.Vec) (bool, tiles.Bombe) {
 	}
 	return false, nil
 }
+*/
 
 /*
 // Herkunftsrichtung
@@ -485,8 +497,8 @@ func moveCharacter2(c interface{}, dt float64) {
 	switch chr.GetDirection() {
 	case Left:
 		x1, y1 := arena1.GetFieldCoord(nextPos.Min)
-		bombThere, _ := isThereABomb(pixel.V(float64(x1*TileSize)+arena1.GetLowerLeft().X+TileSize/2,float64(y1*TileSize)+arena1.GetLowerLeft().Y+TileSize/2))
-		if lev1.IsTile(x1, y1) || x1 < 0 || bombThere{
+		bombThere, _ := isThereABomb(xnow-1, ynow)
+		if lev1.IsTile(x1, y1) || x1 < 0 || bombThere {
 			newDirChoice = true
 		}
 		x1, y1 = arena1.GetFieldCoord(pixel.Vec{nextPos.Min.X, nextPos.Max.Y})
@@ -495,17 +507,17 @@ func moveCharacter2(c interface{}, dt float64) {
 		}
 	case Right:
 		x1, y1 := arena1.GetFieldCoord(nextPos.Max)
-		bombThere, _ := isThereABomb(pixel.V(float64(x1*TileSize)+arena1.GetLowerLeft().X+TileSize/2,float64(y1*TileSize)+arena1.GetLowerLeft().Y+TileSize/2))
-		if lev1.IsTile(x1, y1) || bombThere{
+		bombThere, _ := isThereABomb(xnow+1, ynow)
+		if lev1.IsTile(x1, y1) || bombThere {
 			newDirChoice = true
 		}
 		x1, y1 = arena1.GetFieldCoord(pixel.Vec{nextPos.Max.X, nextPos.Min.Y})
-		if lev1.IsTile(x1, y1) || bombThere{
+		if lev1.IsTile(x1, y1) || bombThere {
 			newDirChoice = true
 		}
 	case Up:
 		x1, y1 := arena1.GetFieldCoord(nextPos.Max)
-		bombThere, _ := isThereABomb(pixel.V(float64(x1*TileSize)+arena1.GetLowerLeft().X+TileSize/2,float64(y1*TileSize)+arena1.GetLowerLeft().Y+TileSize/2))
+		bombThere, _ := isThereABomb(xnow, ynow+1)
 		if lev1.IsTile(x1, y1) || y1 > arena1.GetHeight() || bombThere {
 			newDirChoice = true
 		}
@@ -515,12 +527,12 @@ func moveCharacter2(c interface{}, dt float64) {
 		}
 	case Down:
 		x1, y1 := arena1.GetFieldCoord(nextPos.Min)
-		bombThere, _ := isThereABomb(pixel.V(float64(x1*TileSize)+arena1.GetLowerLeft().X+TileSize/2,float64(y1*TileSize)+arena1.GetLowerLeft().Y+TileSize/2))
-		if lev1.IsTile(x1, y1) || y1 < 0 || bombThere{
+		bombThere, _ := isThereABomb(xnow, ynow-1)
+		if lev1.IsTile(x1, y1) || y1 < 0 || bombThere {
 			newDirChoice = true
 		}
 		x1, y1 = arena1.GetFieldCoord(pixel.Vec{nextPos.Max.X, nextPos.Min.Y})
-		if lev1.IsTile(x1, y1) || bombThere{
+		if lev1.IsTile(x1, y1) || bombThere {
 			newDirChoice = true
 		}
 	}
@@ -797,7 +809,7 @@ func sun() {
 		if win.JustPressed(pixelgl.KeyB) {
 			pb := whiteBomberman.GetPosBox()
 			loleft := arena1.GetLowerLeft()
-			b, _ := isThereABomb(pixel.Vec{X: math.Round(pb.Center().X/TileSize) * TileSize, Y: math.Round(pb.Center().Y/TileSize) * TileSize})
+			b, _ := isThereABomb(arena1.GetFieldCoord(pixel.Vec{X: math.Round(pb.Center().X/TileSize) * TileSize, Y: math.Round(pb.Center().Y/TileSize) * TileSize}))
 			c := lev1.IsTile(int((pb.Min.X-loleft.X)/TileSize), int((pb.Min.Y-loleft.Y)/TileSize))
 			if !b && !c {
 				bombs = append(bombs, tiles.NewBomb(whiteBomberman))
