@@ -24,7 +24,7 @@ Animationen sind teilweise von Bewegungsrichtung abhängig.
 var bm *player
 var en *enemy
 
-const cBoxSize = 15
+
 
 type player struct {
 	character
@@ -57,7 +57,7 @@ func NewPlayer(t uint8) *player {
 	switch t {
 	case WhiteBomberman, BlackBomberman, BlueBomberman, RedBomberman:
 		*c = *bm
-		c.collisionbox = pixel.R(-cBoxSize/2, -cBoxSize*3/4, cBoxSize/2, cBoxSize/4)
+		c.collisionbox = pixel.R(-CBoxSize/2, -CBoxSize*3/4, CBoxSize/2, CBoxSize/4)
 	case WhiteBattleman, BlackBattleman, BlueBattleman, RedBattleman:
 		*c = *bm
 		c.life = 1
@@ -73,7 +73,7 @@ func NewEnemy(t uint8) *enemy {
 	c := new(enemy)
 	*c = *en
 	c.ani = animations.NewAnimation(t)
-	c.collisionbox = pixel.R(-cBoxSize/2, -cBoxSize/2, cBoxSize/2, cBoxSize/2)
+	c.collisionbox = pixel.R(-CBoxSize/2, -CBoxSize/2, CBoxSize/2, CBoxSize/2)
 	c.matrix = pixel.IM.Moved(c.GetMovedPos())
 	switch t {
 	case Balloon:
@@ -245,7 +245,7 @@ func init() {
 	bm.mortal = true
 	bm.wallghost = false
 	bm.bombghost = false
-	bm.collisionbox = pixel.Rect{pixel.Vec{}, pixel.Vec{cBoxSize, cBoxSize}}
+	bm.collisionbox = pixel.Rect{pixel.Vec{}, pixel.Vec{CBoxSize, CBoxSize}}
 
 	// Monster Prototyp
 	en = new(enemy)
@@ -256,5 +256,5 @@ func init() {
 	en.wallghost = false
 	en.bombghost = false
 	en.follow = false
-	en.collisionbox = pixel.Rect{pixel.Vec{}, pixel.Vec{cBoxSize, cBoxSize}}
+	en.collisionbox = pixel.Rect{pixel.Vec{}, pixel.Vec{CBoxSize, CBoxSize}}
 }

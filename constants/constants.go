@@ -38,6 +38,9 @@ const (
 	Dragon         = 34
 	BlueDevil      = 35
 
+	//Character attributes:
+	CBoxSize = 15 // Size of collison Box
+
 	//Items:
 	Bomb            = 100
 	PowerItem       = 101

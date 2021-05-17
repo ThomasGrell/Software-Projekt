@@ -485,8 +485,6 @@ func moveCharacter2(c interface{}, dt float64) {
 	// ganzzahligen Koordinaten im Spielfeld berechnet.
 	xnow, ynow := arena1.GetFieldCoord(transformVecBack(chr.GetDirection(), transformRect(chr.GetDirection(), chr.GetPosBox()).Min))
 
-	xc, yc := arena1.GetFieldCoord(transformVecBack(chr.GetDirection(), transformRect(chr.GetDirection(), chr.GetPosBox()).Max))
-
 	// Aus den Koordinaten wird nun eine Spielfeldnummer berechnet.
 	newFieldNo := xnow + ynow*arena1.GetWidth()
 
@@ -499,7 +497,7 @@ func moveCharacter2(c interface{}, dt float64) {
 	switch chr.GetDirection() {
 	case Left:
 		x1, y1 := arena1.GetFieldCoord(nextPos.Min)
-		bombThere, _ := isThereABomb(xc-1, yc)
+		bombThere, _ := isThereABomb(x1, y1)
 		if lev1.IsTile(x1, y1) || x1 < 0 || bombThere {
 			newDirChoice = true
 		}
@@ -509,7 +507,7 @@ func moveCharacter2(c interface{}, dt float64) {
 		}
 	case Right:
 		x1, y1 := arena1.GetFieldCoord(nextPos.Max)
-		bombThere, _ := isThereABomb(xc+1, yc)
+		bombThere, _ := isThereABomb(x1, y1)
 		if lev1.IsTile(x1, y1) || bombThere {
 			newDirChoice = true
 		}
@@ -519,7 +517,7 @@ func moveCharacter2(c interface{}, dt float64) {
 		}
 	case Up:
 		x1, y1 := arena1.GetFieldCoord(nextPos.Max)
-		bombThere, _ := isThereABomb(xc, yc+1)
+		bombThere, _ := isThereABomb(x1, y1)
 		if lev1.IsTile(x1, y1) || y1 > arena1.GetHeight() || bombThere {
 			newDirChoice = true
 		}
@@ -529,7 +527,7 @@ func moveCharacter2(c interface{}, dt float64) {
 		}
 	case Down:
 		x1, y1 := arena1.GetFieldCoord(nextPos.Min)
-		bombThere, _ := isThereABomb(xc, yc-1)
+		bombThere, _ := isThereABomb(x1, y1)
 		if lev1.IsTile(x1, y1) || y1 < 0 || bombThere {
 			newDirChoice = true
 		}

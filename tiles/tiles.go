@@ -64,8 +64,18 @@ func NewBomb(p characters.Player) *bombe {
 	(*bomb).power = float64(p.GetPower())
 	(*bomb).ani = animations.NewAnimation(Bomb)
 	((*bomb).ani).Show()
-	//fmt.Println(p.GetPosBox().Min)
-	(*bomb).pos = pixel.Vec{math.Round(p.GetPosBox().Center().X/TileSize) * TileSize, math.Round(p.GetPosBox().Center().Y/TileSize) * TileSize}
+	switch p.GetDirection() {
+	case Stay:
+		(*bomb).pos = pixel.Vec{math.Round(p.GetPosBox().Center().X/TileSize) * TileSize, math.Round((p.GetPosBox().Center().Y)/TileSize) * TileSize}
+	case Up:
+		(*bomb).pos = pixel.Vec{math.Round(p.GetPosBox().Center().X/TileSize) * TileSize, math.Round((p.GetPosBox().Center().Y-CBoxSize/2)/TileSize) * TileSize}
+	case Down:
+		(*bomb).pos = pixel.Vec{math.Round(p.GetPosBox().Center().X/TileSize) * TileSize, math.Round((p.GetPosBox().Center().Y+CBoxSize/2)/TileSize) * TileSize}
+	case Left:
+		(*bomb).pos = pixel.Vec{math.Round((p.GetPosBox().Center().X+CBoxSize/2)/TileSize) * TileSize, math.Round(p.GetPosBox().Center().Y/TileSize) * TileSize}
+	case Right:
+		(*bomb).pos = pixel.Vec{math.Round((p.GetPosBox().Center().X-CBoxSize/2)/TileSize) * TileSize, math.Round(p.GetPosBox().Center().Y/TileSize) * TileSize}
+	}
 	(*bomb).matrix = pixel.IM.Moved(bomb.pos)
 	d, _ := time.ParseDuration("3s")
 	(*bomb).timeStamp = (time.Now()).Add(d)
