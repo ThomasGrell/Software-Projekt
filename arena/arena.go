@@ -60,6 +60,11 @@ func (a *data) GetFieldCoord(v pixel.Vec) (x, y int) {
 		return
 	*/
 }
+
+func (a *data) CoordToVec(x, y int) pixel.Vec {
+	return pixel.Vec{float64(x), float64(y)}.Scaled(TileSize).Add(a.lowerLeft).Add(pixel.Vec{TileSize / 2, TileSize / 2})
+}
+
 func (a *data) GetHeight() int {
 	return a.h
 }

@@ -11,7 +11,6 @@ import (
 	"./titlebar"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
-	"math"
 	"math/rand"
 	"time"
 )
@@ -389,44 +388,39 @@ func dirChoice(m characters.Enemy) (dir uint8){
 	}
 	return
 }
+
 */
-func getPossibleDirections(x, y int) (possibleDir [4]uint8, n uint8) {
-	b, _ := isThereABomb(x-1, y)
+func getPossibleDirections(x int, y int, inclBombs bool) (possibleDir [4]uint8, n uint8) {
+	var b bool = false
+
+	if inclBombs {
+		b, _ = isThereABomb(x-1, y)
+	}
 	if x != 0 && !lev1.IsTile(x-1, y) && !b {
 		possibleDir[n] = Left
 		n++
 	}
-	b, _ = isThereABomb(x+1, y)
+
+	if inclBombs {
+		b, _ = isThereABomb(x+1, y)
+	}
 	if x != arena1.GetWidth()-1 && !lev1.IsTile(x+1, y) && !b {
 		possibleDir[n] = Right
 		n++
 	}
-	b, _ = isThereABomb(x, y-1)
+
+	if inclBombs {
+		b, _ = isThereABomb(x, y-1)
+	}
 	if y != 0 && !lev1.IsTile(x, y-1) && !b {
 		possibleDir[n] = Down
 		n++
 	}
-	b, _ = isThereABomb(x, y+1)
+
+	if inclBombs {
+		b, _ = isThereABomb(x, y+1)
+	}
 	if y != arena1.GetHeight()-1 && !lev1.IsTile(x, y+1) && !b {
-		possibleDir[n] = Up
-		n++
-	}
-	return
-}
-func getPossibleDirectionsBombghost(x, y int) (possibleDir [4]uint8, n uint8) {
-	if x != 0 && !lev1.IsTile(x-1, y) {
-		possibleDir[n] = Left
-		n++
-	}
-	if x != arena1.GetWidth()-1 && !lev1.IsTile(x+1, y) {
-		possibleDir[n] = Right
-		n++
-	}
-	if y != 0 && !lev1.IsTile(x, y-1) {
-		possibleDir[n] = Down
-		n++
-	}
-	if y != arena1.GetHeight()-1 && !lev1.IsTile(x, y+1) {
 		possibleDir[n] = Up
 		n++
 	}
@@ -515,47 +509,53 @@ func moveCharacter2(c interface{}, dt float64) {
 		return
 	}
 
+	xv, yv := arena1.GetFieldCoord(transformVecBack(chr.GetDirection(), transformRect(chr.GetDirection(), chr.GetPosBox()).Max))
+
 	// Versperren Wände den Weg? Falls ja, geht es in dieser Richtung nicht weiter.
 	// Eine neue Richtung muss her, also wird newDirChoice auf true gesetzt.
 	switch chr.GetDirection() {
 	case Left:
 		x1, y1 := arena1.GetFieldCoord(nextPos.Min)
-		bombThere, _ := isThereABomb(x1, y1)
-		if lev1.IsTile(x1, y1) || x1 < 0 || bombThere {
+		bombThere1, _ := isThereABomb(xv-1, yv)
+		bombThere2, _ := isThereABomb(xnow-1, ynow)
+		if lev1.IsTile(x1, y1) || x1 < 0 || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
 		x1, y1 = arena1.GetFieldCoord(pixel.Vec{nextPos.Min.X, nextPos.Max.Y})
-		if lev1.IsTile(x1, y1) {
+		if lev1.IsTile(x1, y1) || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
 	case Right:
 		x1, y1 := arena1.GetFieldCoord(nextPos.Max)
-		bombThere, _ := isThereABomb(x1, y1)
-		if lev1.IsTile(x1, y1) || bombThere {
+		bombThere1, _ := isThereABomb(xv+1, yv)
+		bombThere2, _ := isThereABomb(xnow+1, ynow)
+		if lev1.IsTile(x1, y1) || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
 		x1, y1 = arena1.GetFieldCoord(pixel.Vec{nextPos.Max.X, nextPos.Min.Y})
-		if lev1.IsTile(x1, y1) || bombThere {
+		if lev1.IsTile(x1, y1) || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
 	case Up:
 		x1, y1 := arena1.GetFieldCoord(nextPos.Max)
-		bombThere, _ := isThereABomb(x1, y1)
-		if lev1.IsTile(x1, y1) || y1 > arena1.GetHeight() || bombThere {
+		bombThere1, _ := isThereABomb(xv, yv+1)
+		bombThere2, _ := isThereABomb(xnow, ynow+1)
+		if lev1.IsTile(x1, y1) || y1 > arena1.GetHeight() || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
 		x1, y1 = arena1.GetFieldCoord(pixel.Vec{nextPos.Min.X, nextPos.Max.Y})
-		if lev1.IsTile(x1, y1) || bombThere {
+		if lev1.IsTile(x1, y1) || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
 	case Down:
 		x1, y1 := arena1.GetFieldCoord(nextPos.Min)
-		bombThere, _ := isThereABomb(x1, y1)
-		if lev1.IsTile(x1, y1) || y1 < 0 || bombThere {
+		bombThere1, _ := isThereABomb(xv, yv-1)
+		bombThere2, _ := isThereABomb(xnow, ynow-1)
+		if lev1.IsTile(x1, y1) || y1 < 0 || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
 		x1, y1 = arena1.GetFieldCoord(pixel.Vec{nextPos.Max.X, nextPos.Min.Y})
-		if lev1.IsTile(x1, y1) || bombThere {
+		if lev1.IsTile(x1, y1) || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
 	}
@@ -578,11 +578,8 @@ func moveCharacter2(c interface{}, dt float64) {
 		if newDirChoice {
 			var possibleDirections [4]uint8
 			var n uint8
-			if !chr.IsBombghost() {
-				possibleDirections, n = getPossibleDirections(arena1.GetFieldCoord(chr.GetPosBox().Center()))
-			} else {
-				possibleDirections, n = getPossibleDirectionsBombghost(arena1.GetFieldCoord(chr.GetPosBox().Center()))
-			}
+			x, y := arena1.GetFieldCoord(chr.GetPosBox().Center())
+			possibleDirections, n = getPossibleDirections(x, y, !chr.IsBombghost())
 			if n == 0 { // keine erlaubte Richtung
 				chr.SetDirection(Stay) // Stay
 			} else if n == 1 { // 1 erlaubte Richtung --> lauf sie
@@ -837,12 +834,11 @@ func sun() {
 			}
 		}
 		if win.JustPressed(pixelgl.KeyB) {
-			pb := whiteBomberman.GetPosBox()
-			loleft := arena1.GetLowerLeft()
-			b, _ := isThereABomb(arena1.GetFieldCoord(pixel.Vec{X: math.Round(pb.Center().X/TileSize) * TileSize, Y: math.Round(pb.Center().Y/TileSize) * TileSize}))
-			c := lev1.IsTile(int((pb.Min.X-loleft.X)/TileSize), int((pb.Min.Y-loleft.Y)/TileSize))
+			x, y := arena1.GetFieldCoord(whiteBomberman.GetPosBox().Center())
+			b, _ := isThereABomb(x, y)
+			c := lev1.IsTile(x, y)
 			if !b && !c {
-				bombs = append(bombs, tiles.NewBomb(whiteBomberman))
+				bombs = append(bombs, tiles.NewBomb(whiteBomberman, arena1.CoordToVec(x, y)))
 			}
 		}
 

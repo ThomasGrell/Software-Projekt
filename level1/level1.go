@@ -107,7 +107,7 @@ func (l *lv) SetRandomTilesAndItems(numberTiles, numberItems int) {
 		if !b {
 			puffer = append(puffer, index)
 			t = 100 + rand.Intn(12)
-			ni = tiles.NewItem(uint8(t), (*l).loleft, x, y)
+			ni = tiles.NewItem(uint8(t), l.ar.CoordToVec(x, y))
 			(*l).tileMatrix[y][x] = append((*l).tileMatrix[y][x], ni)
 			i++
 		}
@@ -124,7 +124,7 @@ func (l *lv) SetRandomTilesAndItems(numberTiles, numberItems int) {
 		index = rand.Intn(len(freeTiles))
 		x = freeTiles[index][0]
 		y = freeTiles[index][1]
-		nt = tiles.NewTile(uint8(t), (*l).loleft, x, y)
+		nt = tiles.NewTile(uint8(t), l.ar.CoordToVec(x, y))
 		if len((*l).tileMatrix[y][x]) == 1 {
 			((*l).tileMatrix[y][x][0]).Ani().SetVisible(false)
 		}

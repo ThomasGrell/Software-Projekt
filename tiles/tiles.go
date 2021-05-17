@@ -5,7 +5,6 @@ import (
 	"../characters"
 	. "../constants"
 	"github.com/faiface/pixel"
-	"math"
 	"time"
 )
 
@@ -20,7 +19,7 @@ type tile struct {
 	ani      animations.Animation
 	matrix   pixel.Matrix
 	pos      pixel.Vec
-	x, y     int
+	//	x, y     int
 }
 
 type item struct {
@@ -43,53 +42,42 @@ type bombe struct {
 	// Totenkopf -> kurze Zeitspanne einstellen? (ist nur so ne Idee)
 }
 
-func NewItem(t uint8, loleft pixel.Vec, x, y int) *item {
+func NewItem(t uint8, pos pixel.Vec) *item {
 	var it = new(item)
 	(*it).tileType = t
 	(*it).ani = animations.NewAnimation(t)
 	((*it).ani).Show()
-	(*it).x = x
-	(*it).y = y
-	(*it).pos = loleft.Add(pixel.V(float64(x)*TileSize+TileSize/2, float64(y)*TileSize+TileSize/2))
+	//	(*it).x = x
+	//	(*it).y = y
+	(*it).pos = pos
 	(*it).matrix = pixel.IM.Moved(it.pos)
 	d, _ := time.ParseDuration("100m")
 	(*it).timeStamp = (time.Now()).Add(d)
 	return it
 }
 
-func NewBomb(p characters.Player) *bombe {
+func NewBomb(p characters.Player, pos pixel.Vec) *bombe {
 	var bomb = new(bombe)
 	(*bomb).tileType = Bomb
 	(*bomb).owner = p
 	(*bomb).power = float64(p.GetPower())
 	(*bomb).ani = animations.NewAnimation(Bomb)
 	((*bomb).ani).Show()
-	switch p.GetDirection() {
-	case Stay:
-		(*bomb).pos = pixel.Vec{math.Round(p.GetPosBox().Center().X/TileSize) * TileSize, math.Round((p.GetPosBox().Center().Y)/TileSize) * TileSize}
-	case Up:
-		(*bomb).pos = pixel.Vec{math.Round(p.GetPosBox().Center().X/TileSize) * TileSize, math.Round((p.GetPosBox().Center().Y-CBoxSize/2)/TileSize) * TileSize}
-	case Down:
-		(*bomb).pos = pixel.Vec{math.Round(p.GetPosBox().Center().X/TileSize) * TileSize, math.Round((p.GetPosBox().Center().Y+CBoxSize/2)/TileSize) * TileSize}
-	case Left:
-		(*bomb).pos = pixel.Vec{math.Round((p.GetPosBox().Center().X+CBoxSize/2)/TileSize) * TileSize, math.Round(p.GetPosBox().Center().Y/TileSize) * TileSize}
-	case Right:
-		(*bomb).pos = pixel.Vec{math.Round((p.GetPosBox().Center().X-CBoxSize/2)/TileSize) * TileSize, math.Round(p.GetPosBox().Center().Y/TileSize) * TileSize}
-	}
+	bomb.pos = pos
 	(*bomb).matrix = pixel.IM.Moved(bomb.pos)
 	d, _ := time.ParseDuration("3s")
 	(*bomb).timeStamp = (time.Now()).Add(d)
 	return bomb
 }
 
-func NewTile(t uint8, loleft pixel.Vec, x, y int) *tile {
+func NewTile(t uint8, pos pixel.Vec) *tile {
 	var nt = new(tile)
 	(*nt).tileType = t
 	(*nt).ani = animations.NewAnimation(t)
 	((*nt).ani).Show()
-	(*nt).x = x
-	(*nt).y = y
-	(*nt).pos = loleft.Add(pixel.V(float64(x)*TileSize+TileSize/2, float64(y)*TileSize+TileSize/2))
+	//	(*nt).x = x
+	//	(*nt).y = y
+	(*nt).pos = pos
 	if nt.ani.GetSize().Y > TileSize {
 		(*nt).matrix = pixel.IM.Moved(nt.pos.Add(pixel.V(0, ((*nt).ani.GetSize().Y-TileSize)/2)))
 	} else {
@@ -99,9 +87,13 @@ func NewTile(t uint8, loleft pixel.Vec, x, y int) *tile {
 	return nt
 }
 
+/*
+Bisher völlig unbenutzt:
+
 func (it *tile) GetIndexPos() (x, y int) {
 	return it.x, it.y
 }
+*/
 
 func (it *item) SetDestroyable(b bool) {
 	(*it).destroyable = b

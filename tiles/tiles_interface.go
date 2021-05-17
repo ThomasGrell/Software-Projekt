@@ -69,7 +69,7 @@ type Tile interface {
 	 */
 	GetMatrix() pixel.Matrix
 
-	GetIndexPos() (x, y int)
+	//GetIndexPos() (x, y int)
 }
 
 type Item interface {
