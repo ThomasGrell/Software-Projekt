@@ -78,34 +78,59 @@ func NewEnemy(t uint8) *enemy {
 	switch t {
 	case Balloon:
 		c.speed = 10
+		c.points = 100
 	case Teddy:
 		c.speed = 30
+		c.points = 100
 	case Ghost:
 		c.speed = 30
+		c.points = 100
 	case Drop:
 		c.speed = 20
+		c.points = 100
 	case Pinky:
+		c.points = 100
 	case BluePopEye:
+		c.points = 100
 	case Jellyfish:
+		c.points = 100
 	case Snake:
+		c.points = 100
 	case Spinner:
+		c.points = 100
 	case YellowPopEye:
+		c.points = 100
 	case YellowBubble:
+		c.points = 100
 	case PinkPopEye:
+		c.points = 100
 	case Fire:
+		c.points = 100
 	case Crocodile:
+		c.points = 100
 	case Coin:
+		c.points = 100
 	case Puddle:
+		c.points = 100
 	case PinkCyclops:
+		c.points = 100
 	case RedCyclops:
+		c.points = 100
 	case PinkFlower:
+		c.points = 100
 	case Fireball:
 		c.ani.SetView(Intro)
+		c.points = 100
 	case Snowy:
+		c.points = 100
 	case BlueRabbit:
+		c.points = 100
 	case PinkDevil:
+		c.points = 100
 	case Penguin:
+		c.points = 100
 	case BlueCyclops:
+		c.points = 100
 	default:
 		panic("Unknown Enemy")
 	}
