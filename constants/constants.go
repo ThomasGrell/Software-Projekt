@@ -86,10 +86,32 @@ const (
 	Intro = 6
 
 	// Musik
-	ThroughSpace = 1
+	ThroughSpace        = 1
+	TheFieldOfDreams    = 2
+	OrbitalColossus     = 3
+	Fight               = 4
+	JuhaniJunkalaTitle  = 5
+	JuhaniJunkalaLevel1 = 6
+	JuhaniJunkalaLevel2 = 7
+	JuhaniJunkalaLevel3 = 8
+	JuhaniJunkalaEnd    = 9
+	ObservingTheStar    = 10
+	MyVeryOwnDeadShip   = 11
 
 	//Sounds
 	Deathflash = 100
+	Falling1   = 101
+	Falling2   = 102
+	Falling3   = 103
+	Falling4   = 104
+	Falling5   = 105
+	Falling6   = 106
+	Falling7   = 107
+	Falling8   = 108
+	Falling9   = 109
+	Falling10  = 110
+	Falling11  = 111
+	Falling12  = 112
 
 	// Arena Details
 	TileSize   = 16

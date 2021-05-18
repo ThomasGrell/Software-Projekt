@@ -1,6 +1,7 @@
 package level1
 
-import ( //"../arena"
+import ( //
+	"../arena"
 	//"../tiles"
 	"github.com/faiface/pixel"
 )
@@ -9,6 +10,8 @@ import ( //"../arena"
 // NewBlankLevel ()
 
 type Level interface {
+	A() arena.Arena
+
 	SetRandomTilesAndItems(numberTiles, numberItems int)
 
 	DrawColumn(y int, win pixel.Target)

@@ -19,7 +19,8 @@ type lv struct {
 	ar            arena.Arena
 }
 
-func NewBlankLevel(ar arena.Arena, anzPlayer uint8) *lv {
+func NewBlankLevel(typ, width, height int, anzPlayer uint8) *lv {
+	ar := arena.NewArena(typ, width, height)
 	l := new(lv)
 	(*l).loleft = ar.GetLowerLeft()
 	(*l).width = ar.GetWidth()
@@ -71,6 +72,10 @@ func NewBlankLevel(ar arena.Arena, anzPlayer uint8) *lv {
 		fmt.Println("Keine oder mehr als vier Startplätze gibt es nicht.")
 	}
 	return l
+}
+
+func (l *lv) A() arena.Arena {
+	return l.ar
 }
 
 func (l *lv) SetRandomTilesAndItems(numberTiles, numberItems int) {
