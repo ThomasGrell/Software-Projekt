@@ -23,6 +23,14 @@ type Player interface {
 	AddPoints(points uint32)
 
 	// Vor.: -
+	// Eff.: Reduziert den Zähler für aktuell gelegte Bomben.
+	DecBombs()
+
+	// Vor.: -
+	// Eff.: Liefert die Anzahl gelegter Bomben.
+	GetBombs() uint8
+
+	// Vor.: -
 	// Eff.: Liefert die maximale Anzahl an Bomben, die der Spieler legen kann.
 	GetMaxBombs() uint8
 
@@ -33,6 +41,10 @@ type Player interface {
 	// Vor.: -
 	// Eff.: Liefert die Anzahl an Siegen eines Spielers im Multiplayer-Modus.
 	GetWins() uint8
+
+	// Vor.: -
+	// Eff.: Erhöht den Zähler für aktuell gelegte Bomben.
+	IncBombs()
 
 	// Vor.: -
 	// Eff.: Erhöht die verbleibenden Leben eines Spielers um 1.

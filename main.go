@@ -46,6 +46,10 @@ func checkForExplosions() {
 			//bomben = append (bomben,item)
 
 			item.Ani().Die()
+			b, owner := item.Owner()
+			if b {
+				owner.DecBombs()
+			}
 
 			x, y := lev1.A().GetFieldCoord(item.GetPos())
 			power := int(item.GetPower())
@@ -507,6 +511,8 @@ func moveCharacter2(c interface{}, dt float64) {
 		return
 	}
 
+	// Koordinaten des Spielfeldes, in welchem sich die vordere rechte Ecke
+	// der PosBox in Bezug zur Bewegungsrichtung des Characters befindet
 	xv, yv := lev1.A().GetFieldCoord(transformVecBack(chr.GetDirection(), transformRect(chr.GetDirection(), chr.GetPosBox()).Max))
 
 	// Versperren Wände den Weg? Falls ja, geht es in dieser Richtung nicht weiter.
@@ -599,6 +605,25 @@ func moveCharacter2(c interface{}, dt float64) {
 		if newDirChoice {
 			// Und tschüss. Keine Bewegung möglich.
 			return
+		}
+		t, b := lev1.CollectItem(xv, yv)
+		if b {
+			switch t {
+			case BombItem:
+				whiteBomberman.IncMaxBombs()
+			case LifeItem:
+				whiteBomberman.IncLife()
+			case PowerItem:
+				whiteBomberman.IncPower()
+			case RollerbladeItem:
+				whiteBomberman.IncSpeed()
+			case WallghostItem:
+				whiteBomberman.SetWallghost(true)
+			case BombghostItem:
+				whiteBomberman.SetBombghost(true)
+			case SkullItem:
+				whiteBomberman.DecLife()
+			}
 		}
 	}
 	if chr.GetDirection() != Stay {
@@ -829,12 +854,13 @@ func sun() {
 				whiteBomberman.Ani().SetView(Stay)
 			}
 		}
-		if win.JustPressed(pixelgl.KeyB) {
+		if win.JustPressed(pixelgl.KeyB) && whiteBomberman.GetBombs() < whiteBomberman.GetMaxBombs() {
 			x, y := lev1.A().GetFieldCoord(whiteBomberman.GetPosBox().Center())
 			b, _ := isThereABomb(x, y)
 			c := lev1.IsTile(x, y)
 			if !b && !c {
 				bombs = append(bombs, tiles.NewBomb(whiteBomberman, lev1.A().CoordToVec(x, y)))
+				whiteBomberman.IncBombs()
 			}
 		}
 

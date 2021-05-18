@@ -69,6 +69,8 @@ type Tile interface {
 	 */
 	GetMatrix() pixel.Matrix
 
+	GetType() uint8
+
 	//GetIndexPos() (x, y int)
 }
 

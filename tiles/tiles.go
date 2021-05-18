@@ -146,6 +146,10 @@ func (it *item) SetTimeStamp(t time.Time) {
 	(*it).timeStamp = t
 }
 
+func (it *tile) GetType() uint8 {
+	return it.tileType
+}
+
 func (it *tile) GetMatrix() pixel.Matrix {
 	return (*it).matrix
 }

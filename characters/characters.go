@@ -24,8 +24,6 @@ Animationen sind teilweise von Bewegungsrichtung abhängig.
 var bm *player
 var en *enemy
 
-
-
 type player struct {
 	character
 	bombs    uint8 // Anzahl der aktuell gelegten Bomben
@@ -144,9 +142,18 @@ func (c *enemy) IsFollowing() bool {
 func (c *player) AddPoints(p uint32) {
 	c.points += p
 }
+func (c *player) DecBombs() {
+	if c.bombs > 0 {
+		c.bombs--
+	}
+}
+func (c *player) GetBombs() uint8    { return c.bombs }
 func (c *player) GetMaxBombs() uint8 { return c.maxBombs }
 func (c *player) GetWins() uint8     { return c.wins }
 func (c *player) GetPower() uint8    { return c.power }
+func (c *player) IncBombs() {
+	c.bombs++
+}
 func (c *player) IncLife() {
 	c.life++
 }

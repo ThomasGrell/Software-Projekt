@@ -123,7 +123,7 @@ func (l *lv) SetRandomTilesAndItems(numberTiles, numberItems int) {
 		fmt.Println("Es werden nur ", len(freeTiles), " Tiele zufällig platziert.")
 		numberTiles = len(freeTiles)
 	}
-	t = 122 //120 + rand.Intn(19)
+	t = Greenwall //120 + rand.Intn(19)
 	var nt tiles.Tile
 	for i < numberTiles {
 		index = rand.Intn(len(freeTiles))
@@ -175,6 +175,21 @@ func (l *lv) GetPosOfNextTile(x, y int, dir pixel.Vec) (b bool, xx, yy int) {
 		}
 	}
 	return false, -1, -1
+}
+
+func (l *lv) CollectItem(x, y int) (typ uint8, b bool) {
+	if l.freePos[y][x] != Free {
+		return 0, false
+	}
+	if len(l.tileMatrix[y][x]) == 1 {
+		typ = l.tileMatrix[y][x][0].GetType()
+		b = true
+		l.tileMatrix[y][x] = l.tileMatrix[y][x][:0]
+	} else {
+		typ = 0
+		b = false
+	}
+	return typ, b
 }
 
 func (l *lv) RemoveTile(x, y int) {

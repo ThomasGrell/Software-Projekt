@@ -14,6 +14,8 @@ type Level interface {
 
 	SetRandomTilesAndItems(numberTiles, numberItems int)
 
+	CollectItem(x, y int) (typ uint8, b bool)
+
 	DrawColumn(y int, win pixel.Target)
 
 	IsTile(x, y int) bool
