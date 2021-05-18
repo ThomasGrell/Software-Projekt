@@ -14,20 +14,6 @@ import (
  * denn noemale Items verbessern die Werte eines Players beim Einsammeln
  */
 
-type tile struct {
-	tileType uint8
-	ani      animations.Animation
-	matrix   pixel.Matrix
-	pos      pixel.Vec
-	//	x, y     int
-}
-
-type item struct {
-	tile
-	destroyable bool
-	timeStamp   time.Time
-}
-
 type bombe struct {
 	item
 	owner characters.Player // Bombenbesitzer
@@ -42,18 +28,18 @@ type bombe struct {
 	// Totenkopf -> kurze Zeitspanne einstellen? (ist nur so ne Idee)
 }
 
-func NewItem(t uint8, pos pixel.Vec) *item {
-	var it = new(item)
-	(*it).tileType = t
-	(*it).ani = animations.NewAnimation(t)
-	((*it).ani).Show()
-	//	(*it).x = x
-	//	(*it).y = y
-	(*it).pos = pos
-	(*it).matrix = pixel.IM.Moved(it.pos)
-	d, _ := time.ParseDuration("100m")
-	(*it).timeStamp = (time.Now()).Add(d)
-	return it
+type item struct {
+	tile
+	destroyable bool
+	timeStamp   time.Time
+}
+
+type tile struct {
+	tileType uint8
+	ani      animations.Animation
+	matrix   pixel.Matrix
+	pos      pixel.Vec
+	//	x, y     int
 }
 
 func NewBomb(p characters.Player, pos pixel.Vec) *bombe {
@@ -68,6 +54,20 @@ func NewBomb(p characters.Player, pos pixel.Vec) *bombe {
 	d, _ := time.ParseDuration("3s")
 	(*bomb).timeStamp = (time.Now()).Add(d)
 	return bomb
+}
+
+func NewItem(t uint8, pos pixel.Vec) *item {
+	var it = new(item)
+	(*it).tileType = t
+	(*it).ani = animations.NewAnimation(t)
+	((*it).ani).Show()
+	//	(*it).x = x
+	//	(*it).y = y
+	(*it).pos = pos
+	(*it).matrix = pixel.IM.Moved(it.pos)
+	d, _ := time.ParseDuration("100m")
+	(*it).timeStamp = (time.Now()).Add(d)
+	return it
 }
 
 func NewTile(t uint8, pos pixel.Vec) *tile {
@@ -95,24 +95,28 @@ func (it *tile) GetIndexPos() (x, y int) {
 }
 */
 
-func (it *item) SetDestroyable(b bool) {
-	(*it).destroyable = b
+// ******************* Items ***********************
+
+func (it *item) GetTimeStamp() time.Time {
+	return (*it).timeStamp
 }
 
 func (it *item) IsDestroyable() bool {
 	return (*it).destroyable
 }
 
+func (it *item) SetDestroyable(b bool) {
+	(*it).destroyable = b
+}
+
+func (it *item) SetTimeStamp(t time.Time) {
+	(*it).timeStamp = t
+}
+
+// ******************* Tiles ***********************
+
 func (it *tile) Ani() animations.Animation {
 	return (*it).ani
-}
-
-func (it *tile) SetVisible(b bool) {
-	((*it).ani).SetVisible(b)
-}
-
-func (it *tile) IsVisible() bool {
-	return ((*it).ani).IsVisible()
 }
 
 func (it *tile) Draw(win pixel.Target) {
@@ -128,36 +132,45 @@ func (it *tile) Draw(win pixel.Target) {
 	}
 }
 
-func (it *tile) SetPos(pos pixel.Vec) {
-	(*it).pos = pos
-	(*it).matrix = pixel.IM
-	(*it).matrix = ((*it).matrix).Moved(pos)
+func (it *tile) GetMatrix() pixel.Matrix {
+	return (*it).matrix
 }
 
 func (it *tile) GetPos() pixel.Vec {
 	return (*it).pos
 }
 
-func (it *item) GetTimeStamp() time.Time {
-	return (*it).timeStamp
-}
-
-func (it *item) SetTimeStamp(t time.Time) {
-	(*it).timeStamp = t
-}
-
 func (it *tile) GetType() uint8 {
 	return it.tileType
 }
 
-func (it *tile) GetMatrix() pixel.Matrix {
-	return (*it).matrix
+func (it *tile) IsVisible() bool {
+	return ((*it).ani).IsVisible()
+}
+
+func (it *tile) SetVisible(b bool) {
+	((*it).ani).SetVisible(b)
+}
+
+func (it *tile) SetPos(pos pixel.Vec) {
+	(*it).pos = pos
+	(*it).matrix = pixel.IM
+	(*it).matrix = ((*it).matrix).Moved(pos)
 }
 
 //------------------ Funktionen für Bomben -----------------------------
 
+func (it *bombe) GetPower() float64 {
+	return (*it).power
+}
+
 func (it *bombe) Owner() (bool, characters.Player) {
 	return (*it).owner != nil, (*it).owner
+}
+
+func (it *bombe) SetAnimation(newAni animations.Animation) {
+	(*it).ani = newAni
+	((*it).ani).Update()
 }
 
 func (it *bombe) SetOwner(player characters.Player) {
@@ -167,13 +180,4 @@ func (it *bombe) SetOwner(player characters.Player) {
 func (it *bombe) SetPower(newPower float64) {
 	(*it).power = newPower
 	(*it).matrix = ((*it).matrix).ScaledXY((*it).pos, pixel.V(newPower*3.3, newPower*3.3))
-}
-
-func (it *bombe) GetPower() float64 {
-	return (*it).power
-}
-
-func (it *bombe) SetAnimation(newAni animations.Animation) {
-	(*it).ani = newAni
-	((*it).ani).Update()
 }

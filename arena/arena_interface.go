@@ -25,6 +25,9 @@ type Arena interface {
 	//Erg.: Die Koordinaten des Feldes, in dem sich der Punkt v befindet, sind geliefert.
 	GetFieldCoord(v pixel.Vec) (x, y int)
 
+	//Vor.: -
+	//Erg.: Zu dem Spielfeld mit den Koordinaten x,y wird der Feldmittelpunkt
+	//      als Vektor geliefert.
 	CoordToVec(x, y int) pixel.Vec
 
 	//Vor.: /

@@ -10,23 +10,45 @@ import ( //
 // NewBlankLevel ()
 
 type Level interface {
+
+	// Vor.: -
+	// Eff.: Liefert die zum Level gehörende Arena
 	A() arena.Arena
 
-	SetRandomTilesAndItems(numberTiles, numberItems int)
-
+	// Vor.: -
+	// Eff.: Wenn sich an der Stelle x,y im Spielfeld ein Item befindet,
+	//       wird dessen Typ sowie b=true zurückgegeben und das Item gelöscht.
+	//       Befindet sich kein Item an der Stelle, so werden typ=0 und b=false
+	//       zurückgegeben.
 	CollectItem(x, y int) (typ uint8, b bool)
 
+	// Vor.: -
+	// Eff.:
 	DrawColumn(y int, win pixel.Target)
 
-	IsTile(x, y int) bool
-
-	IsDestroyableTile(x, y int) bool
-
+	// Vor.: -
+	// Eff.:
 	GetPosOfNextTile(x, y int, dir pixel.Vec) (b bool, xx, yy int)
 
+	// Vor.: -
+	// Eff.:
+	IsDestroyableTile(x, y int) bool
+
+	// Vor.: -
+	// Eff.:
+	IsTile(x, y int) bool
+
+	// Vor.: -
+	// Eff.:
+	RemoveItems(x, y int, dir pixel.Vec)
+
+	// Vor.: -
+	// Eff.:
 	RemoveTile(x, y int)
 
-	RemoveItems(x, y int, dir pixel.Vec)
+	// Vor.: -
+	// Eff.:
+	SetRandomTilesAndItems(numberTiles, numberItems int)
 
 	/*
 	   GetTiles () []tiles.Tile

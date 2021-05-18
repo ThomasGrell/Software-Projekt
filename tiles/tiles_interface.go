@@ -20,7 +20,7 @@ import (
 	das keine Bombe ist, ist an Position pos geliefert.
 	*data erfüllt das Interface Item
 
-	NewItem(t uint8, pos pixel.Vec) *data
+	NewItem(constant uint8, pos pixel.Vec) *data
 */
 
 /*	Vor.: -
@@ -38,20 +38,32 @@ type Tile interface {
 	 */
 	Ani() animations.Animation
 
-	/*	Vor.: -
-	 * 	Eff.: Das Item ist nun sichtbar genau dann, wenn b=true ist
+	/*	Vor.: win darf nicht nil sein - das fenser win ist geöffnet
+	 * 	Eff.: Das Item ist gezeichnet
 	 */
-	SetVisible(b bool)
+	Draw(win pixel.Target)
+
+	/*	Vor.: -
+	 * 	Eff.: Die ZeichenMatrix, des Items ist geliefert
+	 */
+	GetMatrix() pixel.Matrix
+
+	/*	Vor.: -
+	 * 	Eff.: Der Vektor der Position das Items ist geliefert
+	 */
+	GetPos() pixel.Vec
+
+	/*	Vor.: -
+	 * 	Eff.: Der Typ das Items ist geliefert (siehe constants.go)
+	 */
+	GetType() uint8
+
+	//GetIndexPos() (x, y int)
 
 	/*	Vor.: -
 	 * 	Eff.: true ist genu dann geliefert, wenn das Objekt sichtbar ist
 	 */
 	IsVisible() bool
-
-	/*	Vor.: win darf nicht nil sein - das fenser win ist geöffnet
-	 * 	Eff.: Das Item ist gezeichnet
-	 */
-	Draw(win pixel.Target)
 
 	/*	Vor.: -
 	 * 	Eff.: Das Item wird an die Position nach Vektor pos gesetzt,
@@ -60,28 +72,18 @@ type Tile interface {
 	SetPos(pos pixel.Vec)
 
 	/*	Vor.: -
-	 * 	Eff.: Der Vektor der Position das Items ist geliefert
+	 * 	Eff.: Das Item ist nun sichtbar genau dann, wenn b=true ist
 	 */
-	GetPos() pixel.Vec
-
-	/*	Vor.: -
-	 * 	Eff.: Die ZeichenMatrix, des Items ist geliefert
-	 */
-	GetMatrix() pixel.Matrix
-
-	GetType() uint8
-
-	//GetIndexPos() (x, y int)
+	SetVisible(b bool)
 }
 
 type Item interface {
 	Tile
 
 	/*	Vor.: -
-	 * 	Eff.: Das Objekt ist entweder zerstörbar, falls true übergeben
-	 * 	wurde oder unzerstörbar, falls false übergeben wurde.
+	 * 	Eff.: Der Zeitpunkt, ab dem das Item nicht mehr existieren sollte ist geliefert.
 	 */
-	SetDestroyable(b bool)
+	GetTimeStamp() time.Time
 
 	/*	Vor.: -
 	 * 	Eff.: true ist genu dann geliefert, wenn das Objekt zerstörbar ist
@@ -89,9 +91,10 @@ type Item interface {
 	IsDestroyable() bool
 
 	/*	Vor.: -
-	 * 	Eff.: Der Zeitpunkt, ab dem das Item nicht mehr existieren sollte ist geliefert.
+	 * 	Eff.: Das Objekt ist entweder zerstörbar, falls true übergeben
+	 * 	wurde oder unzerstörbar, falls false übergeben wurde.
 	 */
-	GetTimeStamp() time.Time
+	SetDestroyable(b bool)
 
 	/* Vor.: -
 	 * Eff.: Der Zeitpunkt, ab dem das Item nicht mehr existiert ist nun geändert
@@ -101,6 +104,12 @@ type Item interface {
 
 type Bombe interface {
 	Item
+
+	/*	Vor.: -
+	 * 	Eff.: Wirkungsradius der Bombe ist geliefert
+	 */
+	GetPower() float64
+
 	/*	Vor.: -
 	 * 	Eff.: Falls das Objekt keinen Besitzer hat ist das Tupel false,nil geliefert.
 	 * 	Falls das Objekt einen Besitzer hat, ist true und ein Zeiger auf den Besitzer
@@ -108,18 +117,13 @@ type Bombe interface {
 	 */
 	Owner() (bool, characters.Player)
 
-	/*	Vor.: Das Objekt hat noch keinen Besitzer.
-	 * 	Eff.: Der Besitzer des Objekt ist nun der übergebene player.
-	 */
-	SetOwner(player characters.Player)
-
 	/*	Vor.: -
 	 * 	Eff.: Die Animation der Bombe ist nun verändert
 	 */
 	SetAnimation(animations.Animation)
 
-	/*	Vor.: -
-	 * 	Eff.: Wirkungsradius der Bombe ist geliefert
+	/*	Vor.: Das Objekt hat noch keinen Besitzer.
+	 * 	Eff.: Der Besitzer des Objekt ist nun der übergebene player.
 	 */
-	GetPower() float64
+	SetOwner(player characters.Player)
 }

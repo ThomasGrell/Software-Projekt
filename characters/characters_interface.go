@@ -112,6 +112,10 @@ type Character interface {
 	// Eff.: Liefert die aktuelle Bewegungsrichtung des Characters
 	GetDirection() uint8
 
+	// Vor.: -
+	// Eff.: Liefert die Nummer des Feldes, auf welchem sich der Character befindet.
+	//       Die Nummer berechnet sich aus den Koordianten x,y des Feldes wiefolgt:
+	//       x + y * Spielfeldbreite
 	GetFieldNo() int
 
 	// Vor.: -
@@ -200,5 +204,9 @@ type Character interface {
 	//       0 -> Left, 1 -> Right, 2 -> Up, 3 -> Down
 	SetDirection(dir uint8)
 
+	// Vor.: -
+	// Eff.: Setzt die Nummer des Feldes, auf welchem sich der Character befindet.
+	//       Die Nummer berechnet sich aus den Koordianten x,y des Feldes wiefolgt:
+	//       x + y * Spielfeldbreite
 	SetFieldNo(no int)
 }

@@ -10,15 +10,15 @@ import (
 	"time"
 )
 
-type sound struct {
+type snd struct {
 	nr   uint8
 	path string
 	done chan bool
 	quit chan bool
 }
 
-func NewSound(nr uint8) *sound {
-	s := new(sound)
+func NewSound(nr uint8) Sound {
+	s := new(snd)
 	s.nr = nr
 	s.done = make(chan bool)
 	s.quit = make(chan bool)
@@ -79,7 +79,7 @@ func NewSound(nr uint8) *sound {
 	return s
 }
 
-func (s *sound) PlaySound() {
+func (s *snd) PlaySound() {
 
 	f, err := os.Open(s.path)
 	if err != nil {
@@ -115,7 +115,7 @@ A:
 	}
 }
 
-func (s *sound) StopSound() {
+func (s *snd) StopSound() {
 	s.quit <- true
 }
 
