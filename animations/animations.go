@@ -1411,7 +1411,10 @@ func (c *enhancedAnimation) Update() {
 func init() {
 	file, err := os.Open("graphics/characters.png")
 	if err != nil {
-		log.Fatal(err)
+		file, err = os.Open("../graphics/characters.png") // for testing
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 	img, err := png.Decode(file)
 	if err != nil {
@@ -1425,7 +1428,10 @@ func init() {
 
 	file, err = os.Open("graphics/animations.png")
 	if err != nil {
-		log.Fatal(err)
+		file, err = os.Open("../graphics/animations.png")
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 	img, err = png.Decode(file)
 	if err != nil {
