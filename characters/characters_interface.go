@@ -5,6 +5,38 @@ import (
 	"github.com/faiface/pixel"
 )
 
+/*
+ _______________________________________________
+< Implementiert von Rayk von Ende               >
+< Ergänzung der pixel.Matrix sowie der          >
+< Methoden GetMatrix() und Move(): Thomas Grell >
+ -----------------------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+****************************************************************************************
+
+Konstruktoren:
+
+Vor.: -
+Eff.: Ein neuer Bomberman vom Typ t wird zurückgegeben.
+      Die Typen sind in constants.go definiert.
+      Der Bomberman ist mit Standardwerten initialisiert.
+NewPlayer(t uint8) Player
+
+Vor.: -
+Eff.: Ein neues Monster vom Typ t wird zurückgegeben.
+      Die Typen sind in constants.go definiert.
+      Das Monster ist mit Standardwerten initialisiert.
+NewEnemy(t uint8) Enemy
+
+****************************************************************************************
+
+*/
+
 // Alle Methoden, die nur Monster besitzen.
 type Enemy interface {
 	Character

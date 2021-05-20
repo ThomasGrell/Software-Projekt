@@ -3,6 +3,20 @@ package animations
 import "github.com/faiface/pixel"
 
 /*
+
+ _________________________________
+< Implementiert von Rayk von Ende >
+ ---------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+****************************************************************************************
+
+Konstruktoren:
+
 Vor.: Die Nummer der Animation wird als uint8 übergeben.
 Eff.: Ein Animationsobjekt wird geliefert.
 NewAnimation() Animation
@@ -11,6 +25,8 @@ Vor.: Die Ausdehnung der Explosion in 4 Richtungen wird übergeben.
 Eff.: Ein Explosionsobjekt wird geliefert. Die Views Up, Down etc. sind irrelevant. Ebenso die Methoden Die() und SetView().
 	  Eine Explosion wird mit Show() gestartet.
 NewExplosion(l, r, u, d uint8) Animation
+
+****************************************************************************************
 */
 
 type Animation interface {

@@ -1071,7 +1071,7 @@ func (c *explosionAnimation) IsVisible() bool        { return c.visible }
 func (c *explosionAnimation) SetView(uint8)          {}
 func (c *explosionAnimation) SetIntervall(i int64)   { c.intervall = i }
 func (c *explosionAnimation) SetVisible(b bool)      { c.visible = b }
-func (c *explosionAnimation) SequenceFinished() bool { return true }
+func (c *explosionAnimation) SequenceFinished() bool { return !c.visible }
 func (c *explosionAnimation) Show() {
 	c.visible = true
 	c.lastUpdate = time.Now().UnixNano()

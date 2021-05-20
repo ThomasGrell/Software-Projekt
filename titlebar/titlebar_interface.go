@@ -5,8 +5,25 @@ import (
 )
 
 /*
-New(width float64) liefert eine Anzeige der Breite width. Dabei wird width auf ein
-Vielfaches von 8 abgerundet.
+ _________________________________
+< Implementiert von Rayk von Ende >
+ ---------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+****************************************************************************************
+
+Konstruktor:
+
+Vor.: -
+Eff.: New(width float64) liefert eine Anzeige der Breite width. Dabei wird width auf ein
+      Vielfaches von 8 abgerundet.
+New(width float64) Titlebar
+
+****************************************************************************************
 
 Beispielcode:
 
@@ -58,6 +75,9 @@ func run() {
 func main() {
 	pixelgl.Run(run)
 }
+
+****************************************************************************************
+
 
 */
 
