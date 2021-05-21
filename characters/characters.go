@@ -147,6 +147,11 @@ func (c *player) DecBombs() {
 		c.bombs--
 	}
 }
+func (c *player) DecPower() {
+	if c.power > 0 {
+		c.power--
+	}
+}
 func (c *player) GetBombs() uint8    { return c.bombs }
 func (c *player) GetMaxBombs() uint8 { return c.maxBombs }
 func (c *player) GetWins() uint8     { return c.wins }
@@ -157,13 +162,20 @@ func (c *player) IncBombs() {
 func (c *player) IncLife() {
 	c.life++
 }
-func (c *player) IncMaxBombs()        { c.maxBombs++ }
-func (c *player) IncPower()           { c.power++ }
+func (c *player) IncMaxBombs() { c.maxBombs++ }
+func (c *player) IncPower() {
+	if c.power < 255 {
+		c.power++
+	}
+}
 func (c *player) IncWins()            { c.wins++ }
 func (c *player) ResetWins()          { c.wins = 0 }
 func (c *player) SetLife(l uint8)     { c.life = l }
 func (c *player) SetMaxBombs(b uint8) { c.maxBombs = b }
 func (c *player) SetMortal(b bool)    { c.mortal = b }
+func (c *player) SetPower(p uint8) {
+	c.power = p
+}
 func (c *player) SetWallghost(w bool) { c.wallghost = w }
 
 func (c *character) Ani() animations.Animation { return c.ani }

@@ -59,6 +59,10 @@ type Player interface {
 	DecBombs()
 
 	// Vor.: -
+	// Eff.: Reduziert den Explosionsradius von Bomben.
+	DecPower()
+
+	// Vor.: -
 	// Eff.: Liefert die Anzahl gelegter Bomben.
 	GetBombs() uint8
 
@@ -109,6 +113,10 @@ type Player interface {
 	// Vor.: -
 	// Eff.: Legt fest, ob der Spieler sterblich ist (true) oder unsterblich (false).
 	SetMortal(bool)
+
+	// Vor.: -
+	// Eff.: Legt den Explosionsradius der Bomben fest.
+	SetPower(uint8)
 
 	// Vor.: -
 	// Eff.: Legt fest, ob der Spieler durch Wände laufen kann (true) oder nicht (false).
