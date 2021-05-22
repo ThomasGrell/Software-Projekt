@@ -19,7 +19,7 @@ type lv struct {
 	ar            arena.Arena
 }
 
-func NewBlankLevel(typ, width, height int, anzPlayer uint8) *lv {
+func newBlankLevel(typ, width, height int, anzPlayer uint8) *lv {
 	ar := arena.NewArena(typ, width, height)
 	l := new(lv)
 	(*l).loleft = ar.GetLowerLeft()
@@ -74,11 +74,69 @@ func NewBlankLevel(typ, width, height int, anzPlayer uint8) *lv {
 	return l
 }
 
+func NewRandomLevel (width, height int, anzPlayer uint8) *lv {
+	l := newBlankLevel(rand.Intn(3), width, height, anzPlayer)
+	(*l).setRandomTilesAndItems(width*height/2)
+	return l
+}
+
 func (l *lv) A() arena.Arena {
 	return l.ar
 }
 
-func (l *lv) SetRandomTilesAndItems(numberTiles, numberItems int) {
+func (l *lv) setRandomTilesAndItems(numberTiles int) {
+	rand.Seed(time.Now().UnixNano())
+	width := (*l).width
+	height := (*l).height
+	var freeTiles [][2]int
+	for x := 0; x < width; x++ {
+		for y := 0; y < height; y++ {
+			if (*l).freePos[y][x] == Free {
+				freeTiles = append(freeTiles, [2]int{x, y})
+			}
+		}
+	}
+	if len(freeTiles)<numberTiles {
+		fmt.Println("Nicht genügend freie Plätze für die übergebene Anzahl Teile.")
+		fmt.Println("Es werden nur ", len(freeTiles), " Tiele zufällig platziert.")
+		numberTiles = len(freeTiles)
+	}
+	var index, x, y, i, t int
+	var tile = Greenwall //120 + rand.Intn(19)
+	var nt tiles.Tile
+	var ni tiles.Item
+	for i < int(numberTiles/2) {
+		index = rand.Intn(len(freeTiles))
+		x = freeTiles[index][0]
+		y = freeTiles[index][1]
+		t = 100 + rand.Intn(12)
+		ni = tiles.NewItem(uint8(t), l.ar.CoordToVec(x, y))
+		(*l).tileMatrix[y][x] = append((*l).tileMatrix[y][x], ni)
+		nt = tiles.NewTile(uint8(tile), l.ar.CoordToVec(x, y))
+		(*l).tileMatrix[y][x] = append((*l).tileMatrix[y][x], nt)
+		(*l).freePos[y][x] = Destroyable
+		freeTiles = append(freeTiles[:index], freeTiles[index+1:]...)
+		i++
+	}
+	i=0
+	for i < numberTiles-int(numberTiles*3/4) {
+		index = rand.Intn(len(freeTiles))
+		x = freeTiles[index][0]
+		y = freeTiles[index][1]
+		nt = tiles.NewTile(uint8(tile), l.ar.CoordToVec(x, y))
+		(*l).tileMatrix[y][x] = append((*l).tileMatrix[y][x], nt)
+		(*l).freePos[y][x] = Destroyable
+		freeTiles = append(freeTiles[:index], freeTiles[index+1:]...)
+		i++
+	}
+	
+} 
+
+/*func (l *lv) SetRandomTilesAndItems(numberTiles, numberItems int) {
+	if numberTiles < numberItems { 
+		fmt.Println("Es können nicht mehr Items als Zerstörbareobjekte existieren.")
+		return 
+	}
 	rand.Seed(time.Now().UnixNano())
 	width := (*l).width
 	height := (*l).height
@@ -139,18 +197,23 @@ func (l *lv) SetRandomTilesAndItems(numberTiles, numberItems int) {
 		i++
 	}
 }
+*/
 
-func (l *lv) DrawColumn(y int, win pixel.Target) {
+func (l *lv) DrawColumn(y int,win pixel.Target) {
 	for x, rowSlice := range (*l).tileMatrix[y] {
+		if len(rowSlice) > 1 {
+			rowSlice[1].Draw(win)
+		} else if len(rowSlice) == 1 {
+			rowSlice[0].Draw(win)
+		}
 		for i, tileORitem := range rowSlice {
-			if !tileORitem.Ani().IsVisible() && (i == 1 || len(rowSlice) == 2) {
+			if !tileORitem.Ani().IsVisible() {
 				(*l).tileMatrix[y][x] = append(rowSlice[:i], rowSlice[i+1:]...)
-			} else {
-				tileORitem.Draw(win)
 			}
 		}
 	}
 }
+
 
 func (l *lv) IsTile(x, y int) bool {
 	if x >= l.width || x < 0 || y >= l.height || y < 0 {

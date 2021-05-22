@@ -48,7 +48,7 @@ type Level interface {
 
 	// Vor.: -
 	// Eff.:
-	SetRandomTilesAndItems(numberTiles, numberItems int)
+	//SetRandomTilesAndItems(numberTiles, numberItems int)
 
 	/*
 	   GetTiles () []tiles.Tile

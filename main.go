@@ -768,8 +768,11 @@ func sun() {
 	s1 := sounds.NewSound(OrbitalColossus)
 	go s1.PlaySound()
 
-	lev1 = level1.NewBlankLevel(typ, pitchWidth, pitchHeight, 1)
-	lev1.SetRandomTilesAndItems(40, 10)
+	/*lev1 = level1.NewBlankLevel(typ, pitchWidth, pitchHeight, 1)
+	lev1.SetRandomTilesAndItems(2, 2)
+	*/
+	 
+	lev1 = level1.NewRandomLevel(pitchWidth, pitchHeight, 1)
 
 	whiteBomberman = characters.NewPlayer(WhiteBomberman)
 	whiteBomberman.Ani().Show()
@@ -858,7 +861,7 @@ func sun() {
 			x, y := lev1.A().GetFieldCoord(whiteBomberman.GetPosBox().Center())
 			b, _ := isThereABomb(x, y)
 			c := lev1.IsTile(x, y)
-			if !b && !c {
+			if !b && !c && whiteBomberman.IsAlife() {
 				bombs = append(bombs, tiles.NewBomb(whiteBomberman, lev1.A().CoordToVec(x, y)))
 				whiteBomberman.IncBombs()
 			}
