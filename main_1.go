@@ -655,7 +655,7 @@ func sun() {
 		panic(err)
 	}
 
-	s1 := sounds.NewSound(OrbitalColossus)
+	s1 := sounds.NewSound(lv.GetMusic())
 	go s1.PlaySound()
 
 	/*lev1 = level1.NewBlankLevel(typ, pitchWidth, pitchHeight, 1)

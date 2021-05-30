@@ -16,6 +16,7 @@ type startstatus struct {
 	w, h         int
 	walltype     int
 	arenaType    int
+	music        uint8
 }
 
 func NewLevel(path string) *startstatus {
@@ -45,6 +46,10 @@ func (sts *startstatus) GetArenaType() int {
 	return sts.arenaType
 }
 
+func (sts *startstatus) GetMusic() uint8 {
+	return sts.music
+}
+
 func (sts *startstatus) GetTileType() int {
 	return sts.walltype
 }
@@ -56,7 +61,7 @@ func (sts *startstatus) statusFromFile(path string) {
 		return
 	}
 	var b []byte = make([]byte, 1)
-	var status [7]string = [7]string{"w", "h", "arena", "pos", "item", "enemy", "walltype"}
+	var status []string = []string{"w", "h", "arena", "pos", "item", "enemy", "walltype", "music"}
 	var n, i int
 	var save []byte
 	var err error
@@ -118,6 +123,9 @@ func (sts *startstatus) statusFromFile(path string) {
 				save = save[:0]
 			case "walltype":
 				sts.walltype = parseConstants(string(save))
+				save = save[:0]
+			case "music":
+				sts.music = uint8(parseConstants(string(save)))
 				save = save[:0]
 			}
 		}
@@ -243,6 +251,28 @@ func parseConstants(str string) int {
 		return Perl4
 	case "Littlesnowrock":
 		return Littlesnowrock
+	case "ThroughSpace":
+		return ThroughSpace
+	case "TheFieldOfDreams":
+		return TheFieldOfDreams
+	case "OrbitalColossus":
+		return OrbitalColossus
+	case "Fight":
+		return Fight
+	case "JuhaniJunkalaTitle":
+		return JuhaniJunkalaTitle
+	case "JuhaniJunkalaLevel1":
+		return JuhaniJunkalaLevel1
+	case "JuhaniJunkalaLevel2":
+		return JuhaniJunkalaLevel2
+	case "JuhaniJunkalaLevel3":
+		return JuhaniJunkalaLevel3
+	case "JuhaniJunkalaEnd":
+		return JuhaniJunkalaEnd
+	case "ObservingTheStar":
+		return ObservingTheStar
+	case "MyVeryOwnDeadShip":
+		return MyVeryOwnDeadShip
 	default:
 		fmt.Println("Unbekanntes Format parseConstants hat nicht geklappt")
 	}
