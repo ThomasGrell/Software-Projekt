@@ -6,6 +6,7 @@ import (
 	"github.com/faiface/pixel/pixelgl"
 	"image"
 	_ "image/png"
+	"log"
 	"math"
 	"os"
 	"fmt"
@@ -184,8 +185,8 @@ func (a *data) setPermTiles() {
 	switch a.typ {
 	case MfS:
 		permTilesDefault = [2][]int{
-			{0, 1, 1, 1, 1, 1, 1, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 5, 5, 5, 5, 5, 5, 5, 7, 7, 7, 7, 7, 7, 7, 9, 9, 9, 9, 9, 9, 10},
-			{2, 1, 3, 5, 7, 9, 11, 11, 0, 1, 3, 5, 7, 9, 10, 11, 9, 1, 2, 3, 5, 7, 8, 9, 11, 1, 3, 5, 7, 8, 9, 11, 1, 3, 5, 7, 9, 11, 10}}
+			{2, 1, 3, 5, 7, 9, 11, 11, 0, 1, 3, 5, 7, 9, 10, 11, 9, 0, 1, 3, 5, 7, 9, 11, 1, 3, 5, 7, 8, 9, 11, 1, 3, 5, 7, 9, 11, 10},
+			{0, 1, 1, 1, 1, 1, 1, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 5, 5, 5, 5, 5, 5, 5, 7, 7, 7, 7, 7, 7, 7, 9, 9, 9, 9, 9, 9, 10}}
 	case TurfNtrees:
 		permTilesDefault = [2][]int{
 			{1, 3, 5, 7, 9, 11, 8, 9, 10, 1, 3, 5, 7, 9, 10, 11, 1, 3, 5, 7, 9, 11, 1, 3, 5, 7, 9, 11, 2, 1, 3, 5, 7, 9, 11, 7},
@@ -231,7 +232,10 @@ func (a *data) drawPermTiles() {
 	var permSprite *pixel.Sprite
 	tilesPic, err := loadPicture("graphics/tiles.png")
 	if err != nil {
-		panic(err)
+		tilesPic, err = loadPicture("../graphics/tiles.png")	// for testing
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 	switch a.typ {
 	case MfS:
@@ -251,7 +255,10 @@ func (a *data) drawWallsAndGround() { // baut Arena spaltenweise auf, beginnt un
 	var edgeLowLeft, wallLeft, edgeHiLeft, hiWall, edgeHiRight, wallRight, edgeLowRight, loWall, ground *pixel.Sprite
 	tilesPic, err := loadPicture("graphics/tiles.png")
 	if err != nil {
-		panic(err)
+		tilesPic, err = loadPicture("../graphics/tiles.png")	// for testing
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 	switch a.typ {
 	case MfS:

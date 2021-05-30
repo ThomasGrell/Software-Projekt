@@ -9,26 +9,19 @@ import (
 
 type Arena interface {
 
-	//Vor.: /
-	//Erg.: Ein Slice der Länge (Spielfeldbreite x Spielfeldhöhe) ist geliefert. Jeder Eintrag repräsentiert die
-	//		Betretbarkeit einer Spielfeldkachel.
-	GetPassability() []bool
+	//Vor.: -
+	//Erg.: Zu dem Spielfeld mit den Koordinaten x,y wird der Feldmittelpunkt
+	//      als Vektor geliefert.
+	CoordToVec(x, y int) pixel.Vec
 
 	//Vor.: /
 	//Erg.: Die grafische Darstellung des Spielfelds inklusive Umrandung, Untergrund, permanenten und
 	//      zertörbaren Mauern ist geliefert.
 	GetCanvas() *pixelgl.Canvas
 
-	//GetDestroyableTiles() [][]int
-
 	//Vor.: /
 	//Erg.: Die Koordinaten des Feldes, in dem sich der Punkt v befindet, sind geliefert.
 	GetFieldCoord(v pixel.Vec) (x, y int)
-
-	//Vor.: -
-	//Erg.: Zu dem Spielfeld mit den Koordinaten x,y wird der Feldmittelpunkt
-	//      als Vektor geliefert.
-	CoordToVec(x, y int) pixel.Vec
 
 	//Vor.: /
 	//Erg.: Die Höhe des Spielfelds = Anzahl der Felder in senkrechter Richtung ist geliefert.
@@ -43,12 +36,13 @@ type Arena interface {
 	GetMatrix() *pixel.Matrix
 
 	//Vor.: /
+	//Erg.: Ein Slice der Länge (Spielfeldbreite x Spielfeldhöhe) ist geliefert. Jeder Eintrag repräsentiert die
+	//		Betretbarkeit einer Spielfeldkachel.
+	GetPassability() []bool
+
+	//Vor.: /
 	//Erg.: Das Array, das die Koordinaten der unzerstörbaren Kacheln enthält ist geliefert.
 	GetPermTiles() [2][]int
-
-	////Vor.: /
-	////Erg.: Die Kantenlänge der Feldelemente (Kacheln) ist geliefert.
-	//GetTileSize() float64
 
 	//Vor.: /
 	//Erg.: Die Breite des Spielfelds = Anzahl der Felder in waagerechter Richtung ist geliefert.
@@ -69,8 +63,4 @@ type Arena interface {
 	//		true.
 	IsFreeTile(x, y int) bool
 
-	//Vor.: /
-	//Eff.: Befinden sich zerstörbare Kacheln in der direkten, senkrechten oder waagerechten Nachbarschaft des Feldes
-	//		mit den Koordinaten (x,y), so sind diese entfernt. Ansonsten ist nichts geschehen.
-	//RemoveTiles(x, y int) bool
 }
