@@ -748,12 +748,15 @@ func moveCharacter(c characters.Character, dt float64, dir uint8) (moved bool) {
 }
 */
 func sun() {
-	const zoomFactor = 3
-	const typ = 2
-	const pitchWidth = 13
-	const pitchHeight = 11
-	var winSizeX float64 = zoomFactor * ((3 + pitchWidth) * TileSize) // TileSize = 16
-	var winSizeY float64 = zoomFactor * ((1+pitchHeight)*TileSize + 32)
+	//const pitchWidth =13
+	//const pitchHeight =11
+	lev1 = gameStat.NewGameStat("./level/level1.txt", 1)
+	const zoomFactor = 2
+	//const typ = 2
+	var pitchWidth,pitchHeight int 
+	pitchWidth,pitchHeight = lev1.GetBounds()
+	var winSizeX float64 = zoomFactor * ((3 + float64(pitchWidth)) * TileSize) // TileSize = 16
+	var winSizeY float64 = zoomFactor * ((1+float64(pitchHeight))*TileSize + 32)
 
 	wincfg := pixelgl.WindowConfig{
 		Title:  "Bomberman 2021",
@@ -771,16 +774,14 @@ func sun() {
 	/*lev1 = level1.NewBlankLevel(typ, pitchWidth, pitchHeight, 1)
 	lev1.SetRandomTilesAndItems(2, 2)
 	*/
-	 
-	lev1 = gameStat.NewRandomGameStat(pitchWidth, pitchHeight, 1)
 
 	whiteBomberman = characters.NewPlayer(WhiteBomberman)
 	whiteBomberman.Ani().Show()
 	//whiteBomberman.IncPower()
 	//whiteBomberman.IncPower()
 
-	tb = titlebar.New((3 + pitchWidth) * TileSize)
-	tb.SetMatrix(pixel.IM.Moved(pixel.V((3+pitchWidth)*TileSize/2, (1+pitchHeight)*TileSize+16)))
+	tb = titlebar.New((3 + uint16(pitchWidth)) * TileSize)
+	tb.SetMatrix(pixel.IM.Moved(pixel.V((3+float64(pitchWidth))*TileSize/2, (1+float64(pitchHeight))*TileSize+16)))
 	tb.SetLifePointers(whiteBomberman.GetLifePointer())
 	tb.SetPointsPointer(whiteBomberman.GetPointsPointer())
 	tb.SetPlayers(1)
