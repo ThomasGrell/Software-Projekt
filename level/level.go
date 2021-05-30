@@ -63,7 +63,10 @@ func (sts *startstatus) statusFromFile(path string) {
 	for err != io.EOF {
 		// liest eine Zeile aus
 		n, err = f.Read(b)
-		for b[0] != byte('\n') && err != io.EOF {
+		if n == 0 && err == io.EOF {
+			break
+		}
+		for b[0] != byte('\n') {
 			save = append(save, b[0])
 			n, err = f.Read(b)
 		}
@@ -73,26 +76,30 @@ func (sts *startstatus) statusFromFile(path string) {
 			return
 		}
 		if save[0] == byte('-') {
-			save = make([]byte, 0)
+			save = save[:0]
 			i++
+		} else if save[0] == byte('*') {
+			// Es wurde nur eine Kommentarzeile eingelesen.
+			save = save[:0]
+			continue
 		} else {
 			switch status[i] {
 			case "w":
 				sts.w, _ = strconv.Atoi(string(save))
-				save = make([]byte, 0)
+				save = save[:0]
 			case "h":
 				sts.h, _ = strconv.Atoi(string(save))
-				save = make([]byte, 0)
+				save = save[:0]
 			case "arena":
 				sts.arenaType, _ = strconv.Atoi(string(save))
-				save = make([]byte, 0)
+				save = save[:0]
 			case "pos":
 				sSlice := strings.Split(string(save), ",")
 				var pos [2]int
 				pos[0], _ = strconv.Atoi(sSlice[0])
 				pos[1], _ = strconv.Atoi(sSlice[1])
 				sts.partsPos = append(sts.partsPos, pos)
-				save = make([]byte, 0)
+				save = save[:0]
 			case "item":
 				sSlice := strings.Split(string(save), ":")
 				itemType := parseConstants(sSlice[0])
@@ -100,7 +107,7 @@ func (sts *startstatus) statusFromFile(path string) {
 				for i := 0; i < anzItems; i++ {
 					sts.listOfItems = append(sts.listOfItems, itemType)
 				}
-				save = make([]byte, 0)
+				save = save[:0]
 			case "enemy":
 				sSlice := strings.Split(string(save), ":")
 				enemyType := parseConstants(sSlice[0])
@@ -108,14 +115,11 @@ func (sts *startstatus) statusFromFile(path string) {
 				for i := 0; i < anzE; i++ {
 					sts.listOfEnemys = append(sts.listOfEnemys, enemyType)
 				}
-				save = make([]byte, 0)
+				save = save[:0]
 			case "walltype":
 				sts.walltype = parseConstants(string(save))
-				save = make([]byte, 0)
+				save = save[:0]
 			}
-		}
-		if n == 0 && err == io.EOF {
-			break
 		}
 	}
 

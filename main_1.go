@@ -5,6 +5,7 @@ import (
 	"./characters"
 	. "./constants"
 	"./gameStat"
+	"./level"
 	"./sounds"
 	"./tiles"
 	"./titlebar"
@@ -12,7 +13,6 @@ import (
 	"github.com/faiface/pixel/pixelgl"
 	"math/rand"
 	"time"
-	"./level"
 )
 
 var bombs []tiles.Bombe
@@ -112,13 +112,13 @@ func checkForExplosions() {
 					if !m.Ani().SequenceFinished() {
 						continue
 					}
+					if !m.IsAlife() {
+						clearingNeeded = true
+						continue
+					}
 					xx, yy := lev1.A().GetFieldCoord(m.GetPosBox().Center())
 					if x-i == xx && y == yy {
 						l = i
-						if !m.IsAlife() {
-							clearingNeeded = true
-							continue
-						}
 						m.DecLife()
 						if !m.IsAlife() {
 							m.Ani().Die()
@@ -140,13 +140,13 @@ func checkForExplosions() {
 					if !m.Ani().SequenceFinished() {
 						continue
 					}
+					if !m.IsAlife() {
+						clearingNeeded = true
+						continue
+					}
 					xx, yy := lev1.A().GetFieldCoord(m.GetPosBox().Center())
 					if x+i == xx && y == yy {
 						r = i
-						if !m.IsAlife() {
-							clearingNeeded = true
-							continue
-						}
 						m.DecLife()
 						if !m.IsAlife() {
 							m.Ani().Die()
@@ -168,13 +168,13 @@ func checkForExplosions() {
 					if !m.Ani().SequenceFinished() {
 						continue
 					}
+					if !m.IsAlife() {
+						clearingNeeded = true
+						continue
+					}
 					xx, yy := lev1.A().GetFieldCoord(m.GetPosBox().Center())
 					if y+i == yy && x == xx {
 						u = i
-						if !m.IsAlife() {
-							clearingNeeded = true
-							continue
-						}
 						m.DecLife()
 						if !m.IsAlife() {
 							m.Ani().Die()
@@ -196,13 +196,13 @@ func checkForExplosions() {
 					if !m.Ani().SequenceFinished() {
 						continue
 					}
+					if !m.IsAlife() {
+						clearingNeeded = true
+						continue
+					}
 					xx, yy := lev1.A().GetFieldCoord(m.GetPosBox().Center())
 					if y-i == yy && x == xx {
 						d = i
-						if !m.IsAlife() {
-							clearingNeeded = true
-							continue
-						}
 						m.DecLife()
 						if !m.IsAlife() {
 							m.Ani().Die()
@@ -493,7 +493,7 @@ func transformVecBack(dir uint8, v pixel.Vec) pixel.Vec {
 	}
 }
 
-func moveCharacter2(c interface{}, dt float64) {
+func moveCharacter(c interface{}, dt float64) {
 	nextPos := getNextPosition(c, dt)
 	var newDirChoice bool = false
 	chr := c.(characters.Character)
@@ -634,7 +634,6 @@ func moveCharacter2(c interface{}, dt float64) {
 	chr.Ani().SetView(chr.GetDirection())
 }
 
-
 func sun() {
 	var lv level.Level
 	lv = level.NewLevel("./level/level1.txt")
@@ -642,7 +641,7 @@ func sun() {
 	const typ = 2
 	var pitchWidth int
 	var pitchHeight int
-	pitchWidth,pitchHeight = lv.GetBounds()
+	pitchWidth, pitchHeight = lv.GetBounds()
 	var winSizeX float64 = zoomFactor * ((3 + float64(pitchWidth)) * TileSize) // TileSize = 16
 	var winSizeY float64 = zoomFactor * ((1+float64(pitchHeight))*TileSize + 32)
 
@@ -662,8 +661,8 @@ func sun() {
 	/*lev1 = level1.NewBlankLevel(typ, pitchWidth, pitchHeight, 1)
 	lev1.SetRandomTilesAndItems(2, 2)
 	*/
-	
-	lev1= gameStat.NewGameStat(lv,1)
+
+	lev1 = gameStat.NewGameStat(lv, 1)
 
 	whiteBomberman = characters.NewPlayer(WhiteBomberman)
 	whiteBomberman.Ani().Show()
@@ -681,7 +680,7 @@ func sun() {
 	tb.Update()
 
 	// Enemys from level
-	for _,enemyType := range (lv.GetLevelEnemys()) {
+	for _, enemyType := range lv.GetLevelEnemys() {
 		monster = append(monster, characters.NewEnemy(uint8(enemyType)))
 	}
 	/* monster = append(monster, characters.NewEnemy(Balloon))
@@ -725,22 +724,22 @@ func sun() {
 
 		if win.Pressed(pixelgl.KeyLeft) {
 			whiteBomberman.SetDirection(Left)
-			moveCharacter2(whiteBomberman, dt)
+			moveCharacter(whiteBomberman, dt)
 			keypressed = true
 		}
 		if win.Pressed(pixelgl.KeyRight) {
 			whiteBomberman.SetDirection(Right)
-			moveCharacter2(whiteBomberman, dt)
+			moveCharacter(whiteBomberman, dt)
 			keypressed = true
 		}
 		if win.Pressed(pixelgl.KeyUp) {
 			whiteBomberman.SetDirection(Up)
-			moveCharacter2(whiteBomberman, dt)
+			moveCharacter(whiteBomberman, dt)
 			keypressed = true
 		}
 		if win.Pressed(pixelgl.KeyDown) {
 			whiteBomberman.SetDirection(Down)
-			moveCharacter2(whiteBomberman, dt)
+			moveCharacter(whiteBomberman, dt)
 			keypressed = true
 		}
 		if !keypressed {
@@ -771,12 +770,10 @@ func sun() {
 					whiteBomberman.Ani().Die()
 				}
 			}
-			moveCharacter2(m, dt)
+			moveCharacter(m, dt)
 
-			
 		}
 
-		
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////7
 
 		lev1.A().GetCanvas().Draw(win, *(lev1.A().GetMatrix()))
@@ -807,7 +804,7 @@ func sun() {
 		tb.Draw(win)
 
 		win.Update()
-		
+
 		/*if !whiteBomberman.IsAlife() {
 			s3 := sounds.NewSound(Falling1)
 			go s3.PlaySound()
