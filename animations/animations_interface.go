@@ -17,11 +17,11 @@ import "github.com/faiface/pixel"
 
 Konstruktoren:
 
-Vor.: Die Nummer der Animation wird als uint8 übergeben.
-Eff.: Ein Animationsobjekt wird geliefert.
-NewAnimation() Animation
+Vor.: -
+Eff.: Das Animationsobjekt der Nummer no wird geliefert (siehe constants.go).
+NewAnimation(no uint8) Animation
 
-Vor.: Die Ausdehnung der Explosion in 4 Richtungen wird übergeben.
+Vor.: -
 Eff.: Ein Explosionsobjekt wird geliefert. Die Views Up, Down etc. sind irrelevant. Ebenso die Methoden Die() und SetView().
 	  Eine Explosion wird mit Show() gestartet.
 NewExplosion(l, r, u, d uint8) Animation

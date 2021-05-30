@@ -18,36 +18,26 @@ var CharacterImage *pixel.PictureData
 var ItemImage *pixel.PictureData
 
 type basicAnimation struct {
-	// Position/Bewegung:
-	whatAmI uint8
-
-	// Eigenschaften der Animation:
-
-	sprite *pixel.Sprite // Zugehöriger Sprite
-
-	lastUpdate int64 // time.Now().UnixNano() des letzten Spritewechsels
-	intervall  int64 // Dauer in Nanosekunden bis zum nächsten Spritewechsel
-
-	count  int8 // Nummer des zuletzt gezeichneten Sprites der Animationssequenz beginnend bei 1
-	delta  int8 // entweder -1 oder 1 für Animationsreihenfolge vor und zurück
-	seesaw bool // Bei true geht die Animation hin und her (delta=+1/-1). Bei false werden
-	// die Sprites immer in derselben Reihenfolge durchlaufen (delta=1)
+	count         int8 // Nummer des zuletzt gezeichneten Sprites der Animationssequenz beginnend bei 1
+	delta         int8 // entweder -1 oder 1 für Animationsreihenfolge vor und zurück
 	hasIntro      bool
+	in            uint8 // Anzahl der Sprites für Erscheinungssequenz
+	intervall     int64 // Dauer in Nanosekunden bis zum nächsten Spritewechsel
 	introFinished bool
-	visible       bool // Sichtbarer Sprite?
-
-	view uint8 // Bewegungsrichtung (siehe oben definierte Konstanten)
-	in   uint8 // Anzahl der Sprites für Erscheinungssequenz
-	kn   uint8 // Anzahl der Sprites für Todessequenz
-	n    uint8 // Anzahl der Sprites für unbewegte Figur
-
-	ipos pixel.Vec // intro position - Pixelgenaue Position des Sprites für Erscheinungsanimation
-	kpos pixel.Vec // kill position - Pixelgenaue Position des Sprites für Todessequenz
-	pos  pixel.Vec // Pixelgenaue Position des Sprites innerhalb des png für den ruhenden Charakter
-
-	width  pixel.Vec // Breite und Höhe des Charakter-Sprites
-	iwidth pixel.Vec // Spritegröße für Introanimation
-	kwidth pixel.Vec // Spritegröße für Todesanimation
+	ipos          pixel.Vec     // intro position - Pixelgenaue Position des Sprites für Erscheinungsanimation
+	iwidth        pixel.Vec     // Spritegröße für Introanimation
+	kn            uint8         // Anzahl der Sprites für Todessequenz
+	kpos          pixel.Vec     // kill position - Pixelgenaue Position des Sprites für Todessequenz
+	kwidth        pixel.Vec     // Spritegröße für Todesanimation
+	lastUpdate    int64         // time.Now().UnixNano() des letzten Spritewechsels
+	n             uint8         // Anzahl der Sprites für unbewegte Figur
+	pos           pixel.Vec     // Pixelgenaue Position des Sprites innerhalb des png für den ruhenden Charakter
+	seesaw        bool          // Bei true geht die Animation hin und her (delta=+1/-1). Bei false werden die Sprites immer in derselben Reihenfolge durchlaufen (delta=1)
+	sprite        *pixel.Sprite // Zugehöriger Sprite
+	view          uint8         // Bewegungsrichtung (siehe oben definierte Konstanten)
+	visible       bool          // Sichtbarer Sprite?
+	whatAmI       uint8         // Art der Animation (siehe constants.go)
+	width         pixel.Vec     // Breite und Höhe des Charakter-Sprites
 }
 type enhancedAnimation struct {
 	basicAnimation
@@ -63,26 +53,19 @@ type enhancedAnimation struct {
 	upos pixel.Vec // Pixelgenaue Position des Sprites innerhalb des png für nach oben bewegenden Charakter
 }
 type explosionAnimation struct {
-
-	// Beim Zünden der Bombe hat sie in die 4 Richtungen ggf. unterschiedliche Ausdehnungen
-	lPower uint8
-	rPower uint8
-	uPower uint8
-	dPower uint8
-
-	canvas *pixelgl.Canvas
-	batch  *pixel.Batch
-	sprite *pixel.Sprite // Zugehöriger Sprite
-
-	lastUpdate int64 // time.Now().UnixNano() des letzten Spritewechsels
-	intervall  int64 // Dauer in Nanosekunden bis zum nächsten Spritewechsel
-
-	count int8 // Nummer des zuletzt gezeichneten Sprites der Animationssequenz beginnend bei 0
-	delta int8
-	// die Sprites immer in derselben Reihenfolge durchlaufen (delta=1)
-	visible bool // Sichtbarer Sprite?
-
-	n uint8 // Anzahl der Sprites
+	batch      *pixel.Batch
+	canvas     *pixelgl.Canvas
+	count      int8          // Nummer des zuletzt gezeichneten Sprites der Animationssequenz beginnend bei 0
+	delta      int8          // count wird um delta in der Animation geändert
+	dPower     uint8         // Explosionsausdehnung nach unten
+	intervall  int64         // Dauer in Nanosekunden bis zum nächsten Spritewechsel
+	lastUpdate int64         // time.Now().UnixNano() des letzten Spritewechsels
+	lPower     uint8         // Explosionsausdehnung nach links
+	n          uint8         // Anzahl der Sprites
+	rPower     uint8         // Explosionsausdehnung nach rechts
+	sprite     *pixel.Sprite // Zugehöriger Sprite
+	uPower     uint8         // Explosionsausdehnung nach oben
+	visible    bool          // Sichtbarkeit des Sprites
 }
 
 func NewAnimation(t uint8) Animation {
@@ -1238,10 +1221,6 @@ func (c *basicAnimation) getSpriteCoords() pixel.Rect {
 	return pixel.R(v.X, v.Y, v.X+width.X, v.Y+width.Y)
 }
 func (c *basicAnimation) GetView() uint8 { return c.view }
-
-/*
-func (c *basicAnimation) IntroFinished() bool { return c.introFinished }
-*/
 func (c *basicAnimation) IsVisible() bool {
 	return c.visible
 }
