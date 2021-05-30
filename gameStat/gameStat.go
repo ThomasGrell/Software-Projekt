@@ -26,35 +26,28 @@ func NewRandomGameStat (width, height int, anzPlayer uint8) *gs {
 	return l
 }
 
-func NewGameStat (path string, anzPlayer uint8) *gs {
+func NewGameStat (lv level.Level, anzPlayer uint8) *gs {
 	g := new(gs)
-	var lv level.Level
-	//var ar arena.Arena
-	lv = level.NewLevel(path)
 	g.lv = lv
-	g.width,g.height = lv.GetBounds()
-	fmt.Println(lv.GetArenaType(), g.width, g.height)
-	ar := arena.NewArena(lv.GetArenaType(), g.width, g.height)
+	var w,h int
+	w,h = lv.GetBounds()
+	g.width = w
+	g.height = h
+	ar := arena.NewArena(2,13,11)
 	g.ar = ar
+	fmt.Println(lv.GetArenaType(), w, h)
+	for layer := 0; layer < g.height; layer++ {
+		g.tileMatrix = append(g.tileMatrix, make([][]tiles.Tile, g.width))
+		g.freePos = append(g.freePos, make([]uint8, g.width))
+	}
+	for y := 0; y < g.height; y++ {
+		for x := 0; x < g.width; x++ {
+			if ar.IsTile(x, y) {
+				g.freePos[y][x] = Undestroyable
+			}
+		}
+	}
 	g.anzPlayer = anzPlayer
-	g.freePos[0][0] = Blocked
-	g.freePos[0][1] = Blocked
-	g.freePos[1][0] = Blocked
-	if anzPlayer > 1 {
-		g.freePos[g.height-1][g.width-1] = Blocked
-		g.freePos[g.height-1][g.width-2] = Blocked
-		g.freePos[g.height-2][g.width-1] = Blocked
-	} 
-	if anzPlayer > 2 {
-		g.freePos[g.height-1][0] = Blocked
-		g.freePos[g.height-1][1] = Blocked
-		g.freePos[g.height-2][0] = Blocked
-	}
-	if anzPlayer > 3 {
-		g.freePos[0][g.width-1] = Blocked
-		g.freePos[0][g.width-2] = Blocked
-		g.freePos[1][g.width-1] = Blocked
-	}
 	g.setTilesAndItems (lv.GetTilePos(),lv.GetLevelItems(),lv.GetTileType ())
 	return g
 }
@@ -62,6 +55,7 @@ func NewGameStat (path string, anzPlayer uint8) *gs {
 func (g *gs) GetBounds () (int,int){
 	return g.width,g.height
 }
+
 
 func (g *gs) setTilesAndItems (partPos [][2]int,itemList []int,tile int) {
 	rand.Seed(time.Now().UnixNano())
@@ -192,38 +186,23 @@ func newBlankLevel(typ, width, height int, anzPlayer uint8) *gs {
 		}
 	}
 	(*l).anzPlayer = anzPlayer
-	(*l).freePos[0][0] = Blocked
-	(*l).freePos[0][1] = Blocked
-	(*l).freePos[1][0] = Blocked
-	switch anzPlayer {
-	case 1:
-		//Defaulteinstellung: Startplatz (untenlinks) für einen Player im Spiel
-	case 2:
-		(*l).freePos[(*l).height-1][(*l).width-1] = Blocked
-		(*l).freePos[(*l).height-1][(*l).width-2] = Blocked
-		(*l).freePos[(*l).height-2][(*l).width-1] = Blocked
-		//Startplatz (untenlinks und obenrechts) für zwei Player im Spiel
-	case 3:
-		(*l).freePos[(*l).height-1][(*l).width-1] = Blocked
-		(*l).freePos[(*l).height-1][(*l).width-2] = Blocked
-		(*l).freePos[(*l).height-2][(*l).width-1] = Blocked
-		(*l).freePos[(*l).height-1][0] = Blocked
-		(*l).freePos[(*l).height-1][1] = Blocked
-		(*l).freePos[(*l).height-2][0] = Blocked
-		//Startplatz (untenlinks, obenrechts und obenlinks) für drei Player im Spiel
-	case 4:
-		(*l).freePos[(*l).height-1][(*l).width-1] = Blocked
-		(*l).freePos[(*l).height-1][(*l).width-1-2] = Blocked
-		(*l).freePos[(*l).height-2][(*l).width-1] = Blocked
-		(*l).freePos[(*l).height-1][0] = Blocked
-		(*l).freePos[(*l).height-1][1] = Blocked
-		(*l).freePos[(*l).height-2][0] = Blocked
-		(*l).freePos[0][(*l).width-1] = Blocked
-		(*l).freePos[0][(*l).width-2] = Blocked
-		(*l).freePos[1][(*l).width-1] = Blocked
-		//Startplatz (alle Ecken) für vier Player im Spiel
-	default:
-		fmt.Println("Keine oder mehr als vier Startplätze gibt es nicht.")
+	l.freePos[0][0] = Blocked
+	l.freePos[0][1] = Blocked
+	l.freePos[1][0] = Blocked
+	if anzPlayer > 1 {
+		l.freePos[l.height-1][l.width-1] = Blocked
+		l.freePos[l.height-1][l.width-2] = Blocked
+		l.freePos[l.height-2][l.width-1] = Blocked
+	} 
+	if anzPlayer > 2 {
+		l.freePos[l.height-1][0] = Blocked
+		l.freePos[l.height-1][1] = Blocked
+		l.freePos[l.height-2][0] = Blocked
+	}
+	if anzPlayer > 3 {
+		l.freePos[0][l.width-1] = Blocked
+		l.freePos[0][l.width-2] = Blocked
+		l.freePos[1][l.width-1] = Blocked
 	}
 	return l
 }

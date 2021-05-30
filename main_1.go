@@ -12,6 +12,7 @@ import (
 	"github.com/faiface/pixel/pixelgl"
 	"math/rand"
 	"time"
+	"./level"
 )
 
 var bombs []tiles.Bombe
@@ -633,128 +634,15 @@ func moveCharacter2(c interface{}, dt float64) {
 	chr.Ani().SetView(chr.GetDirection())
 }
 
-/*
-func getGrantedDirections(c characters.Character) [4]bool {
-	var b [4]bool
-	b[0] = true
-	b[1] = true
-	b[2] = true
-	b[3] = true
-	pb := c.GetPosBox()
-	ll := pb.Min.Sub(lev1.A().GetLowerLeft())
-	ur := pb.Max.Sub(lev1.A().GetLowerLeft())
-	if lev1.IsTile(int((ll.X-1)/TileSize), int(ll.Y/TileSize)) || lev1.IsTile(int((ll.X-1)/TileSize), int(ur.Y/TileSize)) || ll.X-1 < 0 {
-		b[2] = false
-	}
-	if int((ur.X+1)/TileSize) > lev1.A().GetWidth()-1 {
-		b[3] = false
-	} else if lev1.IsTile(int((ur.X+1)/TileSize), int(ll.Y/TileSize)) || lev1.IsTile(int((ur.X+1)/TileSize), int(ur.Y/TileSize)) {
-		b[3] = false
-	}
-	if int((ur.Y+1)/TileSize) > lev1.A().GetHeight()-1 {
-		b[0] = false
-	} else if lev1.IsTile(int(ll.X/TileSize), int((ur.Y+1)/TileSize)) || lev1.IsTile(int(ur.X/TileSize), int((ur.Y+1)/TileSize)) {
-		b[0] = false
-	}
-	if lev1.IsTile(int(ll.X/TileSize), int((ll.Y-1)/TileSize)) || lev1.IsTile(int(ur.X/TileSize), int((ll.Y-1)/TileSize)) || ll.Y-1 < 0 {
-		b[1] = false
-	}
-	return b
-}
 
-func moveCharacter(c characters.Character, dt float64, dir uint8) (moved bool) {
-
-	// Ist der Character Unsichtbar? Dann ist nichts zu bewegen.
-	if !c.Ani().IsVisible() || c.Ani().GetView() == Dead || c.Ani().GetView() == Intro {
-		return false
-	}
-
-	dist := c.GetSpeed() * dt
-	if dist >= TileSize {
-		dist = TileSize - 0.1
-	}
-	pb := c.GetPosBox()
-	ll := pb.Min.Sub(lev1.A().GetLowerLeft())
-	ur := pb.Max.Sub(lev1.A().GetLowerLeft())
-
-	switch dir {
-	case Left:
-		dist = -dist
-		bl, xl, _ := lev1.GetPosOfNextTile(int(ll.X/TileSize), int(ll.Y/TileSize), pixel.V(-TileSize, 0))
-		bu, xu, _ := lev1.GetPosOfNextTile(int(ll.X/TileSize), int(ur.Y/TileSize), pixel.V(-TileSize, 0))
-		if bl || bu {
-			if bl && (xl >= xu || xu == -1) {
-				if ll.X+dist < float64((xl+1)*TileSize) {
-					dist = float64((xl+1)*TileSize) - ll.X + 0.1
-				}
-			} else if bu && (xu >= xl || xl == -1) {
-				if ll.X+dist < float64((xu+1)*TileSize) {
-					dist = float64((xu+1)*TileSize) - ll.X + 0.1
-				}
-			}
-		}
-		c.Move(pixel.V(dist, 0))
-	case Right:
-		bl, xl, _ := lev1.GetPosOfNextTile(int((ur.X)/TileSize), int(ll.Y/TileSize), pixel.V(TileSize, 0))
-		bu, xu, _ := lev1.GetPosOfNextTile(int((ur.X)/TileSize), int(ur.Y/TileSize), pixel.V(TileSize, 0))
-		if bl || bu {
-			if bl && (xl <= xu || xu == -1) {
-				if ur.X+dist > float64((xl)*TileSize) {
-					dist = float64((xl)*TileSize) - ur.X - 0.1
-				}
-			} else if bu && (xu <= xl || xl == -1) {
-				if ur.X+dist > float64((xu)*TileSize) {
-					dist = float64((xu)*TileSize) - ur.X - 0.1
-				}
-			}
-		}
-		c.Move(pixel.V(dist, 0))
-	case Up:
-		bl, _, yl := lev1.GetPosOfNextTile(int((ll.X)/TileSize), int((ur.Y)/TileSize), pixel.V(0, TileSize))
-		br, _, yr := lev1.GetPosOfNextTile(int((ur.X)/TileSize), int((ur.Y)/TileSize), pixel.V(0, TileSize))
-		if bl || br {
-			if bl && (yl <= yr || yr == -1) {
-				if ur.Y+dist > float64((yl)*TileSize) {
-					dist = float64((yl)*TileSize) - ur.Y - 0.1
-				}
-			} else if br && (yr <= yl || yl == -1) {
-				if ur.Y+dist > float64((yr)*TileSize) {
-					dist = float64((yr)*TileSize) - ur.Y - 0.1
-				}
-			}
-		}
-		c.Move(pixel.V(0, dist))
-	case Down:
-		dist = -dist
-		bl, _, yl := lev1.GetPosOfNextTile(int((ll.X)/TileSize), int((ll.Y)/TileSize), pixel.V(0, -TileSize))
-		br, _, yr := lev1.GetPosOfNextTile(int((ur.X)/TileSize), int((ll.Y)/TileSize), pixel.V(0, -TileSize))
-		if bl || br {
-			//fmt.Println(br, xr, yr)
-			if bl && (yl >= yr || yr == -1) {
-				if ll.Y+dist < float64((yl+1)*TileSize) {
-					dist = float64((yl+1)*TileSize) - ll.Y + 0.1
-				}
-			} else if br && (yr >= yl || yl == -1) {
-				if ll.Y+dist < float64((yr+1)*TileSize) {
-					dist = float64((yr+1)*TileSize) - ll.Y + 0.1
-				}
-			}
-			//fmt.Println(dist, ll.Y, float64((yr)*TileSize))
-		}
-		c.Move(pixel.V(0, dist))
-	}
-	c.Ani().SetView(dir)
-	return
-}
-*/
 func sun() {
-	//const pitchWidth =13
-	//const pitchHeight =11
-	lev1 = gameStat.NewGameStat("./level/level1.txt", 1)
-	const zoomFactor = 2
-	//const typ = 2
-	var pitchWidth,pitchHeight int 
-	pitchWidth,pitchHeight = lev1.GetBounds()
+	var lv level.Level
+	lv = level.NewLevel("./level/level1.txt")
+	const zoomFactor = 3
+	const typ = 2
+	var pitchWidth int
+	var pitchHeight int
+	pitchWidth,pitchHeight = lv.GetBounds()
 	var winSizeX float64 = zoomFactor * ((3 + float64(pitchWidth)) * TileSize) // TileSize = 16
 	var winSizeY float64 = zoomFactor * ((1+float64(pitchHeight))*TileSize + 32)
 
@@ -774,6 +662,8 @@ func sun() {
 	/*lev1 = level1.NewBlankLevel(typ, pitchWidth, pitchHeight, 1)
 	lev1.SetRandomTilesAndItems(2, 2)
 	*/
+	
+	lev1= gameStat.NewGameStat(lv,1)
 
 	whiteBomberman = characters.NewPlayer(WhiteBomberman)
 	whiteBomberman.Ani().Show()
@@ -790,10 +680,14 @@ func sun() {
 	tb.StartCountdown()
 	tb.Update()
 
-	// 2 Enemys
-	monster = append(monster, characters.NewEnemy(Balloon))
+	// Enemys from level
+	for _,enemyType := range (lv.GetLevelEnemys()) {
+		monster = append(monster, characters.NewEnemy(uint8(enemyType)))
+	}
+	/* monster = append(monster, characters.NewEnemy(Balloon))
 	monster[0].SetBombghost(true)
 	monster = append(monster, characters.NewEnemy(Drop))
+	*/
 
 	rand.Seed(time.Now().UnixNano())
 
@@ -805,8 +699,8 @@ func sun() {
 
 	for _, m := range monster {
 		for {
-			i := rand.Intn(lev1.A().GetWidth())
-			j := rand.Intn(lev1.A().GetHeight())
+			i := rand.Intn(pitchWidth)
+			j := rand.Intn(pitchHeight)
 			if !lev1.IsTile(i, j) && xx != i && yy != j {
 				m.MoveTo(lev1.A().GetLowerLeft().Add(pixel.V(float64(i)*
 					TileSize, float64(j)*TileSize)))
@@ -879,58 +773,10 @@ func sun() {
 			}
 			moveCharacter2(m, dt)
 
-			/*
-				xx,yy := lev1.A().GetFieldCoord(m.GetPos())
-				x,y := lev1.A().GetFieldCoord(whiteBomberman.GetPos())
-				if x == xx && y == yy {	// wenn Monster und Bomberman auf dem gleichen Feld sind, wird dem Bm ein Leben abgezogen
-					whiteBomberman.DecLife()
-					if !whiteBomberman.IsAlife() {
-						whiteBomberman.Ani().Die()
-					}
-				}
-
-				m.SetDirection(dirChoice(m))
-				pos1 := math.Round(10*(m.GetPos().X+m.GetPos().Y)) / 10 // Auf eine Nachkommastelle runden.
-				moveCharacter(m, dt, m.GetDirection())	// in die gewählte Richtung laufen
-				//fmt.Println("d:",d,"m.GetDir",m.GetDirection(),"moved",b)
-				pos2 := math.Round(10*(m.GetPos().X+m.GetPos().Y)) / 10
-				if pos1 == pos2 { // monster konnte sich nicht bewegen --> neue Richtung probieren.
-					// Dadurch zittert es in der Falle bzw. biegt in Ecken ab oder läuft zurück.
-					m.SetDirection(uint8(rand.Intn(4) + 1))
-				}
-			*/
+			
 		}
 
-		/*
-			for _,m := range(monster) {
-				if !m.IsFollowing() {
-					dirEn := rand.Intn(4)
-					switch dirEn {
-						case 0:									// l
-							if !lev1.A().IsTile(xx-1,yy) {
-								m.Move(pixel.V(-stepSize,0))
-								m.Ani().SetView(Left)
-							}
-						case 1:									// r
-							if !lev1.A().IsTile(xx+1,yy) {
-								m.Move(pixel.V(stepSize,0))
-								m.Ani().SetView(Right)
-							}
-						case 2:									// up
-							if !lev1.A().IsTile(xx,yy+1) {
-								m.Move(pixel.V(0,stepSize))
-								m.Ani().SetView(Up)
-							}
-						case 3:
-							if	!lev1.A().IsTile(xx,yy-1) {
-								m.Move(pixel.V(0,-stepSize))
-								m.Ani().SetView(Down)
-							}
-					}
-				}
-			}
-		*/
-
+		
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////7
 
 		lev1.A().GetCanvas().Draw(win, *(lev1.A().GetMatrix()))
@@ -961,6 +807,12 @@ func sun() {
 		tb.Draw(win)
 
 		win.Update()
+		
+		/*if !whiteBomberman.IsAlife() {
+			s3 := sounds.NewSound(Falling1)
+			go s3.PlaySound()
+		}
+		*/
 	}
 }
 

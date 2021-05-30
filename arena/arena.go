@@ -8,6 +8,7 @@ import (
 	_ "image/png"
 	"math"
 	"os"
+	"fmt"
 )
 
 type data struct {
@@ -42,6 +43,7 @@ func NewArena(typ, width, height int) *data {
 		a.lowerLeft = pixel.V(24, 8)
 	}
 	a.matrix = pixel.IM.Moved(pixel.V((float64(width)*TileSize+WallWidth)/2-TileSize/4, (float64(height)*TileSize+WallHeight)/2-TileSize/2))
+	fmt.Println(float64(width),float64(height))
 	a.canvas = pixelgl.NewCanvas(pixel.R(-2*TileSize, -2*TileSize, float64(width)*TileSize+WallWidth+TileSize/2, float64(height)*TileSize+WallHeight))
 	a.drawWallsAndGround()
 	a.drawPermTiles()

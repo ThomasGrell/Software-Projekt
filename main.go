@@ -773,7 +773,6 @@ func sun() {
 	*/
 	 
 	lev1 = gameStat.NewRandomGameStat(pitchWidth, pitchHeight, 1)
-
 	whiteBomberman = characters.NewPlayer(WhiteBomberman)
 	whiteBomberman.Ani().Show()
 	//whiteBomberman.IncPower()
