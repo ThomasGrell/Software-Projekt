@@ -1,14 +1,14 @@
-package main
+package titlebar
 
 import (
-	"./titlebar"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
+	"testing"
 )
 
 func run() {
 	wincfg := pixelgl.WindowConfig{
-		Title:  "Bombermen 2021",
+		Title:  "Titlebar Test",
 		Bounds: pixel.R(0, 0, 1024, 768),
 		VSync:  true,
 	}
@@ -21,7 +21,7 @@ func run() {
 
 	win.SetMatrix(pixel.IM.Moved(win.Bounds().Center()).Scaled(win.Bounds().Center(), 3))
 
-	bar := titlebar.New(16 * 16)
+	bar := New(16 * 16)
 	bar.SetPlayers(4)
 	var playerOneLifes uint8 = 3
 	var playerTwoLifes uint8 = 1
@@ -31,7 +31,7 @@ func run() {
 	var points uint32 = 1243
 	bar.SetPointsPointer(&points)
 	go bar.Manager()
-	bar.SetSeconds(5 * 60)
+	bar.SetSeconds(200)
 	bar.StartCountdown()
 	win.Update()
 	for {
@@ -43,7 +43,6 @@ func run() {
 	}
 }
 
-func main() {
-	// Hier darf nichts weiter stehen als die folgende Anweisung:
+func TestMain(*testing.M) {
 	pixelgl.Run(run)
 }

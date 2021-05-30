@@ -53,6 +53,7 @@ func New(width uint16) Titlebar {
 	t.background.Push(t.canvas.Bounds().Max)
 	t.background.Rectangle(0)
 	t.players = 0
+	t.timeLeft = 60
 
 	// Gepufferter Channel für die nebenläufige Steuerung des Titlebars.
 	// Kommandos sind oben über Konstanten definiert.
