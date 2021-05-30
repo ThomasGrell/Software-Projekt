@@ -29,17 +29,21 @@
 12,6
 -
 * Art und Anzahl der Items:
-PowerItem:3
-BombItem:3
+PowerItem:1
+BombItem:1
 RollerbladeItem:1
 SkullItem:1
 -
 * Art und Anzahl der Gegner:
-Drop:1
-BluePopEye:1
+Balloon:2
+Teddy:2
+Ghost:1
 -
 * Art der Hindernisse:
 Greenwall
 -
 * Musik:
 MyVeryOwnDeadShip
+-
+* maximale Spieldauer:
+120

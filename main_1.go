@@ -393,13 +393,19 @@ func dirChoice(m characters.Enemy) (dir uint8){
 }
 
 */
-func getPossibleDirections(x int, y int, inclBombs bool) (possibleDir [4]uint8, n uint8) {
+func getPossibleDirections(x int, y int, inclBombs bool, inclTiles bool) (possibleDir [4]uint8, n uint8) {
 	var b bool = false
+	var isT func(int, int) bool
+	if inclTiles {
+		isT = lev1.IsTile
+	} else {
+		isT = lev1.IsUndestroyableTile
+	}
 
 	if inclBombs {
 		b, _ = isThereABomb(x-1, y)
 	}
-	if x != 0 && !lev1.IsTile(x-1, y) && !b {
+	if x != 0 && !isT(x-1, y) && !b {
 		possibleDir[n] = Left
 		n++
 	}
@@ -407,7 +413,7 @@ func getPossibleDirections(x int, y int, inclBombs bool) (possibleDir [4]uint8, 
 	if inclBombs {
 		b, _ = isThereABomb(x+1, y)
 	}
-	if x != lev1.A().GetWidth()-1 && !lev1.IsTile(x+1, y) && !b {
+	if x != lev1.A().GetWidth()-1 && !isT(x+1, y) && !b {
 		possibleDir[n] = Right
 		n++
 	}
@@ -415,7 +421,7 @@ func getPossibleDirections(x int, y int, inclBombs bool) (possibleDir [4]uint8, 
 	if inclBombs {
 		b, _ = isThereABomb(x, y-1)
 	}
-	if y != 0 && !lev1.IsTile(x, y-1) && !b {
+	if y != 0 && !isT(x, y-1) && !b {
 		possibleDir[n] = Down
 		n++
 	}
@@ -423,7 +429,7 @@ func getPossibleDirections(x int, y int, inclBombs bool) (possibleDir [4]uint8, 
 	if inclBombs {
 		b, _ = isThereABomb(x, y+1)
 	}
-	if y != lev1.A().GetHeight()-1 && !lev1.IsTile(x, y+1) && !b {
+	if y != lev1.A().GetHeight()-1 && !isT(x, y+1) && !b {
 		possibleDir[n] = Up
 		n++
 	}
@@ -523,44 +529,44 @@ func moveCharacter(c interface{}, dt float64) {
 		x1, y1 := lev1.A().GetFieldCoord(nextPos.Min)
 		bombThere1, _ := isThereABomb(xv-1, yv)
 		bombThere2, _ := isThereABomb(xnow-1, ynow)
-		if lev1.IsTile(x1, y1) || x1 < 0 || (bombThere1 && bombThere2) {
+		if lev1.IsUndestroyableTile(x1, y1) || (lev1.IsDestroyableTile(x1, y1) && !chr.IsWallghost()) || x1 < 0 || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
 		x1, y1 = lev1.A().GetFieldCoord(pixel.Vec{nextPos.Min.X, nextPos.Max.Y})
-		if lev1.IsTile(x1, y1) || (bombThere1 && bombThere2) {
+		if lev1.IsUndestroyableTile(x1, y1) || (lev1.IsDestroyableTile(x1, y1) && !chr.IsWallghost()) || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
 	case Right:
 		x1, y1 := lev1.A().GetFieldCoord(nextPos.Max)
 		bombThere1, _ := isThereABomb(xv+1, yv)
 		bombThere2, _ := isThereABomb(xnow+1, ynow)
-		if lev1.IsTile(x1, y1) || (bombThere1 && bombThere2) {
+		if lev1.IsUndestroyableTile(x1, y1) || (lev1.IsDestroyableTile(x1, y1) && !chr.IsWallghost()) || x1 > lev1.A().GetWidth() || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
 		x1, y1 = lev1.A().GetFieldCoord(pixel.Vec{nextPos.Max.X, nextPos.Min.Y})
-		if lev1.IsTile(x1, y1) || (bombThere1 && bombThere2) {
+		if lev1.IsUndestroyableTile(x1, y1) || (lev1.IsDestroyableTile(x1, y1) && !chr.IsWallghost()) || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
 	case Up:
 		x1, y1 := lev1.A().GetFieldCoord(nextPos.Max)
 		bombThere1, _ := isThereABomb(xv, yv+1)
 		bombThere2, _ := isThereABomb(xnow, ynow+1)
-		if lev1.IsTile(x1, y1) || y1 > lev1.A().GetHeight() || (bombThere1 && bombThere2) {
+		if lev1.IsUndestroyableTile(x1, y1) || (lev1.IsDestroyableTile(x1, y1) && !chr.IsWallghost()) || y1 > lev1.A().GetHeight() || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
 		x1, y1 = lev1.A().GetFieldCoord(pixel.Vec{nextPos.Min.X, nextPos.Max.Y})
-		if lev1.IsTile(x1, y1) || (bombThere1 && bombThere2) {
+		if lev1.IsUndestroyableTile(x1, y1) || (lev1.IsDestroyableTile(x1, y1) && !chr.IsWallghost()) || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
 	case Down:
 		x1, y1 := lev1.A().GetFieldCoord(nextPos.Min)
 		bombThere1, _ := isThereABomb(xv, yv-1)
 		bombThere2, _ := isThereABomb(xnow, ynow-1)
-		if lev1.IsTile(x1, y1) || y1 < 0 || (bombThere1 && bombThere2) {
+		if lev1.IsUndestroyableTile(x1, y1) || (lev1.IsDestroyableTile(x1, y1) && !chr.IsWallghost()) || y1 < 0 || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
 		x1, y1 = lev1.A().GetFieldCoord(pixel.Vec{nextPos.Max.X, nextPos.Min.Y})
-		if lev1.IsTile(x1, y1) || (bombThere1 && bombThere2) {
+		if lev1.IsUndestroyableTile(x1, y1) || (lev1.IsDestroyableTile(x1, y1) && !chr.IsWallghost()) || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
 	}
@@ -584,7 +590,7 @@ func moveCharacter(c interface{}, dt float64) {
 			var possibleDirections [4]uint8
 			var n uint8
 			x, y := lev1.A().GetFieldCoord(chr.GetPosBox().Center())
-			possibleDirections, n = getPossibleDirections(x, y, !chr.IsBombghost())
+			possibleDirections, n = getPossibleDirections(x, y, !chr.IsBombghost(), !chr.IsWallghost())
 			if n == 0 { // keine erlaubte Richtung
 				chr.SetDirection(Stay) // Stay
 			} else if n == 1 { // 1 erlaubte Richtung --> lauf sie
@@ -675,7 +681,7 @@ func sun() {
 	tb.SetPointsPointer(whiteBomberman.GetPointsPointer())
 	tb.SetPlayers(1)
 	go tb.Manager()
-	tb.SetSeconds(5 * 60)
+	tb.SetSeconds(lv.GetTime())
 	tb.StartCountdown()
 	tb.Update()
 

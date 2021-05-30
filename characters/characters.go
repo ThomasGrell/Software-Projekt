@@ -75,19 +75,22 @@ func NewEnemy(t uint8) *enemy {
 	c.matrix = pixel.IM.Moved(c.GetMovedPos())
 	switch t {
 	case Balloon:
-		c.speed = 10
-		c.points = 100
+		c.speed = 20
+		c.points = 10
 	case Teddy:
 		c.speed = 30
-		c.points = 100
+		c.points = 20
 	case Ghost:
-		c.speed = 30
-		c.points = 100
-	case Drop:
 		c.speed = 20
-		c.points = 100
+		c.points = 20
+		c.wallghost = true
+	case Drop:
+		c.speed = 40
+		c.points = 30
 	case Pinky:
-		c.points = 100
+		c.speed = 40
+		c.bombghost = true
+		c.points = 40
 	case BluePopEye:
 		c.points = 100
 	case Jellyfish:
@@ -259,7 +262,7 @@ func init() {
 	bm.life = 3
 	bm.maxBombs = 1
 	bm.power = 1
-	bm.speed = 100
+	bm.speed = 40
 	bm.kick = false
 	bm.mortal = true
 	bm.wallghost = false

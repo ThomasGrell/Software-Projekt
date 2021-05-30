@@ -3,8 +3,8 @@ package gameStat
 import (
 	"../arena"
 	. "../constants"
-	"../tiles"
 	"../level"
+	"../tiles"
 	"fmt"
 	"github.com/faiface/pixel"
 	"math/rand"
@@ -17,23 +17,23 @@ type gs struct {
 	anzPlayer     uint8
 	width, height int
 	ar            arena.Arena
-	lv 			  level.Level
+	lv            level.Level
 }
 
-func NewRandomGameStat (width, height int, anzPlayer uint8) *gs {
+func NewRandomGameStat(width, height int, anzPlayer uint8) *gs {
 	l := newBlankLevel(rand.Intn(3), width, height, anzPlayer)
-	(*l).setRandomTilesAndItems(width*height/2)
+	(*l).setRandomTilesAndItems(width * height / 2)
 	return l
 }
 
-func NewGameStat (lv level.Level, anzPlayer uint8) *gs {
+func NewGameStat(lv level.Level, anzPlayer uint8) *gs {
 	g := new(gs)
 	g.lv = lv
-	var w,h int
-	w,h = lv.GetBounds()
+	var w, h int
+	w, h = lv.GetBounds()
 	g.width = w
 	g.height = h
-	ar := arena.NewArena(2,13,11)
+	ar := arena.NewArena(2, 13, 11)
 	g.ar = ar
 	fmt.Println(lv.GetArenaType(), w, h)
 	for layer := 0; layer < g.height; layer++ {
@@ -48,29 +48,28 @@ func NewGameStat (lv level.Level, anzPlayer uint8) *gs {
 		}
 	}
 	g.anzPlayer = anzPlayer
-	g.setTilesAndItems (lv.GetTilePos(),lv.GetLevelItems(),lv.GetTileType ())
+	g.setTilesAndItems(lv.GetTilePos(), lv.GetLevelItems(), lv.GetTileType())
 	return g
 }
 
-func (g *gs) GetBounds () (int,int){
-	return g.width,g.height
+func (g *gs) GetBounds() (int, int) {
+	return g.width, g.height
 }
 
-
-func (g *gs) setTilesAndItems (partPos [][2]int,itemList []int,tile int) {
+func (g *gs) setTilesAndItems(partPos [][2]int, itemList []int, tile int) {
 	rand.Seed(time.Now().UnixNano())
 	var nt tiles.Tile
 	var ni tiles.Item
-	var cParts [][2]int = make ([][2]int,len(partPos))
-	var cItems []int = make ([]int,len(itemList))
-	var index,x,y int
-	copy(cParts,partPos)
-	copy(cItems,itemList)
-	for len(cParts)!=0 {
+	var cParts [][2]int = make([][2]int, len(partPos))
+	var cItems []int = make([]int, len(itemList))
+	var index, x, y int
+	copy(cParts, partPos)
+	copy(cItems, itemList)
+	for len(cParts) != 0 {
 		index = rand.Intn(len(cParts))
 		x = cParts[index][0]
 		y = cParts[index][1]
-		if len(cItems)!=0 {
+		if len(cItems) != 0 {
 			ni = tiles.NewItem(uint8(cItems[0]), g.ar.CoordToVec(x, y))
 			g.tileMatrix[y][x] = append(g.tileMatrix[y][x], ni)
 			cItems = cItems[1:]
@@ -86,9 +85,7 @@ func (l *gs) A() arena.Arena {
 	return l.ar
 }
 
-
-
-func (l *gs) DrawColumn(y int,win pixel.Target) {
+func (l *gs) DrawColumn(y int, win pixel.Target) {
 	for x, rowSlice := range (*l).tileMatrix[y] {
 		if len(rowSlice) > 1 {
 			rowSlice[1].Draw(win)
@@ -103,7 +100,6 @@ func (l *gs) DrawColumn(y int,win pixel.Target) {
 	}
 }
 
-
 func (l *gs) IsTile(x, y int) bool {
 	if x >= l.width || x < 0 || y >= l.height || y < 0 {
 		return true
@@ -112,7 +108,17 @@ func (l *gs) IsTile(x, y int) bool {
 }
 
 func (l *gs) IsDestroyableTile(x, y int) bool {
+	if x >= l.width || x < 0 || y >= l.height || y < 0 {
+		return false
+	}
 	return (*l).freePos[y][x] == Destroyable
+}
+
+func (l *gs) IsUndestroyableTile(x, y int) bool {
+	if x >= l.width || x < 0 || y >= l.height || y < 0 {
+		return true
+	}
+	return (*l).freePos[y][x] == Undestroyable
 }
 
 func (l *gs) GetPosOfNextTile(x, y int, dir pixel.Vec) (b bool, xx, yy int) {
@@ -167,7 +173,6 @@ func (l *gs) RemoveItems(x, y int, dir pixel.Vec) {
 	}
 }
 
-
 func newBlankLevel(typ, width, height int, anzPlayer uint8) *gs {
 	ar := arena.NewArena(typ, width, height)
 	l := new(gs)
@@ -193,7 +198,7 @@ func newBlankLevel(typ, width, height int, anzPlayer uint8) *gs {
 		l.freePos[l.height-1][l.width-1] = Blocked
 		l.freePos[l.height-1][l.width-2] = Blocked
 		l.freePos[l.height-2][l.width-1] = Blocked
-	} 
+	}
 	if anzPlayer > 2 {
 		l.freePos[l.height-1][0] = Blocked
 		l.freePos[l.height-1][1] = Blocked
@@ -219,7 +224,7 @@ func (l *gs) setRandomTilesAndItems(numberTiles int) {
 			}
 		}
 	}
-	if len(freeTiles)<numberTiles {
+	if len(freeTiles) < numberTiles {
 		fmt.Println("Nicht genügend freie Plätze für die übergebene Anzahl Teile.")
 		fmt.Println("Es werden nur ", len(freeTiles), " Tiele zufällig platziert.")
 		numberTiles = len(freeTiles)
@@ -241,7 +246,7 @@ func (l *gs) setRandomTilesAndItems(numberTiles int) {
 		freeTiles = append(freeTiles[:index], freeTiles[index+1:]...)
 		i++
 	}
-	i=0
+	i = 0
 	for i < numberTiles-int(numberTiles*3/4) {
 		index = rand.Intn(len(freeTiles))
 		x = freeTiles[index][0]
@@ -252,6 +257,5 @@ func (l *gs) setRandomTilesAndItems(numberTiles int) {
 		freeTiles = append(freeTiles[:index], freeTiles[index+1:]...)
 		i++
 	}
-	
-} 
 
+}

@@ -16,7 +16,8 @@ type startstatus struct {
 	w, h         int
 	walltype     int
 	arenaType    int
-	music        uint8
+	music        int
+	time         int
 }
 
 func NewLevel(path string) *startstatus {
@@ -47,7 +48,11 @@ func (sts *startstatus) GetArenaType() int {
 }
 
 func (sts *startstatus) GetMusic() uint8 {
-	return sts.music
+	return uint8(sts.music)
+}
+
+func (sts *startstatus) GetTime() uint16 {
+	return uint16(sts.time)
 }
 
 func (sts *startstatus) GetTileType() int {
@@ -61,7 +66,7 @@ func (sts *startstatus) statusFromFile(path string) {
 		return
 	}
 	var b []byte = make([]byte, 1)
-	var status []string = []string{"w", "h", "arena", "pos", "item", "enemy", "walltype", "music"}
+	var status []string = []string{"w", "h", "arena", "pos", "item", "enemy", "walltype", "music", "time"}
 	var n, i int
 	var save []byte
 	var err error
@@ -71,7 +76,7 @@ func (sts *startstatus) statusFromFile(path string) {
 		if n == 0 && err == io.EOF {
 			break
 		}
-		for b[0] != byte('\n') {
+		for b[0] != byte('\n') && err != io.EOF {
 			save = append(save, b[0])
 			n, err = f.Read(b)
 		}
@@ -125,7 +130,10 @@ func (sts *startstatus) statusFromFile(path string) {
 				sts.walltype = parseConstants(string(save))
 				save = save[:0]
 			case "music":
-				sts.music = uint8(parseConstants(string(save)))
+				sts.music = parseConstants(string(save))
+				save = save[:0]
+			case "time":
+				sts.time, _ = strconv.Atoi(string(save))
 				save = save[:0]
 			}
 		}

@@ -46,6 +46,12 @@ type Level interface {
 
 	/*
 	 * Vor.: -
+	 * Erg.: Die Spielzeit in Sekunden des Levels ist geliefert.
+	 */
+	GetTime() uint16
+
+	/*
+	 * Vor.: -
 	 * Erg.: Der Typ der Zerstörbaren Teile (als int, vgl. constants) ist geliefert.
 	 */
 	GetTileType() int

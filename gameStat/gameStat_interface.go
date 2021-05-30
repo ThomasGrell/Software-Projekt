@@ -36,6 +36,10 @@ type GameStat interface {
 
 	// Vor.: -
 	// Eff.:
+	IsUndestroyableTile(x, y int) bool
+
+	// Vor.: -
+	// Eff.:
 	IsTile(x, y int) bool
 
 	// Vor.: -
@@ -45,10 +49,10 @@ type GameStat interface {
 	// Vor.: -
 	// Eff.:
 	RemoveTile(x, y int)
-	
+
 	// Vor.: -
 	// Eff.:
-	GetBounds () (int,int)
+	GetBounds() (int, int)
 
 	// Vor.: -
 	// Eff.:
