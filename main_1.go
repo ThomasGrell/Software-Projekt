@@ -1029,13 +1029,10 @@ C:	if continu{
 
 		win.Update()
 
-
-
-		/*if !whiteBomberman.IsAlife() {
-			s3 := sounds.NewSound(Falling1)
-			go s3.PlaySound()
+		if !whiteBomberman.IsAlife() {
+			break
 		}
-		*/
+
 	}
 	win.SetMatrix(pixel.IM.Moved(win.Bounds().Center()))
 	//if rand.Intn(2) == 1 {
