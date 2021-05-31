@@ -57,15 +57,16 @@ func showIntro(win *pixelgl.Window) {
 	// Startbild: Zoom in
 	winSize := win.Bounds().Size()
 	picSize := pic.Bounds().Size()
-	zoomFactor := winSize.Len()/picSize.Len()
+	zoomFactor := winSize.Len()/picSize.Len() - 0.15
 	for i := float64(0); i <= zoomFactor; i = i + 0.01 {
 		sprite.Draw(win, pixel.IM.Scaled(pixel.ZV, i))
 		win.Update()
 	}
 
 	// Startbild: Rotate
-	for i := float64(0); i <= 6.282; i = i + 0.3141 {
+	for i := float64(0); i <= 12.564/*6.282*/; i = i + 0.3141 {
 		sprite.Draw(win, pixel.IM.Scaled(pixel.ZV, zoomFactor).Rotated(pixel.ZV, i))
+		time.Sleep(1e7)
 		win.Update()
 	}
 }
@@ -80,7 +81,7 @@ func fadeOut(win *pixelgl.Window) {
 	for i := 0; i < 100; i++ {
 		imd.Draw(win)
 		win.Update()
-		time.Sleep(50 * time.Millisecond)
+		time.Sleep(20 * time.Millisecond)
 	}
 }
 func togglePics(win *pixelgl.Window, sprite1, sprite2 *pixel.Sprite, zoomFactor float64) {
@@ -861,11 +862,10 @@ func sun() {
 
 	showIntro(win)
 
-	time.Sleep(2 * time.Second)
+	time.Sleep(5 * time.Second)
 
+	go sIntro.FadeOut()
 	fadeOut(win)
-
-	sIntro.StopSound()
 
 	s1 := sounds.NewSound(lv.GetMusic())
 	go s1.PlaySound()
