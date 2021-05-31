@@ -69,6 +69,7 @@ func showIntro(win *pixelgl.Window) {
 		time.Sleep(1e7)
 		win.Update()
 	}
+	win.SetSmooth(false)
 }
 
 func fadeOut(win *pixelgl.Window) {
@@ -122,6 +123,7 @@ func victory(win *pixelgl.Window) {
 		time.Sleep(1e5)
 		win.Update()
 	}
+	win.SetSmooth(false)
 }
 func gameOver(win *pixelgl.Window) (goOn bool){
 	var picGoOn pixel.Picture
@@ -155,11 +157,13 @@ func gameOver(win *pixelgl.Window) (goOn bool){
 			spriteGoOn.Draw(win, pixel.IM.Scaled(pixel.ZV, zoomFactor))
 			goOn = true
 		}else if win.Pressed(pixelgl.KeyEnter) {
+			win.SetSmooth(false)
 			return
 		}
 		time.Sleep(1e7)
 		win.Update()
 	}
+	win.SetSmooth(false)
 	return
 }
 
