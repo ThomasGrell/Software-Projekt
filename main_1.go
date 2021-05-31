@@ -22,6 +22,7 @@ var lv level.Level
 var tempAniSlice [][]interface{} // [Animation][Matrix]
 var monster []characters.Enemy
 var whiteBomberman characters.Player
+var win *pixelgl.Window
 
 var clearingNeeded bool = false
 
@@ -131,6 +132,7 @@ func checkForExplosions() {
 					l = i
 					whiteBomberman.DecLife()
 					whiteBomberman.Ani().Die()
+					deathSequence ()
 					lev1.Reset()
 					whiteBomberman.MoveTo(lev1.A().GetLowerLeft())
 					break
@@ -161,6 +163,7 @@ func checkForExplosions() {
 					r = i
 					whiteBomberman.DecLife()
 					whiteBomberman.Ani().Die()
+					deathSequence ()
 					lev1.Reset()
 					whiteBomberman.MoveTo(lev1.A().GetLowerLeft())
 					break
@@ -191,6 +194,7 @@ func checkForExplosions() {
 					u = i
 					whiteBomberman.DecLife()
 					whiteBomberman.Ani().Die()
+					deathSequence ()
 					lev1.Reset()
 					whiteBomberman.MoveTo(lev1.A().GetLowerLeft())
 					break
@@ -221,6 +225,7 @@ func checkForExplosions() {
 					d = i
 					whiteBomberman.DecLife()
 					whiteBomberman.Ani().Die()
+					deathSequence ()
 					lev1.Reset()
 					whiteBomberman.MoveTo(lev1.A().GetLowerLeft())
 					break
@@ -659,6 +664,13 @@ func moveCharacter(c interface{}, dt float64) {
 	chr.Ani().SetView(chr.GetDirection())
 }
 
+func deathSequence () {
+	for !whiteBomberman.Ani().SequenceFinished() {
+		whiteBomberman.Draw(win)
+		win.Update()
+	}
+}
+
 func setMonster (pitchWidth, pitchHeight int) {
 	monster = make([]characters.Enemy,0)
 	
@@ -692,13 +704,14 @@ func sun() {
 	var zoomFactor float64 = 11/float64(pitchHeight)*3
 	var winSizeX float64 = zoomFactor * ((3 + float64(pitchWidth)) * TileSize) // TileSize = 16
 	var winSizeY float64 = zoomFactor * ((1+float64(pitchHeight))*TileSize + 32)
+	var err error
 
 	wincfg := pixelgl.WindowConfig{
 		Title:  "Bomberman 2021",
 		Bounds: pixel.R(0, 0, winSizeX, winSizeY),
 		VSync:  true,
 	}
-	win, err := pixelgl.NewWindow(wincfg)
+	win, err = pixelgl.NewWindow(wincfg)
 	if err != nil {
 		panic(err)
 	}
@@ -786,6 +799,7 @@ func sun() {
 				if whiteBomberman.Ani().SequenceFinished() && whiteBomberman.GetPosBox().Intersects(m.GetPosBox()) {
 					whiteBomberman.DecLife()
 					whiteBomberman.Ani().Die()
+					deathSequence ()
 					lev1.Reset()
 					whiteBomberman.MoveTo(lev1.A().GetLowerLeft())
 				}
