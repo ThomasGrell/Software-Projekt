@@ -20,6 +20,7 @@ import (
 )
 
 var bombs []tiles.Bombe
+var continu bool
 var tb titlebar.Titlebar
 var lev1 gameStat.GameStat
 var lv level.Level
@@ -47,6 +48,8 @@ func loadPic(path string) (pixel.Picture, error) {
 }
 
 func showIntro(win *pixelgl.Window) {
+	sIntro := sounds.NewSound(ThroughSpace)
+	go sIntro.PlaySound()
 	pic, err := loadPic("graphics/bomberman.png")
 	if err != nil {
 		panic(err)
@@ -69,6 +72,11 @@ func showIntro(win *pixelgl.Window) {
 		time.Sleep(1e7)
 		win.Update()
 	}
+	time.Sleep(5 * time.Second)
+
+	go sIntro.FadeOut()
+	fadeOut(win)
+
 	win.SetSmooth(false)
 }
 
@@ -125,7 +133,7 @@ func victory(win *pixelgl.Window) {
 	}
 	win.SetSmooth(false)
 }
-func gameOver(win *pixelgl.Window) (goOn bool){
+func gameOver(win *pixelgl.Window){
 	var picGoOn pixel.Picture
 	picEnd, err := loadPic("graphics/Screenshots/gameOverEnd.png")
 	if err != nil {
@@ -147,15 +155,15 @@ func gameOver(win *pixelgl.Window) (goOn bool){
 		spriteGoOn.Draw(win, pixel.IM.Scaled(pixel.ZV, i))
 		win.Update()
 	}
-	goOn = true
+	continu = true
 	// victory picGoOn: toggle
 	for !win.Closed() && !win.Pressed(pixelgl.KeyEscape) {
 		if win.Pressed(pixelgl.KeyDown) {
 			spriteEnd.Draw(win, pixel.IM.Scaled(pixel.ZV, zoomFactor))
-			goOn = false
+			continu = false
 		}else if win.Pressed(pixelgl.KeyUp) {
 			spriteGoOn.Draw(win, pixel.IM.Scaled(pixel.ZV, zoomFactor))
-			goOn = true
+			continu = true
 		}else if win.Pressed(pixelgl.KeyEnter) {
 			win.SetSmooth(false)
 			return
@@ -163,8 +171,8 @@ func gameOver(win *pixelgl.Window) (goOn bool){
 		time.Sleep(1e7)
 		win.Update()
 	}
+	continu = false
 	win.SetSmooth(false)
-	return
 }
 
 func clearMonsters() {
@@ -858,15 +866,15 @@ func sun() {
 
 	win.SetMatrix(pixel.IM.Moved(win.Bounds().Center()))
 
-	sIntro := sounds.NewSound(ThroughSpace)
-	go sIntro.PlaySound()
+	//sIntro := sounds.NewSound(ThroughSpace)
+	//go sIntro.PlaySound()
 
 	showIntro(win)
 
-	time.Sleep(5 * time.Second)
-
-	go sIntro.FadeOut()
-	fadeOut(win)
+	//time.Sleep(5 * time.Second)
+	//
+	//go sIntro.FadeOut()
+	//fadeOut(win)
 
 	s1 := sounds.NewSound(lv.GetMusic())
 	go s1.PlaySound()
@@ -898,6 +906,25 @@ func sun() {
 	win.Update()
 	last := time.Now()
 	dt := time.Since(last).Seconds()
+
+	// if player wants to continue:
+C:	if continu{
+		continu = false
+		lev1.Reset()
+		setMonster()
+		whiteBomberman.MoveTo(lev1.A().GetLowerLeft())
+		whiteBomberman.SetDirection(Stay)
+		whiteBomberman.Ani().SetView(Down)
+		whiteBomberman.Ani().SetView(Stay)
+		whiteBomberman.Ani().SetVisible(true)
+		whiteBomberman.Reset()
+		win.SetMatrix(pixel.IM.Moved(win.Bounds().Center()))
+		win.SetMatrix(pixel.IM.Scaled(pixel.V(0, 0), zoomFactor))
+		win.Update()
+		tb.SetSeconds(lv.GetTime())
+		tb.StartCountdown()
+		tb.Update()
+	}
 
 	for !win.Closed() && !win.Pressed(pixelgl.KeyEscape) {
 
@@ -1011,11 +1038,12 @@ func sun() {
 		*/
 	}
 	win.SetMatrix(pixel.IM.Moved(win.Bounds().Center()))
-	if rand.Intn(2) == 1 {
-		victory(win)
-	}else{
+	//if rand.Intn(2) == 1 {
+	//	victory(win)
+	//}else{
 		gameOver(win)
-	}
+	//}
+	if continu {goto C}
 
 }
 
