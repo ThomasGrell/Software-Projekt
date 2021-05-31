@@ -753,6 +753,7 @@ func sun() {
 	dt := time.Since(last).Seconds()
 
 	for !win.Closed() && !win.Pressed(pixelgl.KeyEscape) {
+		//life := whiteBomberman.GetLife()
 		keypressed := false
 		dt = time.Since(last).Seconds()
 		last = time.Now()
@@ -790,7 +791,7 @@ func sun() {
 			x, y := lev1.A().GetFieldCoord(whiteBomberman.GetPosBox().Center())
 			b, _ := isThereABomb(x, y)
 			c := lev1.IsTile(x, y)
-			if !b && !c && whiteBomberman.IsAlife() {
+			if !b && !c {//&& whiteBomberman.IsAlife() {
 				bombs = append(bombs, tiles.NewBomb(whiteBomberman, lev1.A().CoordToVec(x, y)))
 				whiteBomberman.IncBombs()
 			}
@@ -799,8 +800,8 @@ func sun() {
 		/////////////////////////////////////Moving Enemys ///////////////////////////////////////////////////////////
 
 		for _, m := range monster {
-			if whiteBomberman.Ani().IsVisible() && m.IsAlife() && m.Ani().SequenceFinished() {
-				if  whiteBomberman.Ani().SequenceFinished() && whiteBomberman.GetPosBox().Intersects(m.GetPosBox()) {
+			if m.IsAlife() && m.Ani().SequenceFinished() {
+				if whiteBomberman.Ani().IsVisible() && whiteBomberman.Ani().SequenceFinished() && whiteBomberman.GetPosBox().Intersects(m.GetPosBox()) {
 					whiteBomberman.DecLife()
 					whiteBomberman.Ani().Die()
 				}
@@ -809,13 +810,7 @@ func sun() {
 
 		}
 		
-		/*if !whiteBomberman.Ani().IsVisible() {
-			lev1.Reset()
-			whiteBomberman.MoveTo(lev1.A().GetLowerLeft())
-			bombs = bombs[:0]
-			tempAniSlice = tempAniSlice[:0]
-		}
-		*/
+		
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////7
 
 		lev1.A().GetCanvas().Draw(win, *(lev1.A().GetMatrix()))
@@ -835,6 +830,15 @@ func sun() {
 
 		itemBatch.Draw(win)
 
+		showExplosions(win)
+		tempAniSlice = clearExplosions(tempAniSlice)
+		
+		if !whiteBomberman.Ani().IsVisible() {		//life != whiteBomberman.GetLife() {
+			lev1.Reset()
+			whiteBomberman.MoveTo(lev1.A().GetLowerLeft())
+			//bombs = bombs[:0]
+			//tempAniSlice = tempAniSlice[:0]
+		}
 
 		whiteBomberman.Draw(win)
 		for _, m := range monster {
