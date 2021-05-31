@@ -220,7 +220,18 @@ func (c *player) IncPower() {
 }
 func (c *player) IncWins() { c.wins++ }
 func (c *player) Reset() {
-	*c = *bm
+	c.wallghost = false
+	c.bombghost = false
+	c.life = bm.life
+	c.power = 1
+	c.bombs = 0
+	c.speed = bm.speed
+	c.direction = Stay
+	c.points = 0
+	c.kick = false
+	c.maxBombs = 1
+	c.mortal = true
+	c.wins = 0
 }
 func (c *player) ResetWins()          { c.wins = 0 }
 func (c *player) SetLife(l uint8)     { c.life = l }
