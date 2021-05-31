@@ -32,4 +32,8 @@ type Sound interface {
 	// Vor.: Die Soundwiedergabe wurde mit PlaySound() nebenläufig gestartet.
 	// Eff.: Beendet die Wiedergabe aller Sounds.
 	StopSound()
+
+	// Vor.: Die Soundwiedergabe wurde mit PlaySound() nebenläufig gestartet.
+	// Eff.: Lässt den Sound ausklingen.
+	FadeOut()
 }

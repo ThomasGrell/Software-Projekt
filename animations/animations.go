@@ -428,6 +428,24 @@ func NewAnimation(t uint8) Animation {
 		c.intervall = 2e8
 		c.lastUpdate = time.Now().UnixNano()
 		return c
+	case BlueDevil:
+		c := new(basicAnimation)
+		c.whatAmI = t
+		*c = *be
+		c.view = Intro
+		c.introFinished = false
+		c.hasIntro = true
+		c.pos = pixel.V(0, 4*16)
+		c.ipos = pixel.V(10*16, 3*16)
+		c.kpos = pixel.V(6*16, 4*16)
+		c.iwidth = pixel.V(16, 16)
+		c.in = 5
+		c.kn = 7
+		c.seesaw = true
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
+		c.intervall = 2e8
+		c.lastUpdate = time.Now().UnixNano()
+		return c
 	case Fireball:
 		c := new(basicAnimation)
 		c.whatAmI = t

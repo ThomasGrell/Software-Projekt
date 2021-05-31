@@ -10,12 +10,8 @@ import (
 	"./tiles"
 	"./titlebar"
 	"github.com/faiface/pixel"
-	"github.com/faiface/pixel/imdraw"
 	"github.com/faiface/pixel/pixelgl"
-	"golang.org/x/image/colornames"
-	"image/png"
 	"math/rand"
-	"os"
 	"time"
 )
 
@@ -32,135 +28,6 @@ var pitchHeight int
 var itemBatch *pixel.Batch
 
 var clearingNeeded bool = false
-
-func loadPic(path string) (pixel.Picture, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-	img, err := png.Decode(file)
-	if err != nil {
-		return nil, err
-	}
-	return pixel.PictureDataFromImage(img), nil
-}
-
-func showIntro(win *pixelgl.Window) {
-	pic, err := loadPic("graphics/bomberman.png")
-	if err != nil {
-		panic(err)
-	}
-	sprite := pixel.NewSprite(pic, pic.Bounds())
-	win.Clear(colornames.Darkblue)
-	win.SetSmooth(true)
-	// Startbild: Zoom in
-	winSize := win.Bounds().Size()
-	picSize := pic.Bounds().Size()
-	zoomFactor := winSize.Len()/picSize.Len()
-	for i := float64(0); i <= zoomFactor; i = i + 0.01 {
-		sprite.Draw(win, pixel.IM.Scaled(pixel.ZV, i))
-		win.Update()
-	}
-
-	// Startbild: Rotate
-	for i := float64(0); i <= 6.282; i = i + 0.3141 {
-		sprite.Draw(win, pixel.IM.Scaled(pixel.ZV, zoomFactor).Rotated(pixel.ZV, i))
-		win.Update()
-	}
-}
-
-func fadeOut(win *pixelgl.Window) {
-	imd := imdraw.New(nil)
-	imd.Color = colornames.Black
-	imd.SetColorMask(pixel.Alpha(0.05))
-	imd.Push(pixel.V(-win.Bounds().W()/2, -win.Bounds().H()/2))
-	imd.Push(pixel.V(win.Bounds().W()/2, win.Bounds().H()/2))
-	imd.Rectangle(0)
-	for i := 0; i < 100; i++ {
-		imd.Draw(win)
-		win.Update()
-		time.Sleep(50 * time.Millisecond)
-	}
-}
-func togglePics(win *pixelgl.Window, sprite1, sprite2 *pixel.Sprite, zoomFactor float64) {
-	for {
-		sprite1.Draw(win, pixel.IM.Scaled(pixel.ZV, zoomFactor))
-		win.Update()
-		time.Sleep(2e8)
-		sprite2.Draw(win, pixel.IM.Scaled(pixel.ZV, zoomFactor))
-		win.Update()
-		time.Sleep(2e8)
-	}
-}
-func victory(win *pixelgl.Window) {
-	var pic2 pixel.Picture
-	pic1, err := loadPic("graphics/Screenshots/victory1.png")
-	if err != nil {
-		panic(err)
-	}
-	pic2, err = loadPic("graphics/Screenshots/victory2.png")
-	if err != nil {
-		panic(err)
-	}
-	sprite1 := pixel.NewSprite(pic1, pic1.Bounds())
-	sprite2 := pixel.NewSprite(pic2, pic2.Bounds())
-	win.Clear(colornames.Black)
-	win.SetSmooth(true)
-	// victory pic: zoom in
-	winSize := win.Bounds().Size()
-	picSize := pic1.Bounds().Size()
-	zoomFactor := winSize.Len()/picSize.Len()
-	for i := float64(0); i <= zoomFactor; i = i + 0.01 {
-		sprite1.Draw(win, pixel.IM.Scaled(pixel.ZV, i))
-		win.Update()
-	}
-	// victory pic: toggle
-	go togglePics(win, sprite1, sprite2, zoomFactor)
-	for !win.Closed() && !win.Pressed(pixelgl.KeyEscape) {
-		time.Sleep(1e5)
-		win.Update()
-	}
-}
-func gameOver(win *pixelgl.Window) (goOn bool){
-	var picGoOn pixel.Picture
-	picEnd, err := loadPic("graphics/Screenshots/gameOverEnd.png")
-	if err != nil {
-		panic(err)
-	}
-	picGoOn, err = loadPic("graphics/Screenshots/gameOverGoOn.png")
-	if err != nil {
-		panic(err)
-	}
-	spriteGoOn := pixel.NewSprite(picGoOn, picGoOn.Bounds())
-	spriteEnd := pixel.NewSprite(picEnd,picEnd.Bounds())
-	win.Clear(colornames.Black)
-	win.SetSmooth(true)
-	// victory picGoOn: zoom in
-	winSize := win.Bounds().Size()
-	picSize := picGoOn.Bounds().Size()
-	zoomFactor := winSize.Len()/picSize.Len()
-	for i := float64(0); i <= zoomFactor; i = i + 0.01 {
-		spriteGoOn.Draw(win, pixel.IM.Scaled(pixel.ZV, i))
-		win.Update()
-	}
-	goOn = true
-	// victory picGoOn: toggle
-	for !win.Closed() && !win.Pressed(pixelgl.KeyEscape) {
-		if win.Pressed(pixelgl.KeyDown) {
-			spriteEnd.Draw(win, pixel.IM.Scaled(pixel.ZV, zoomFactor))
-			goOn = false
-		}else if win.Pressed(pixelgl.KeyUp) {
-			spriteGoOn.Draw(win, pixel.IM.Scaled(pixel.ZV, zoomFactor))
-			goOn = true
-		}else if win.Pressed(pixelgl.KeyEnter) {
-			return
-		}
-		time.Sleep(1e7)
-		win.Update()
-	}
-	return
-}
 
 func clearMonsters() {
 	remains := make([]characters.Enemy, 0)
@@ -854,19 +721,6 @@ func sun() {
 		panic(err)
 	}
 
-	win.SetMatrix(pixel.IM.Moved(win.Bounds().Center()))
-
-	sIntro := sounds.NewSound(ThroughSpace)
-	go sIntro.PlaySound()
-
-	showIntro(win)
-
-	time.Sleep(2 * time.Second)
-
-	fadeOut(win)
-
-	sIntro.StopSound()
-
 	s1 := sounds.NewSound(lv.GetMusic())
 	go s1.PlaySound()
 
@@ -899,6 +753,7 @@ func sun() {
 	dt := time.Since(last).Seconds()
 
 	for !win.Closed() && !win.Pressed(pixelgl.KeyEscape) {
+		//life := whiteBomberman.GetLife()
 		keypressed := false
 		dt = time.Since(last).Seconds()
 		last = time.Now()
@@ -936,7 +791,7 @@ func sun() {
 			x, y := lev1.A().GetFieldCoord(whiteBomberman.GetPosBox().Center())
 			b, _ := isThereABomb(x, y)
 			c := lev1.IsTile(x, y)
-			if !b && !c && whiteBomberman.IsAlife() {
+			if !b && !c {//&& whiteBomberman.IsAlife() {
 				bombs = append(bombs, tiles.NewBomb(whiteBomberman, lev1.A().CoordToVec(x, y)))
 				whiteBomberman.IncBombs()
 			}
@@ -945,8 +800,8 @@ func sun() {
 		/////////////////////////////////////Moving Enemys ///////////////////////////////////////////////////////////
 
 		for _, m := range monster {
-			if whiteBomberman.Ani().IsVisible() && m.IsAlife() && m.Ani().SequenceFinished() {
-				if  whiteBomberman.Ani().SequenceFinished() && whiteBomberman.GetPosBox().Intersects(m.GetPosBox()) {
+			if m.IsAlife() && m.Ani().SequenceFinished() {
+				if whiteBomberman.Ani().IsVisible() && whiteBomberman.Ani().SequenceFinished() && whiteBomberman.GetPosBox().Intersects(m.GetPosBox()) {
 					whiteBomberman.DecLife()
 					whiteBomberman.Ani().Die()
 				}
@@ -955,13 +810,7 @@ func sun() {
 
 		}
 		
-		/*if !whiteBomberman.Ani().IsVisible() {
-			lev1.Reset()
-			whiteBomberman.MoveTo(lev1.A().GetLowerLeft())
-			bombs = bombs[:0]
-			tempAniSlice = tempAniSlice[:0]
-		}
-		*/
+		
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////7
 
 		lev1.A().GetCanvas().Draw(win, *(lev1.A().GetMatrix()))
@@ -981,6 +830,15 @@ func sun() {
 
 		itemBatch.Draw(win)
 
+		showExplosions(win)
+		tempAniSlice = clearExplosions(tempAniSlice)
+		
+		if !whiteBomberman.Ani().IsVisible() {		//life != whiteBomberman.GetLife() {
+			lev1.Reset()
+			whiteBomberman.MoveTo(lev1.A().GetLowerLeft())
+			//bombs = bombs[:0]
+			//tempAniSlice = tempAniSlice[:0]
+		}
 
 		whiteBomberman.Draw(win)
 		for _, m := range monster {
@@ -991,21 +849,12 @@ func sun() {
 
 		win.Update()
 
-
-
 		/*if !whiteBomberman.IsAlife() {
 			s3 := sounds.NewSound(Falling1)
 			go s3.PlaySound()
 		}
 		*/
 	}
-	win.SetMatrix(pixel.IM.Moved(win.Bounds().Center()))
-	if rand.Intn(2) == 1 {
-		victory(win)
-	}else{
-		gameOver(win)
-	}
-
 }
 
 func main() {
