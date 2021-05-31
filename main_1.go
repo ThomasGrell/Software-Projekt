@@ -7,6 +7,7 @@ import (
 	"./gameStat"
 	"./level"
 	"./sounds"
+	txt "./text"
 	"./tiles"
 	"./titlebar"
 	"github.com/faiface/pixel"
@@ -67,7 +68,7 @@ func showIntro(win *pixelgl.Window) {
 	}
 
 	// Startbild: Rotate
-	for i := float64(0); i <= 12.564/*6.282*/; i = i + 0.3141 {
+	for i := float64(0); i <= 12.564; /*6.282*/ i = i + 0.3141 {
 		sprite.Draw(win, pixel.IM.Scaled(pixel.ZV, zoomFactor).Rotated(pixel.ZV, i))
 		time.Sleep(1e7)
 		win.Update()
@@ -120,7 +121,7 @@ func victory(win *pixelgl.Window) {
 	// victory pic: zoom in
 	winSize := win.Bounds().Size()
 	picSize := pic1.Bounds().Size()
-	zoomFactor := winSize.Len()/picSize.Len()
+	zoomFactor := winSize.Len() / picSize.Len()
 	for i := float64(0); i <= zoomFactor; i = i + 0.01 {
 		sprite1.Draw(win, pixel.IM.Scaled(pixel.ZV, i))
 		win.Update()
@@ -133,7 +134,7 @@ func victory(win *pixelgl.Window) {
 	}
 	win.SetSmooth(false)
 }
-func gameOver(win *pixelgl.Window){
+func gameOver(win *pixelgl.Window) {
 	var picGoOn pixel.Picture
 	picEnd, err := loadPic("graphics/Screenshots/gameOverEnd.png")
 	if err != nil {
@@ -144,13 +145,13 @@ func gameOver(win *pixelgl.Window){
 		panic(err)
 	}
 	spriteGoOn := pixel.NewSprite(picGoOn, picGoOn.Bounds())
-	spriteEnd := pixel.NewSprite(picEnd,picEnd.Bounds())
+	spriteEnd := pixel.NewSprite(picEnd, picEnd.Bounds())
 	win.Clear(colornames.Black)
 	win.SetSmooth(true)
 	// victory picGoOn: zoom in
 	winSize := win.Bounds().Size()
 	picSize := picGoOn.Bounds().Size()
-	zoomFactor := winSize.Len()/picSize.Len()
+	zoomFactor := winSize.Len() / picSize.Len()
 	for i := float64(0); i <= zoomFactor; i = i + 0.01 {
 		spriteGoOn.Draw(win, pixel.IM.Scaled(pixel.ZV, i))
 		win.Update()
@@ -161,10 +162,10 @@ func gameOver(win *pixelgl.Window){
 		if win.Pressed(pixelgl.KeyDown) {
 			spriteEnd.Draw(win, pixel.IM.Scaled(pixel.ZV, zoomFactor))
 			continu = false
-		}else if win.Pressed(pixelgl.KeyUp) {
+		} else if win.Pressed(pixelgl.KeyUp) {
 			spriteGoOn.Draw(win, pixel.IM.Scaled(pixel.ZV, zoomFactor))
 			continu = true
-		}else if win.Pressed(pixelgl.KeyEnter) {
+		} else if win.Pressed(pixelgl.KeyEnter) {
 			win.SetSmooth(false)
 			return
 		}
@@ -871,8 +872,11 @@ func sun() {
 
 	showIntro(win)
 
-	//time.Sleep(5 * time.Second)
-	//
+	win.Clear(colornames.Black)
+	txt.Print("Let's Start").Draw(win, pixel.IM.Scaled(pixel.V(0, 0), 3))
+	win.Update()
+	time.Sleep(time.Second * 3)
+
 	//go sIntro.FadeOut()
 	//fadeOut(win)
 
@@ -908,7 +912,8 @@ func sun() {
 	dt := time.Since(last).Seconds()
 
 	// if player wants to continue:
-C:	if continu{
+C:
+	if continu {
 		continu = false
 		lev1.Reset()
 		setMonster()
@@ -1038,9 +1043,11 @@ C:	if continu{
 	//if rand.Intn(2) == 1 {
 	//	victory(win)
 	//}else{
-		gameOver(win)
+	gameOver(win)
 	//}
-	if continu {goto C}
+	if continu {
+		goto C
+	}
 
 }
 
