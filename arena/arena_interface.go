@@ -54,13 +54,13 @@ type Arena interface {
 	GrantedDirections(posBox pixel.Rect) [4]bool
 
 	//Vor.: /
-	//Erg.: Falls auf der Kachel mit den Koordinaten x,y ein permanentes Hindernis steht, so ist true geliefert, sonst
-	//		false.
-	IsTile(x, y int) bool
-
-	//Vor.: /
 	//Erg.: Falls auf der Kachel mit den Koordinaten x,y ein permanentes Hindernis steht, so ist false geliefert, sonst
 	//		true.
 	IsFreeTile(x, y int) bool
+
+	//Vor.: /
+	//Erg.: Falls auf der Kachel mit den Koordinaten x,y ein permanentes Hindernis steht, so ist true geliefert, sonst
+	//		false.
+	IsTile(x, y int) bool
 
 }

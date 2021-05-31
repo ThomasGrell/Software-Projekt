@@ -16,9 +16,9 @@ type data struct {
 	canvas    *pixelgl.Canvas
 	lowerLeft pixel.Vec // linke untere Spielfeldecke für korrekte Positionsbestimmung
 	matrix    pixel.Matrix
-	typ       int
-	passably  []bool // Slice showing passably for each tile
+	passably  []bool // Slice showing passability for each tile
 	permTiles [2][]int
+	typ       int
 	w, h      int
 }
 
