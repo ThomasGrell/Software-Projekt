@@ -1024,6 +1024,9 @@ C:
 
 		itemBatch.Draw(win)
 
+		showExplosions(win)
+		tempAniSlice = clearExplosions(tempAniSlice)
+
 		whiteBomberman.Draw(win)
 
 		for _, m := range monster {
