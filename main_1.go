@@ -23,6 +23,9 @@ var tempAniSlice [][]interface{} // [Animation][Matrix]
 var monster []characters.Enemy
 var whiteBomberman characters.Player
 var win *pixelgl.Window
+var pitchWidth int
+var pitchHeight int
+var itemBatch *pixel.Batch
 
 var clearingNeeded bool = false
 
@@ -132,9 +135,6 @@ func checkForExplosions() {
 					l = i
 					whiteBomberman.DecLife()
 					whiteBomberman.Ani().Die()
-					deathSequence ()
-					lev1.Reset()
-					whiteBomberman.MoveTo(lev1.A().GetLowerLeft())
 					break
 				}
 			}
@@ -163,9 +163,6 @@ func checkForExplosions() {
 					r = i
 					whiteBomberman.DecLife()
 					whiteBomberman.Ani().Die()
-					deathSequence ()
-					lev1.Reset()
-					whiteBomberman.MoveTo(lev1.A().GetLowerLeft())
 					break
 				}
 			}
@@ -194,9 +191,6 @@ func checkForExplosions() {
 					u = i
 					whiteBomberman.DecLife()
 					whiteBomberman.Ani().Die()
-					deathSequence ()
-					lev1.Reset()
-					whiteBomberman.MoveTo(lev1.A().GetLowerLeft())
 					break
 				}
 			}
@@ -225,9 +219,6 @@ func checkForExplosions() {
 					d = i
 					whiteBomberman.DecLife()
 					whiteBomberman.Ani().Die()
-					deathSequence ()
-					lev1.Reset()
-					whiteBomberman.MoveTo(lev1.A().GetLowerLeft())
 					break
 				}
 			}
@@ -652,8 +643,7 @@ func moveCharacter(c interface{}, dt float64) {
 				whiteBomberman.SetBombghost(true)
 			case SkullItem:
 				whiteBomberman.DecLife()
-				lev1.Reset()
-				whiteBomberman.MoveTo(lev1.A().GetLowerLeft())
+				whiteBomberman.Ani().Die()
 			}
 		}
 	}
@@ -666,13 +656,28 @@ func moveCharacter(c interface{}, dt float64) {
 
 func deathSequence () {
 	for !whiteBomberman.Ani().SequenceFinished() {
+		itemBatch.Clear()
+
+		for i := 0; i < pitchHeight; i++ {
+			lev1.DrawColumn(i, itemBatch)
+		}
+
+		itemBatch.Draw(win)
+
+		showExplosions(win)
+		tempAniSlice = clearExplosions(tempAniSlice)
+
 		whiteBomberman.Draw(win)
+		for _, m := range monster {
+			m.Draw(win)
+		}
 		win.Update()
 	}
+	
 }
 
-func setMonster (pitchWidth, pitchHeight int) {
-	monster = make([]characters.Enemy,0)
+func setMonster () {
+	monster = monster[:0]
 	
 	// Enemys from level
 	for _, enemyType := range lv.GetLevelEnemys() {
@@ -698,8 +703,6 @@ func setMonster (pitchWidth, pitchHeight int) {
 func sun() {
 	lv = level.NewLevel("./level/level1.txt")
 	const typ = 2
-	var pitchWidth int
-	var pitchHeight int
 	pitchWidth, pitchHeight = lv.GetBounds()
 	var zoomFactor float64 = 11/float64(pitchHeight)*3
 	var winSizeX float64 = zoomFactor * ((3 + float64(pitchWidth)) * TileSize) // TileSize = 16
@@ -735,14 +738,14 @@ func sun() {
 	tb.StartCountdown()
 	tb.Update()
 	
-	setMonster(pitchWidth, pitchHeight)
+	setMonster()
 
 	// Bomberman is in lowleft Corner
 	whiteBomberman.MoveTo(lev1.A().GetLowerLeft())
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	itemBatch := pixel.NewBatch(&pixel.TrianglesData{}, animations.ItemImage)
+	itemBatch = pixel.NewBatch(&pixel.TrianglesData{}, animations.ItemImage)
 	win.SetMatrix(pixel.IM.Scaled(pixel.V(0, 0), zoomFactor))
 	win.Update()
 	last := time.Now()
@@ -795,19 +798,23 @@ func sun() {
 		/////////////////////////////////////Moving Enemys ///////////////////////////////////////////////////////////
 
 		for _, m := range monster {
-			if m.IsAlife() && m.Ani().SequenceFinished() {
-				if whiteBomberman.Ani().SequenceFinished() && whiteBomberman.GetPosBox().Intersects(m.GetPosBox()) {
+			if whiteBomberman.Ani().IsVisible() && m.IsAlife() && m.Ani().SequenceFinished() {
+				if  whiteBomberman.Ani().SequenceFinished() && whiteBomberman.GetPosBox().Intersects(m.GetPosBox()) {
 					whiteBomberman.DecLife()
 					whiteBomberman.Ani().Die()
-					deathSequence ()
-					lev1.Reset()
-					whiteBomberman.MoveTo(lev1.A().GetLowerLeft())
 				}
 			}
 			moveCharacter(m, dt)
 
 		}
-
+		
+		/*if !whiteBomberman.Ani().IsVisible() {
+			lev1.Reset()
+			whiteBomberman.MoveTo(lev1.A().GetLowerLeft())
+			bombs = bombs[:0]
+			tempAniSlice = tempAniSlice[:0]
+		}
+		*/
 		/////////////////////////////////////////////////////////////////////////////////////////////////////////////7
 
 		lev1.A().GetCanvas().Draw(win, *(lev1.A().GetMatrix()))
@@ -827,8 +834,6 @@ func sun() {
 
 		itemBatch.Draw(win)
 
-		showExplosions(win)
-		tempAniSlice = clearExplosions(tempAniSlice)
 
 		whiteBomberman.Draw(win)
 		for _, m := range monster {
