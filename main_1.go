@@ -807,10 +807,7 @@ func deathSequence() {
 		}
 		win.Update()
 	}
-	
 }
-
-
 
 func setMonster() {
 	monster = monster[:0]
@@ -899,37 +896,48 @@ func sun() {
 	dt := time.Since(last).Seconds()
 
 	for !win.Closed() && !win.Pressed(pixelgl.KeyEscape) {
+
+		if whiteBomberman.Ani().GetView() == Dead && whiteBomberman.Ani().SequenceFinished() {
+			lev1.Reset()
+			setMonster()
+			whiteBomberman.MoveTo(lev1.A().GetLowerLeft())
+			whiteBomberman.SetDirection(Stay)
+			whiteBomberman.Ani().SetView(Down)
+			whiteBomberman.Ani().SetView(Stay)
+			whiteBomberman.Ani().SetVisible(true)
+		}
+
 		keypressed := false
 		dt = time.Since(last).Seconds()
 		last = time.Now()
 
-		if win.Pressed(pixelgl.KeyLeft) {
+		if win.Pressed(pixelgl.KeyLeft) && whiteBomberman.Ani().GetView() != Dead {
 			whiteBomberman.SetDirection(Left)
 			moveCharacter(whiteBomberman, dt)
 			keypressed = true
 		}
-		if win.Pressed(pixelgl.KeyRight) {
+		if win.Pressed(pixelgl.KeyRight) && whiteBomberman.Ani().GetView() != Dead {
 			whiteBomberman.SetDirection(Right)
 			moveCharacter(whiteBomberman, dt)
 			keypressed = true
 		}
-		if win.Pressed(pixelgl.KeyUp) {
+		if win.Pressed(pixelgl.KeyUp) && whiteBomberman.Ani().GetView() != Dead {
 			whiteBomberman.SetDirection(Up)
 			moveCharacter(whiteBomberman, dt)
 			keypressed = true
 		}
-		if win.Pressed(pixelgl.KeyDown) {
+		if win.Pressed(pixelgl.KeyDown) && whiteBomberman.Ani().GetView() != Dead {
 			whiteBomberman.SetDirection(Down)
 			moveCharacter(whiteBomberman, dt)
 			keypressed = true
 		}
 		if !keypressed {
-			if whiteBomberman.Ani().SequenceFinished() && whiteBomberman.IsAlife() {
-				if !whiteBomberman.Ani().IsVisible() {
-					whiteBomberman.Ani().SetVisible(true)
-					whiteBomberman.Ani().SetView(Down)
-				}
-				whiteBomberman.Ani().SetView(Stay)
+			if whiteBomberman.Ani().GetView() != Dead && whiteBomberman.IsAlife() {
+				/*				if !whiteBomberman.Ani().IsVisible() {
+									whiteBomberman.Ani().SetVisible(true)
+									whiteBomberman.Ani().SetView(Down)
+								}
+				*/whiteBomberman.Ani().SetView(Stay)
 			}
 		}
 		if win.JustPressed(pixelgl.KeyB) && whiteBomberman.GetBombs() < whiteBomberman.GetMaxBombs() {
@@ -945,16 +953,15 @@ func sun() {
 		/////////////////////////////////////Moving Enemys ///////////////////////////////////////////////////////////
 
 		for _, m := range monster {
-			if whiteBomberman.Ani().IsVisible() && m.IsAlife() && m.Ani().SequenceFinished() {
-				if  whiteBomberman.Ani().SequenceFinished() && whiteBomberman.GetPosBox().Intersects(m.GetPosBox()) {
+			if m.IsAlife() && m.Ani().GetView() != Dead {
+				if whiteBomberman.Ani().GetView() != Dead && whiteBomberman.GetPosBox().Intersects(m.GetPosBox()) {
 					whiteBomberman.DecLife()
 					whiteBomberman.Ani().Die()
 				}
 			}
 			moveCharacter(m, dt)
-
 		}
-		
+
 		/*if !whiteBomberman.Ani().IsVisible() {
 			lev1.Reset()
 			whiteBomberman.MoveTo(lev1.A().GetLowerLeft())
@@ -981,8 +988,8 @@ func sun() {
 
 		itemBatch.Draw(win)
 
-
 		whiteBomberman.Draw(win)
+
 		for _, m := range monster {
 			m.Draw(win)
 		}
