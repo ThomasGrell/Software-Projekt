@@ -33,9 +33,8 @@ func NewGameStat(lv level.Level, anzPlayer uint8) *gs {
 	w, h = lv.GetBounds()
 	g.width = w
 	g.height = h
-	ar := arena.NewArena(2, 13, 11)
+	ar := arena.NewArena(lv.GetArenaType(), w, h)
 	g.ar = ar
-	fmt.Println(lv.GetArenaType(), w, h)
 	for layer := 0; layer < g.height; layer++ {
 		g.tileMatrix = append(g.tileMatrix, make([][]tiles.Tile, g.width))
 		g.freePos = append(g.freePos, make([]uint8, g.width))
@@ -171,6 +170,22 @@ func (l *gs) RemoveItems(x, y int, dir pixel.Vec) {
 			}
 		}
 	}
+}
+
+func (g *gs) Reset() {
+	for layer := 0; layer < g.height; layer++ {
+		g.tileMatrix [layer] = make([][]tiles.Tile, g.width)
+	}
+	for y := 0; y < g.height; y++ {
+		for x := 0; x < g.width; x++ {
+			if g.ar.IsTile(x, y) {
+				g.freePos[y][x] = Undestroyable
+			} else {
+				g.freePos[y][x] = Free
+			}
+		}
+	}
+	g.setTilesAndItems(g.lv.GetTilePos(), g.lv.GetLevelItems(), g.lv.GetTileType())
 }
 
 func newBlankLevel(typ, width, height int, anzPlayer uint8) *gs {
