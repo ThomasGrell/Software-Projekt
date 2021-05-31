@@ -522,6 +522,15 @@ func moveCharacter(c interface{}, dt float64) {
 	// der PosBox in Bezug zur Bewegungsrichtung des Characters befindet
 	xv, yv := lev1.A().GetFieldCoord(transformVecBack(chr.GetDirection(), transformRect(chr.GetDirection(), chr.GetPosBox()).Max))
 
+	// Abhängig davon, ob der Character durch zerstörbare Wände gehen kann oder nicht, wird die Prüffunktion isT
+	// definiert.
+	var isT func(int, int) bool
+	if chr.IsWallghost() {
+		isT = lev1.IsUndestroyableTile
+	} else {
+		isT = lev1.IsTile
+	}
+
 	// Versperren Wände den Weg? Falls ja, geht es in dieser Richtung nicht weiter.
 	// Eine neue Richtung muss her, also wird newDirChoice auf true gesetzt.
 	switch chr.GetDirection() {
@@ -529,44 +538,44 @@ func moveCharacter(c interface{}, dt float64) {
 		x1, y1 := lev1.A().GetFieldCoord(nextPos.Min)
 		bombThere1, _ := isThereABomb(xv-1, yv)
 		bombThere2, _ := isThereABomb(xnow-1, ynow)
-		if lev1.IsUndestroyableTile(x1, y1) || (lev1.IsDestroyableTile(x1, y1) && !chr.IsWallghost()) || x1 < 0 || (bombThere1 && bombThere2) {
+		if isT(x1, y1) || x1 < 0 || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
 		x1, y1 = lev1.A().GetFieldCoord(pixel.Vec{nextPos.Min.X, nextPos.Max.Y})
-		if lev1.IsUndestroyableTile(x1, y1) || (lev1.IsDestroyableTile(x1, y1) && !chr.IsWallghost()) || (bombThere1 && bombThere2) {
+		if isT(x1, y1) || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
 	case Right:
 		x1, y1 := lev1.A().GetFieldCoord(nextPos.Max)
 		bombThere1, _ := isThereABomb(xv+1, yv)
 		bombThere2, _ := isThereABomb(xnow+1, ynow)
-		if lev1.IsUndestroyableTile(x1, y1) || (lev1.IsDestroyableTile(x1, y1) && !chr.IsWallghost()) || x1 > lev1.A().GetWidth() || (bombThere1 && bombThere2) {
+		if isT(x1, y1) || x1 > lev1.A().GetWidth() || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
 		x1, y1 = lev1.A().GetFieldCoord(pixel.Vec{nextPos.Max.X, nextPos.Min.Y})
-		if lev1.IsUndestroyableTile(x1, y1) || (lev1.IsDestroyableTile(x1, y1) && !chr.IsWallghost()) || (bombThere1 && bombThere2) {
+		if isT(x1, y1) || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
 	case Up:
 		x1, y1 := lev1.A().GetFieldCoord(nextPos.Max)
 		bombThere1, _ := isThereABomb(xv, yv+1)
 		bombThere2, _ := isThereABomb(xnow, ynow+1)
-		if lev1.IsUndestroyableTile(x1, y1) || (lev1.IsDestroyableTile(x1, y1) && !chr.IsWallghost()) || y1 > lev1.A().GetHeight() || (bombThere1 && bombThere2) {
+		if isT(x1, y1) || y1 > lev1.A().GetHeight() || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
 		x1, y1 = lev1.A().GetFieldCoord(pixel.Vec{nextPos.Min.X, nextPos.Max.Y})
-		if lev1.IsUndestroyableTile(x1, y1) || (lev1.IsDestroyableTile(x1, y1) && !chr.IsWallghost()) || (bombThere1 && bombThere2) {
+		if isT(x1, y1) || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
 	case Down:
 		x1, y1 := lev1.A().GetFieldCoord(nextPos.Min)
 		bombThere1, _ := isThereABomb(xv, yv-1)
 		bombThere2, _ := isThereABomb(xnow, ynow-1)
-		if lev1.IsUndestroyableTile(x1, y1) || (lev1.IsDestroyableTile(x1, y1) && !chr.IsWallghost()) || y1 < 0 || (bombThere1 && bombThere2) {
+		if isT(x1, y1) || y1 < 0 || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
 		x1, y1 = lev1.A().GetFieldCoord(pixel.Vec{nextPos.Max.X, nextPos.Min.Y})
-		if lev1.IsUndestroyableTile(x1, y1) || (lev1.IsDestroyableTile(x1, y1) && !chr.IsWallghost()) || (bombThere1 && bombThere2) {
+		if isT(x1, y1) || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
 	}
@@ -699,7 +708,7 @@ func sun() {
 	// Bomberman is in lowleft Corner
 	whiteBomberman.MoveTo(lev1.A().GetLowerLeft())
 
-	///////////////////////// ToDo Enyemys should be a Part of Level //////////////////////////////////////////////
+	///////////////////////// ToDo Enemys should be a Part of Level //////////////////////////////////////////////
 	xx, yy := lev1.A().GetFieldCoord(whiteBomberman.GetPos())
 
 	for _, m := range monster {
