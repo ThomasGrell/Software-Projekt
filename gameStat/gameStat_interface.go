@@ -55,24 +55,6 @@ type GameStat interface {
 	GetBounds() (int, int)
 
 	// Vor.: -
-	// Eff.:
-	//SetRandomTilesAndItems(numberTiles, numberItems int)
-
-	/*
-	   GetTiles () []tiles.Tile
-
-
-
-	   SetRandomItems (number int)
-
-	   DrawTiles (win *pixelgl.Window)
-
-	   DrawItems (win *pixelgl.Window)
-
-	   IsTile (x,y int) bool
-
-	   RemoveTile(x,y int) bool
-
-	   RemoveItems (x,y,dir,len int)
-	*/
+	// Eff.: 
+	Reset ()
 }

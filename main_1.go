@@ -18,10 +18,11 @@ import (
 var bombs []tiles.Bombe
 var tb titlebar.Titlebar
 var lev1 gameStat.GameStat
-
+var lv level.Level
 var tempAniSlice [][]interface{} // [Animation][Matrix]
 var monster []characters.Enemy
 var whiteBomberman characters.Player
+var win *pixelgl.Window
 
 var clearingNeeded bool = false
 
@@ -131,6 +132,9 @@ func checkForExplosions() {
 					l = i
 					whiteBomberman.DecLife()
 					whiteBomberman.Ani().Die()
+					deathSequence ()
+					lev1.Reset()
+					whiteBomberman.MoveTo(lev1.A().GetLowerLeft())
 					break
 				}
 			}
@@ -159,6 +163,9 @@ func checkForExplosions() {
 					r = i
 					whiteBomberman.DecLife()
 					whiteBomberman.Ani().Die()
+					deathSequence ()
+					lev1.Reset()
+					whiteBomberman.MoveTo(lev1.A().GetLowerLeft())
 					break
 				}
 			}
@@ -187,6 +194,9 @@ func checkForExplosions() {
 					u = i
 					whiteBomberman.DecLife()
 					whiteBomberman.Ani().Die()
+					deathSequence ()
+					lev1.Reset()
+					whiteBomberman.MoveTo(lev1.A().GetLowerLeft())
 					break
 				}
 			}
@@ -215,6 +225,9 @@ func checkForExplosions() {
 					d = i
 					whiteBomberman.DecLife()
 					whiteBomberman.Ani().Die()
+					deathSequence ()
+					lev1.Reset()
+					whiteBomberman.MoveTo(lev1.A().GetLowerLeft())
 					break
 				}
 			}
@@ -639,6 +652,8 @@ func moveCharacter(c interface{}, dt float64) {
 				whiteBomberman.SetBombghost(true)
 			case SkullItem:
 				whiteBomberman.DecLife()
+				lev1.Reset()
+				whiteBomberman.MoveTo(lev1.A().GetLowerLeft())
 			}
 		}
 	}
@@ -649,23 +664,54 @@ func moveCharacter(c interface{}, dt float64) {
 	chr.Ani().SetView(chr.GetDirection())
 }
 
+func deathSequence () {
+	for !whiteBomberman.Ani().SequenceFinished() {
+		whiteBomberman.Draw(win)
+		win.Update()
+	}
+}
+
+func setMonster (pitchWidth, pitchHeight int) {
+	monster = make([]characters.Enemy,0)
+	
+	// Enemys from level
+	for _, enemyType := range lv.GetLevelEnemys() {
+		monster = append(monster, characters.NewEnemy(uint8(enemyType)))
+	}
+	
+	rand.Seed(time.Now().UnixNano())
+	xx, yy := lev1.A().GetFieldCoord(whiteBomberman.GetPos())
+	for _, m := range monster {
+		for {
+			i := rand.Intn(pitchWidth)
+			j := rand.Intn(pitchHeight)
+			if !lev1.IsTile(i, j) && xx != i && yy != j && i+j > 4{
+				m.MoveTo(lev1.A().GetLowerLeft().Add(pixel.V(float64(i)*
+					TileSize, float64(j)*TileSize)))
+				m.Ani().SetVisible(true)
+				break
+			}
+		}
+	}
+}
+
 func sun() {
-	var lv level.Level
 	lv = level.NewLevel("./level/level1.txt")
-	const zoomFactor = 3
 	const typ = 2
 	var pitchWidth int
 	var pitchHeight int
 	pitchWidth, pitchHeight = lv.GetBounds()
+	var zoomFactor float64 = 11/float64(pitchHeight)*3
 	var winSizeX float64 = zoomFactor * ((3 + float64(pitchWidth)) * TileSize) // TileSize = 16
 	var winSizeY float64 = zoomFactor * ((1+float64(pitchHeight))*TileSize + 32)
+	var err error
 
 	wincfg := pixelgl.WindowConfig{
 		Title:  "Bomberman 2021",
 		Bounds: pixel.R(0, 0, winSizeX, winSizeY),
 		VSync:  true,
 	}
-	win, err := pixelgl.NewWindow(wincfg)
+	win, err = pixelgl.NewWindow(wincfg)
 	if err != nil {
 		panic(err)
 	}
@@ -673,16 +719,11 @@ func sun() {
 	s1 := sounds.NewSound(lv.GetMusic())
 	go s1.PlaySound()
 
-	/*lev1 = level1.NewBlankLevel(typ, pitchWidth, pitchHeight, 1)
-	lev1.SetRandomTilesAndItems(2, 2)
-	*/
 
 	lev1 = gameStat.NewGameStat(lv, 1)
 
 	whiteBomberman = characters.NewPlayer(WhiteBomberman)
 	whiteBomberman.Ani().Show()
-	//whiteBomberman.IncPower()
-	//whiteBomberman.IncPower()
 
 	tb = titlebar.New((3 + uint16(pitchWidth)) * TileSize)
 	tb.SetMatrix(pixel.IM.Moved(pixel.V((3+float64(pitchWidth))*TileSize/2, (1+float64(pitchHeight))*TileSize+16)))
@@ -693,36 +734,11 @@ func sun() {
 	tb.SetSeconds(lv.GetTime())
 	tb.StartCountdown()
 	tb.Update()
-
-	// Enemys from level
-	for _, enemyType := range lv.GetLevelEnemys() {
-		monster = append(monster, characters.NewEnemy(uint8(enemyType)))
-	}
-	/* monster = append(monster, characters.NewEnemy(Balloon))
-	monster[0].SetBombghost(true)
-	monster = append(monster, characters.NewEnemy(Drop))
-	*/
-
-	rand.Seed(time.Now().UnixNano())
+	
+	setMonster(pitchWidth, pitchHeight)
 
 	// Bomberman is in lowleft Corner
 	whiteBomberman.MoveTo(lev1.A().GetLowerLeft())
-
-	///////////////////////// ToDo Enemys should be a Part of Level //////////////////////////////////////////////
-	xx, yy := lev1.A().GetFieldCoord(whiteBomberman.GetPos())
-
-	for _, m := range monster {
-		for {
-			i := rand.Intn(pitchWidth)
-			j := rand.Intn(pitchHeight)
-			if !lev1.IsTile(i, j) && xx != i && yy != j {
-				m.MoveTo(lev1.A().GetLowerLeft().Add(pixel.V(float64(i)*
-					TileSize, float64(j)*TileSize)))
-				m.Ani().SetVisible(true)
-				break
-			}
-		}
-	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -783,6 +799,9 @@ func sun() {
 				if whiteBomberman.Ani().SequenceFinished() && whiteBomberman.GetPosBox().Intersects(m.GetPosBox()) {
 					whiteBomberman.DecLife()
 					whiteBomberman.Ani().Die()
+					deathSequence ()
+					lev1.Reset()
+					whiteBomberman.MoveTo(lev1.A().GetLowerLeft())
 				}
 			}
 			moveCharacter(m, dt)
