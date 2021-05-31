@@ -218,7 +218,10 @@ func (c *player) IncPower() {
 		c.power++
 	}
 }
-func (c *player) IncWins()            { c.wins++ }
+func (c *player) IncWins() { c.wins++ }
+func (c *player) Reset() {
+	*c = *bm
+}
 func (c *player) ResetWins()          { c.wins = 0 }
 func (c *player) SetLife(l uint8)     { c.life = l }
 func (c *player) SetMaxBombs(b uint8) { c.maxBombs = b }

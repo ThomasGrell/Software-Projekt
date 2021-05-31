@@ -99,6 +99,10 @@ type Player interface {
 	IncWins()
 
 	// Vor.: -
+	// Eff.: Setzt den Bomberman auf Standardeinstellungen zurück.
+	Reset()
+
+	// Vor.: -
 	// Eff.: Setzt die Anzahl der Siege auf 0 zurück.
 	ResetWins()
 
