@@ -3,6 +3,7 @@ package sounds
 import (
 	. "../constants"
 	"github.com/faiface/beep"
+	"github.com/faiface/beep/effects"
 	"github.com/faiface/beep/speaker"
 	"github.com/faiface/beep/vorbis"
 	"log"
@@ -15,6 +16,14 @@ type snd struct {
 	path string
 	done chan bool
 	quit chan bool
+	fade chan bool
+}
+
+type Volume struct {
+	Streamer beep.Streamer
+	Base     float64
+	Volume   float64
+	Silent   bool
 }
 
 func NewSound(nr uint8) Sound {
@@ -22,6 +31,7 @@ func NewSound(nr uint8) Sound {
 	s.nr = nr
 	s.done = make(chan bool)
 	s.quit = make(chan bool)
+	s.fade = make(chan bool)
 	switch nr {
 	// Musik:
 	case ThroughSpace:
@@ -92,31 +102,63 @@ func (s *snd) PlaySound() {
 		log.Fatal(err)
 	}
 	defer streamer.Close()
-	speaker.Play(beep.Seq(streamer, beep.Callback(func() {
-		s.done <- true
-	})))
+
+	ctrl := &beep.Ctrl{Streamer: beep.Loop(-1, streamer), Paused: false}
+	volume := &effects.Volume{
+		Streamer: ctrl,
+		Base:     2,
+		Volume:   0,
+		Silent:   false,
+	}
+
+	if s.nr < 100 {
+		// Musik
+		speaker.Play(volume)
+	} else {
+		// Soundeffekt
+		speaker.Play(beep.Seq(streamer, beep.Callback(func() {
+			s.done <- true
+		})))
+	}
 
 A:
 	for {
 		select {
 		case <-s.quit:
 			speaker.Clear()
+		case <-s.fade:
+			for i := 0; i < 1000; i++ {
+				time.Sleep(time.Millisecond * 2)
+				speaker.Lock()
+				volume.Volume -= 0.01
+				speaker.Unlock()
+			}
+			volume.Silent = true
+			break A
 		case <-s.done:
 			// Falls es Musik ist dann wird diese in einer Endlosschleife wiederholt.
-			if s.nr < 100 {
-				streamer.Seek(0)
-				speaker.Play(beep.Seq(streamer, beep.Callback(func() {
-					s.done <- true
-				})))
-			} else {
-				break A
-			}
+			/*
+				if s.nr < 100 {
+					streamer.Seek(0)
+					speaker.Play(beep.Seq(streamer, beep.Callback(func() {
+						s.done <- true
+					})))
+
+				} else {
+					break A
+				}
+			*/
+			break A
 		}
 	}
 }
 
 func (s *snd) StopSound() {
 	s.quit <- true
+}
+
+func (s *snd) FadeOut() {
+	s.fade <- true
 }
 
 func init() {
