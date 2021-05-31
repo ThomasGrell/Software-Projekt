@@ -75,63 +75,110 @@ func NewEnemy(t uint8) *enemy {
 	c.matrix = pixel.IM.Moved(c.GetMovedPos())
 	switch t {
 	case Balloon:
-		c.speed = 20
+		c.speed = 10
 		c.points = 10
 	case Teddy:
-		c.speed = 30
+		c.speed = 15
 		c.points = 20
+		c.follow = true
 	case Ghost:
-		c.speed = 20
-		c.points = 20
+		c.speed = 15
+		c.points = 30
 		c.wallghost = true
 	case Drop:
-		c.speed = 40
-		c.points = 30
-	case Pinky:
-		c.speed = 40
-		c.bombghost = true
+		c.speed = 20
 		c.points = 40
+	case Pinky:
+		c.speed = 20
+		c.bombghost = true
+		c.points = 50
 	case BluePopEye:
-		c.points = 100
+		c.speed = 25
+		c.points = 50
 	case Jellyfish:
-		c.points = 100
+		c.speed = 25
+		c.points = 60
 	case Snake:
-		c.points = 100
-	case Spinner:
-		c.points = 100
+		c.life = 2
+		c.speed = 25
+		c.points = 70
 	case YellowPopEye:
-		c.points = 100
+		c.speed = 30
+		c.points = 80
+	case Spinner:
+		c.speed = 50
+		c.points = 90
 	case YellowBubble:
-		c.points = 100
+		c.speed = 30
+		c.bombghost = true
+		c.points = 90
 	case PinkPopEye:
+		c.speed = 35
 		c.points = 100
 	case Fire:
-		c.points = 100
+		c.speed = 35
+		c.wallghost = true
+		c.points = 110
 	case Crocodile:
-		c.points = 100
+		c.life = 2
+		c.speed = 35
+		c.points = 120
 	case Coin:
-		c.points = 100
+		c.speed = 40
+		c.points = 130
 	case Puddle:
-		c.points = 100
+		c.follow = true
+		c.speed = 40
+		c.points = 140
 	case PinkCyclops:
-		c.points = 100
+		c.speed = 45
+		c.points = 150
 	case RedCyclops:
-		c.points = 100
+		c.life = 2
+		c.speed = 45
+		c.points = 150
 	case PinkFlower:
-		c.points = 100
+		c.follow = true
+		c.speed = 50
+		c.points = 160
 	case Fireball:
+		// Boss Stufe 1
+		c.speed = 50
+		c.life = 3
+		c.follow = true
 		c.ani.SetView(Intro)
-		c.points = 100
+		c.points = 300
 	case Snowy:
-		c.points = 100
+		c.speed = 50
+		c.points = 170
+		c.bombghost = true
 	case BlueRabbit:
-		c.points = 100
+		c.speed = 50
+		c.life = 2
+		c.points = 180
 	case PinkDevil:
-		c.points = 100
+		c.speed = 50
+		c.wallghost = true
+		c.points = 190
 	case Penguin:
-		c.points = 100
+		c.wallghost = true
+		c.bombghost = true
+		c.speed = 50
+		c.points = 200
+	case BlueDevil:
+		// Boss Stufe 2
+		c.speed = 50
+		c.follow = true
+		c.wallghost = true
+		c.life = 3
+		c.points = 400
 	case BlueCyclops:
-		c.points = 100
+		// Boss Stufe 3
+		c.speed = 50
+		c.follow = true
+		c.bombghost = true
+		c.life = 5
+		c.points = 500
 	default:
 		panic("Unknown Enemy")
 	}
