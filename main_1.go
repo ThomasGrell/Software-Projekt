@@ -21,13 +21,13 @@ import (
 )
 
 var bombs []tiles.Bombe
-var continu bool
+var continu bool = true
 var tb titlebar.Titlebar
-var lev1 gameStat.GameStat
-var lv level.Level
+var lv gameStat.GameStat
+var levelDef level.Level
 var tempAniSlice [][]interface{} // [Animation][Matrix]
 var monster []characters.Enemy
-var whiteBomberman characters.Player
+var wB characters.Player
 var win *pixelgl.Window
 var pitchWidth int
 var pitchHeight int
@@ -49,33 +49,49 @@ func loadPic(path string) (pixel.Picture, error) {
 }
 
 func showIntro(win *pixelgl.Window) {
-	sIntro := sounds.NewSound(ThroughSpace)
-	go sIntro.PlaySound()
+	var zoom float64
+	var intro sounds.Sound
+
+	intro = sounds.NewSound(ThroughSpace)
+	go intro.PlaySound()
+
 	pic, err := loadPic("graphics/bomberman.png")
 	if err != nil {
 		panic(err)
 	}
 	sprite := pixel.NewSprite(pic, pic.Bounds())
+
 	win.Clear(colornames.Darkblue)
 	win.SetSmooth(true)
+
 	// Startbild: Zoom in
-	winSize := win.Bounds().Size()
-	picSize := pic.Bounds().Size()
-	zoomFactor := winSize.Len()/picSize.Len() - 0.15
-	for i := float64(0); i <= zoomFactor; i = i + 0.01 {
+	if win.Bounds().H() > win.Bounds().W() {
+		zoom = win.Bounds().W() / pic.Bounds().Size().Len()
+	} else {
+		zoom = win.Bounds().H() / pic.Bounds().Size().Len()
+	}
+	for i := float64(0); i <= zoom; i = i + 0.01 {
 		sprite.Draw(win, pixel.IM.Scaled(pixel.ZV, i))
 		win.Update()
 	}
 
 	// Startbild: Rotate
 	for i := float64(0); i <= 12.564; /*6.282*/ i = i + 0.3141 {
-		sprite.Draw(win, pixel.IM.Scaled(pixel.ZV, zoomFactor).Rotated(pixel.ZV, i))
+		sprite.Draw(win, pixel.IM.Scaled(pixel.ZV, zoom).Rotated(pixel.ZV, i))
 		time.Sleep(1e7)
 		win.Update()
 	}
-	time.Sleep(5 * time.Second)
 
-	go sIntro.FadeOut()
+	time.Sleep(time.Second)
+
+	txt.Print("Press Space").Draw(win, pixel.IM.Scaled(pixel.ZV, zoom*6).Moved(pixel.V(0, -win.Bounds().H()/4)))
+
+	for !win.Pressed(pixelgl.KeySpace) {
+		win.Update()
+		time.Sleep(100 * time.Millisecond)
+	}
+
+	intro.FadeOut()
 	fadeOut(win)
 
 	win.SetSmooth(false)
@@ -104,6 +120,7 @@ func togglePics(win *pixelgl.Window, sprite1, sprite2 *pixel.Sprite, zoomFactor 
 		time.Sleep(2e8)
 	}
 }
+
 func victory(win *pixelgl.Window) {
 	var pic2 pixel.Picture
 	pic1, err := loadPic("graphics/Screenshots/victory1.png")
@@ -186,6 +203,20 @@ func clearMonsters() {
 	monster = remains[:]
 }
 
+func killEnemy(m characters.Enemy) {
+	m.DecLife()
+	if !m.IsAlife() {
+		m.Ani().Die()
+	}
+	go sounds.NewSound(Falling1).PlaySound()
+}
+
+func killPlayer(bm characters.Player) {
+	bm.DecLife()
+	bm.Ani().Die()
+	go sounds.NewSound(Falling10).PlaySound()
+}
+
 // Vor: ...
 // Eff: Ist der Counddown der Bombe abgelaufen passiert folgendes:
 //     		- Eine neue Explosionsanimation ist erstellt und an die Position der ehemaligen bombe gesetzt.
@@ -203,7 +234,7 @@ func checkForExplosions() {
 				owner.DecBombs()
 			}
 
-			x, y := lev1.A().GetFieldCoord(item.GetPos())
+			x, y := lv.A().GetFieldCoord(item.GetPos())
 			power := int(item.GetPower())
 			l, r, u, d := power, power, power, power
 
@@ -211,44 +242,44 @@ func checkForExplosions() {
 			if l > x {
 				l = x
 			}
-			if lev1.A().GetWidth()-1-r < x {
-				r = lev1.A().GetWidth() - 1 - x
+			if lv.A().GetWidth()-1-r < x {
+				r = lv.A().GetWidth() - 1 - x
 			}
 			if d > y {
 				d = y
 			}
-			if lev1.A().GetHeight()-1-u < y {
-				u = lev1.A().GetHeight() - 1 - y
+			if lv.A().GetHeight()-1-u < y {
+				u = lv.A().GetHeight() - 1 - y
 			}
 
 			// Falls es Hindernisse gibt, die zerstörbar oder unzerstörbar sind
-			bl, xl, yl := lev1.GetPosOfNextTile(x, y, pixel.V(float64(-l), 0))
+			bl, xl, yl := lv.GetPosOfNextTile(x, y, pixel.V(float64(-l), 0))
 			if bl {
-				if lev1.IsDestroyableTile(xl, yl) {
+				if lv.IsDestroyableTile(xl, yl) {
 					l = x - xl
 				} else {
 					l = x - xl - 1
 				}
 			}
-			br, xr, yr := lev1.GetPosOfNextTile(x, y, pixel.V(float64(r), 0))
+			br, xr, yr := lv.GetPosOfNextTile(x, y, pixel.V(float64(r), 0))
 			if br {
-				if lev1.IsDestroyableTile(xr, yr) {
+				if lv.IsDestroyableTile(xr, yr) {
 					r = xr - x
 				} else {
 					r = xr - x - 1
 				}
 			}
-			bd, xd, yd := lev1.GetPosOfNextTile(x, y, pixel.V(0, float64(-d)))
+			bd, xd, yd := lv.GetPosOfNextTile(x, y, pixel.V(0, float64(-d)))
 			if bd {
-				if lev1.IsDestroyableTile(xd, yd) {
+				if lv.IsDestroyableTile(xd, yd) {
 					d = y - yd
 				} else {
 					d = y - yd - 1
 				}
 			}
-			bu, xu, yu := lev1.GetPosOfNextTile(x, y, pixel.V(0, float64(u)))
+			bu, xu, yu := lv.GetPosOfNextTile(x, y, pixel.V(0, float64(u)))
 			if bu {
-				if lev1.IsDestroyableTile(xu, yu) {
+				if lv.IsDestroyableTile(xu, yu) {
 					u = yu - y
 				} else {
 					u = yu - y - 1
@@ -257,7 +288,7 @@ func checkForExplosions() {
 
 			// falls sich ein Monster oder Player im Explosionsradius befindet
 
-			bmX, bmY := lev1.A().GetFieldCoord(whiteBomberman.GetPosBox().Center())
+			bmX, bmY := lv.A().GetFieldCoord(wB.GetPosBox().Center())
 			for i := 0; i <= l; i++ {
 				for _, m := range monster {
 					if !m.Ani().SequenceFinished() {
@@ -267,21 +298,17 @@ func checkForExplosions() {
 						clearingNeeded = true
 						continue
 					}
-					xx, yy := lev1.A().GetFieldCoord(m.GetPosBox().Center())
+					xx, yy := lv.A().GetFieldCoord(m.GetPosBox().Center())
 					if x-i == xx && y == yy {
 						l = i
-						m.DecLife()
-						if !m.IsAlife() {
-							m.Ani().Die()
-						}
-						whiteBomberman.AddPoints(m.GetPoints())
+						killEnemy(m)
+						wB.AddPoints(m.GetPoints())
 						break
 					}
 				}
-				if x-i == bmX && y == bmY && whiteBomberman.Ani().SequenceFinished() {
+				if x-i == bmX && y == bmY && wB.Ani().SequenceFinished() {
 					l = i
-					whiteBomberman.DecLife()
-					whiteBomberman.Ani().Die()
+					killPlayer(wB)
 					break
 				}
 			}
@@ -295,21 +322,17 @@ func checkForExplosions() {
 						clearingNeeded = true
 						continue
 					}
-					xx, yy := lev1.A().GetFieldCoord(m.GetPosBox().Center())
+					xx, yy := lv.A().GetFieldCoord(m.GetPosBox().Center())
 					if x+i == xx && y == yy {
 						r = i
-						m.DecLife()
-						if !m.IsAlife() {
-							m.Ani().Die()
-						}
-						whiteBomberman.AddPoints(m.GetPoints())
+						killEnemy(m)
+						wB.AddPoints(m.GetPoints())
 						break
 					}
 				}
-				if x+i == bmX && y == bmY && whiteBomberman.Ani().SequenceFinished() {
+				if x+i == bmX && y == bmY && wB.Ani().SequenceFinished() {
 					r = i
-					whiteBomberman.DecLife()
-					whiteBomberman.Ani().Die()
+					killPlayer(wB)
 					break
 				}
 			}
@@ -323,21 +346,17 @@ func checkForExplosions() {
 						clearingNeeded = true
 						continue
 					}
-					xx, yy := lev1.A().GetFieldCoord(m.GetPosBox().Center())
+					xx, yy := lv.A().GetFieldCoord(m.GetPosBox().Center())
 					if y+i == yy && x == xx {
 						u = i
-						m.DecLife()
-						if !m.IsAlife() {
-							m.Ani().Die()
-						}
-						whiteBomberman.AddPoints(m.GetPoints() + 100)
+						killEnemy(m)
+						wB.AddPoints(m.GetPoints() + 100)
 						break
 					}
 				}
-				if x == bmX && y+i == bmY && whiteBomberman.Ani().SequenceFinished() {
+				if x == bmX && y+i == bmY && wB.Ani().SequenceFinished() {
 					u = i
-					whiteBomberman.DecLife()
-					whiteBomberman.Ani().Die()
+					killPlayer(wB)
 					break
 				}
 			}
@@ -351,67 +370,63 @@ func checkForExplosions() {
 						clearingNeeded = true
 						continue
 					}
-					xx, yy := lev1.A().GetFieldCoord(m.GetPosBox().Center())
+					xx, yy := lv.A().GetFieldCoord(m.GetPosBox().Center())
 					if y-i == yy && x == xx {
 						d = i
-						m.DecLife()
-						if !m.IsAlife() {
-							m.Ani().Die()
-						}
-						whiteBomberman.AddPoints(m.GetPoints() + 100)
+						killEnemy(m)
+						wB.AddPoints(m.GetPoints() + 100)
 						break
 					}
 				}
-				if x == bmX && y-i == bmY && whiteBomberman.Ani().SequenceFinished() {
+				if x == bmX && y-i == bmY && wB.Ani().SequenceFinished() {
 					d = i
-					whiteBomberman.DecLife()
-					whiteBomberman.Ani().Die()
+					killPlayer(wB)
 					break
 				}
 			}
 
 			if xl+l == x {
-				lev1.RemoveTile(xl, yl)
+				lv.RemoveTile(xl, yl)
 			}
 			if xr-r == x {
-				lev1.RemoveTile(xr, yr)
+				lv.RemoveTile(xr, yr)
 			}
 			if yd+d == y {
-				lev1.RemoveTile(xd, yd)
+				lv.RemoveTile(xd, yd)
 			}
 			if yu-u == y {
-				lev1.RemoveTile(xu, yu)
+				lv.RemoveTile(xu, yu)
 			}
 
 			// Items, die im Expolsionsradius liegen werden zerstört, die Expolion wird aber nicht kleiner!
 
-			lev1.RemoveItems(x, y, pixel.V(float64(-l), 0))
-			lev1.RemoveItems(x, y, pixel.V(float64(r), 0))
-			lev1.RemoveItems(x, y, pixel.V(0, float64(-d)))
-			lev1.RemoveItems(x, y, pixel.V(0, float64(u)))
+			lv.RemoveItems(x, y, pixel.V(float64(-l), 0))
+			lv.RemoveItems(x, y, pixel.V(float64(r), 0))
+			lv.RemoveItems(x, y, pixel.V(0, float64(-d)))
+			lv.RemoveItems(x, y, pixel.V(0, float64(u)))
 
 			// falls weitere Bomben im Explosionsradius liegen, werden auch gleich explodieren
 
 			for i := 1; i <= l; i++ {
-				b, bom := isThereABomb(lev1.A().GetFieldCoord(item.GetPos().Add(pixel.V(float64(-i)*TileSize, 0))))
+				b, bom := isThereABomb(lv.A().GetFieldCoord(item.GetPos().Add(pixel.V(float64(-i)*TileSize, 0))))
 				if b {
 					bom.SetTimeStamp(time.Now())
 				}
 			}
 			for i := 1; i <= r; i++ {
-				b, bom := isThereABomb(lev1.A().GetFieldCoord(item.GetPos().Add(pixel.V(float64(i)*TileSize, 0))))
+				b, bom := isThereABomb(lv.A().GetFieldCoord(item.GetPos().Add(pixel.V(float64(i)*TileSize, 0))))
 				if b {
 					bom.SetTimeStamp(time.Now())
 				}
 			}
 			for i := 1; i <= u; i++ {
-				b, bom := isThereABomb(lev1.A().GetFieldCoord(item.GetPos().Add(pixel.V(0, float64(i)*TileSize))))
+				b, bom := isThereABomb(lv.A().GetFieldCoord(item.GetPos().Add(pixel.V(0, float64(i)*TileSize))))
 				if b {
 					bom.SetTimeStamp(time.Now())
 				}
 			}
 			for i := 1; i <= d; i++ {
-				b, bom := isThereABomb(lev1.A().GetFieldCoord(item.GetPos().Add(pixel.V(0, float64(-i)*TileSize))))
+				b, bom := isThereABomb(lv.A().GetFieldCoord(item.GetPos().Add(pixel.V(0, float64(-i)*TileSize))))
 				if b {
 					bom.SetTimeStamp(time.Now())
 				}
@@ -467,7 +482,7 @@ func clearExplosions(existingExplosions [][]interface{}) (remainingExplosions []
 
 func isThereABomb(x, y int) (bool, tiles.Bombe) {
 	for _, item := range bombs {
-		xx, yy := lev1.A().GetFieldCoord(item.GetPos())
+		xx, yy := lv.A().GetFieldCoord(item.GetPos())
 		if xx == x && yy == y {
 			return true, item
 		}
@@ -475,82 +490,13 @@ func isThereABomb(x, y int) (bool, tiles.Bombe) {
 	return false, nil
 }
 
-/*
-func isThereABomb(v pixel.Vec) (bool, tiles.Bombe) {
-	for _, item := range bombs {
-		if item.GetPos() == v {
-			return true, item
-		}
-	}
-	return false, nil
-}
-*/
-
-/*
-// Herkunftsrichtung
-func homeDir(dir uint8) (hdir uint8) {
-	switch dir {
-	case Up: hdir = Down
-	case Down: hdir = Up
-	case Left: hdir = Right
-	case Right: hdir = Left
-	}
-	return
-}
-*/
-
-/*
-// Vor.: /
-// Erg.: Die neue Bewegungsrichtung des Monsters ist zurückgegeben.
-//		 Kann es sich nicht bewegen, ist die neue Bewegungsrichtung die alte (dann zittert es, weil die Bewegung auf 1 Pixel eingeschränkt ist).
-//		 Gibt es nur die Möglichkeit zurück zu laufen, läuft es zurück,
-//		 gibt es nur die Möglichkeit weiter oder zurück zu laufen, läuft es weiter,
-//		 gibt es mehr als zwei Möglichkeiten, wird eine zufällige, nicht rückwärtsgewandte, Richtung zurückgegeben.
-//		 links:0,rechts:1,oben:2,unten:3
-func dirChoice(m characters.Enemy) (dir uint8){
-	var grDirBool [4]bool = getGrantedDirections(m) // Wahrheitswerte der erlaubten Richtungen, bei Index 0: Up, 1: Down, 2: Left, 3: Right
-	var grDirUint8 = make([]uint8,0)	// Zahlenwerte der erlaubten Richtungen (constants): Up: 1, Down: 2, Left: 3, Right: 4
-	var n int	// Zählvariable um festzustellen, wie viele mögliche Richtungen es gibt
-	for j := range grDirBool {	// Schleife zum Zählen der erlaubten Richtungen und um sie in den Richtungsslice grDirUint8 zu schreiben
-		if grDirBool[j] {
-			n++
-			grDirUint8 = append(grDirUint8, uint8(j+1))
-		}
-	}
-	if n == 0 {	// keine erlaubte Richtung
-		dir = 0	// Stay
-	}else if n == 1{	// 1 erlaubte Richtung --> lauf sie
-		dir = grDirUint8[0]
-	}else if n == 2 {	//	2 erlaubte Richtungen
-		for _,d := range grDirUint8{	// wenn es nur weiter oder zurück geht, lauf weiter!
-			if d == m.GetDirection() {
-				dir = d
-				return
-			}
-		}
-		choice := rand.Intn(len(grDirUint8)) //	wenn du abbiegen kannst, tu das oder lauf zurück
-		dir = grDirUint8[choice]
-	}else{	// drei oder vier erlaubte Richtungen
-		for i, d := range grDirUint8{
-			if d == homeDir(m.GetDirection()) {	// verhindert das Zurücklaufen bei mehr als zwei erlaubten Wegen
-				grDirUint8[i] = grDirUint8[len(grDirUint8)-1]
-				grDirUint8 = grDirUint8[:len(grDirUint8)-1]
-			}
-		}
-		choice := rand.Intn(len(grDirUint8))	// wähle eine zufällige (außer zurück)
-		dir = grDirUint8[choice]
-	}
-	return
-}
-
-*/
 func getPossibleDirections(x int, y int, inclBombs bool, inclTiles bool) (possibleDir [4]uint8, n uint8) {
 	var b bool = false
 	var isT func(int, int) bool
 	if inclTiles {
-		isT = lev1.IsTile
+		isT = lv.IsTile
 	} else {
-		isT = lev1.IsUndestroyableTile
+		isT = lv.IsUndestroyableTile
 	}
 
 	if inclBombs {
@@ -564,7 +510,7 @@ func getPossibleDirections(x int, y int, inclBombs bool, inclTiles bool) (possib
 	if inclBombs {
 		b, _ = isThereABomb(x+1, y)
 	}
-	if x != lev1.A().GetWidth()-1 && !isT(x+1, y) && !b {
+	if x != lv.A().GetWidth()-1 && !isT(x+1, y) && !b {
 		possibleDir[n] = Right
 		n++
 	}
@@ -580,7 +526,7 @@ func getPossibleDirections(x int, y int, inclBombs bool, inclTiles bool) (possib
 	if inclBombs {
 		b, _ = isThereABomb(x, y+1)
 	}
-	if y != lev1.A().GetHeight()-1 && !isT(x, y+1) && !b {
+	if y != lv.A().GetHeight()-1 && !isT(x, y+1) && !b {
 		possibleDir[n] = Up
 		n++
 	}
@@ -660,10 +606,10 @@ func moveCharacter(c interface{}, dt float64) {
 
 	// Blickt man in Bewegungsrichtung, so werden von der hinteren linken Ecke (Min) der PosBox die
 	// ganzzahligen Koordinaten im Spielfeld berechnet.
-	xnow, ynow := lev1.A().GetFieldCoord(transformVecBack(chr.GetDirection(), transformRect(chr.GetDirection(), chr.GetPosBox()).Min))
+	xnow, ynow := lv.A().GetFieldCoord(transformVecBack(chr.GetDirection(), transformRect(chr.GetDirection(), chr.GetPosBox()).Min))
 
 	// Aus den Koordinaten wird nun eine Spielfeldnummer berechnet.
-	newFieldNo := xnow + ynow*lev1.A().GetWidth()
+	newFieldNo := xnow + ynow*lv.A().GetWidth()
 
 	if !chr.IsAlife() {
 		return
@@ -671,61 +617,61 @@ func moveCharacter(c interface{}, dt float64) {
 
 	// Koordinaten des Spielfeldes, in welchem sich die vordere rechte Ecke
 	// der PosBox in Bezug zur Bewegungsrichtung des Characters befindet
-	xv, yv := lev1.A().GetFieldCoord(transformVecBack(chr.GetDirection(), transformRect(chr.GetDirection(), chr.GetPosBox()).Max))
+	xv, yv := lv.A().GetFieldCoord(transformVecBack(chr.GetDirection(), transformRect(chr.GetDirection(), chr.GetPosBox()).Max))
 
 	// Abhängig davon, ob der Character durch zerstörbare Wände gehen kann oder nicht, wird die Prüffunktion isT
 	// definiert.
 	var isT func(int, int) bool
 	if chr.IsWallghost() {
-		isT = lev1.IsUndestroyableTile
+		isT = lv.IsUndestroyableTile
 	} else {
-		isT = lev1.IsTile
+		isT = lv.IsTile
 	}
 
 	// Versperren Wände den Weg? Falls ja, geht es in dieser Richtung nicht weiter.
 	// Eine neue Richtung muss her, also wird newDirChoice auf true gesetzt.
 	switch chr.GetDirection() {
 	case Left:
-		x1, y1 := lev1.A().GetFieldCoord(nextPos.Min)
+		x1, y1 := lv.A().GetFieldCoord(nextPos.Min)
 		bombThere1, _ := isThereABomb(xv-1, yv)
 		bombThere2, _ := isThereABomb(xnow-1, ynow)
 		if isT(x1, y1) || x1 < 0 || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
-		x1, y1 = lev1.A().GetFieldCoord(pixel.Vec{nextPos.Min.X, nextPos.Max.Y})
+		x1, y1 = lv.A().GetFieldCoord(pixel.Vec{nextPos.Min.X, nextPos.Max.Y})
 		if isT(x1, y1) || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
 	case Right:
-		x1, y1 := lev1.A().GetFieldCoord(nextPos.Max)
+		x1, y1 := lv.A().GetFieldCoord(nextPos.Max)
 		bombThere1, _ := isThereABomb(xv+1, yv)
 		bombThere2, _ := isThereABomb(xnow+1, ynow)
-		if isT(x1, y1) || x1 > lev1.A().GetWidth() || (bombThere1 && bombThere2) {
+		if isT(x1, y1) || x1 > lv.A().GetWidth() || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
-		x1, y1 = lev1.A().GetFieldCoord(pixel.Vec{nextPos.Max.X, nextPos.Min.Y})
+		x1, y1 = lv.A().GetFieldCoord(pixel.Vec{nextPos.Max.X, nextPos.Min.Y})
 		if isT(x1, y1) || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
 	case Up:
-		x1, y1 := lev1.A().GetFieldCoord(nextPos.Max)
+		x1, y1 := lv.A().GetFieldCoord(nextPos.Max)
 		bombThere1, _ := isThereABomb(xv, yv+1)
 		bombThere2, _ := isThereABomb(xnow, ynow+1)
-		if isT(x1, y1) || y1 > lev1.A().GetHeight() || (bombThere1 && bombThere2) {
+		if isT(x1, y1) || y1 > lv.A().GetHeight() || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
-		x1, y1 = lev1.A().GetFieldCoord(pixel.Vec{nextPos.Min.X, nextPos.Max.Y})
+		x1, y1 = lv.A().GetFieldCoord(pixel.Vec{nextPos.Min.X, nextPos.Max.Y})
 		if isT(x1, y1) || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
 	case Down:
-		x1, y1 := lev1.A().GetFieldCoord(nextPos.Min)
+		x1, y1 := lv.A().GetFieldCoord(nextPos.Min)
 		bombThere1, _ := isThereABomb(xv, yv-1)
 		bombThere2, _ := isThereABomb(xnow, ynow-1)
 		if isT(x1, y1) || y1 < 0 || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
-		x1, y1 = lev1.A().GetFieldCoord(pixel.Vec{nextPos.Max.X, nextPos.Min.Y})
+		x1, y1 = lv.A().GetFieldCoord(pixel.Vec{nextPos.Max.X, nextPos.Min.Y})
 		if isT(x1, y1) || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
@@ -749,7 +695,7 @@ func moveCharacter(c interface{}, dt float64) {
 		if newDirChoice {
 			var possibleDirections [4]uint8
 			var n uint8
-			x, y := lev1.A().GetFieldCoord(chr.GetPosBox().Center())
+			x, y := lv.A().GetFieldCoord(chr.GetPosBox().Center())
 			possibleDirections, n = getPossibleDirections(x, y, !chr.IsBombghost(), !chr.IsWallghost())
 			if n == 0 { // keine erlaubte Richtung
 				chr.SetDirection(Stay) // Stay
@@ -773,24 +719,24 @@ func moveCharacter(c interface{}, dt float64) {
 			// Und tschüss. Keine Bewegung möglich.
 			return
 		}
-		t, b := lev1.CollectItem(xv, yv)
+		t, b := lv.CollectItem(xv, yv)
 		if b {
 			switch t {
 			case BombItem:
-				whiteBomberman.IncMaxBombs()
+				wB.IncMaxBombs()
 			case LifeItem:
-				whiteBomberman.IncLife()
+				wB.IncLife()
 			case PowerItem:
-				whiteBomberman.IncPower()
+				wB.IncPower()
 			case RollerbladeItem:
-				whiteBomberman.IncSpeed()
+				wB.IncSpeed()
 			case WallghostItem:
-				whiteBomberman.SetWallghost(true)
+				wB.SetWallghost(true)
 			case BombghostItem:
-				whiteBomberman.SetBombghost(true)
+				wB.SetBombghost(true)
 			case SkullItem:
-				whiteBomberman.DecLife()
-				whiteBomberman.Ani().Die()
+				wB.DecLife()
+				wB.Ani().Die()
 			}
 		}
 	}
@@ -801,12 +747,13 @@ func moveCharacter(c interface{}, dt float64) {
 	chr.Ani().SetView(chr.GetDirection())
 }
 
+/*
 func deathSequence() {
-	for !whiteBomberman.Ani().SequenceFinished() {
+	for !wB.Ani().SequenceFinished() {
 		itemBatch.Clear()
 
 		for i := 0; i < pitchHeight; i++ {
-			lev1.DrawColumn(i, itemBatch)
+			lv.DrawColumn(i, itemBatch)
 		}
 
 		itemBatch.Draw(win)
@@ -814,32 +761,31 @@ func deathSequence() {
 		showExplosions(win)
 		tempAniSlice = clearExplosions(tempAniSlice)
 
-		whiteBomberman.Draw(win)
+		wB.Draw(win)
 		for _, m := range monster {
 			m.Draw(win)
 		}
 		win.Update()
 	}
 }
+*/
 
 func setMonster() {
 	monster = monster[:0]
-
 	// Enemys from level
-	for _, enemyType := range lv.GetLevelEnemys() {
+	for _, enemyType := range levelDef.GetLevelEnemys() {
 		monster = append(monster, characters.NewEnemy(uint8(enemyType)))
 	}
 
 	rand.Seed(time.Now().UnixNano())
-	xx, yy := lev1.A().GetFieldCoord(whiteBomberman.GetPos())
+	//xx, yy := lv.A().GetFieldCoord(wB.GetPos())
 	for _, m := range monster {
 		for {
 			i := rand.Intn(pitchWidth)
 			j := rand.Intn(pitchHeight)
-			if !lev1.IsTile(i, j) && xx != i && yy != j && i+j > 4 {
-				m.MoveTo(lev1.A().GetLowerLeft().Add(pixel.V(float64(i)*
-					TileSize, float64(j)*TileSize)))
-				m.Ani().SetVisible(true)
+			if !lv.IsTile(i, j) && i+j > 4 {
+				m.MoveTo(lv.A().GetLowerLeft().Add(pixel.V(float64(i)*TileSize, float64(j)*TileSize)))
+				m.Ani().Show()
 				break
 			}
 		}
@@ -847,12 +793,16 @@ func setMonster() {
 }
 
 func sun() {
-	lv = level.NewLevel("./level/level1.txt")
-	const typ = 2
-	pitchWidth, pitchHeight = lv.GetBounds()
-	var zoomFactor float64 = 11 / float64(pitchHeight) * 3
-	var winSizeX float64 = zoomFactor * ((3 + float64(pitchWidth)) * TileSize) // TileSize = 16
-	var winSizeY float64 = zoomFactor * ((1+float64(pitchHeight))*TileSize + 32)
+	levelDef = level.NewLevel("./level/stufe_3_level_1.txt")
+	pitchWidth, pitchHeight = levelDef.GetBounds()
+	var zoomFactor float64
+	if float64((pitchHeight+1)*TileSize+32)/float64((pitchWidth+3)*TileSize) > float64(MaxWinSizeY)/MaxWinSizeX {
+		zoomFactor = MaxWinSizeY / float64((pitchHeight+1)*TileSize+32)
+	} else {
+		zoomFactor = MaxWinSizeX / float64((pitchWidth+3)*TileSize)
+	}
+	var winSizeX float64 = zoomFactor * float64(pitchWidth+3) * TileSize
+	var winSizeY float64 = zoomFactor * (float64(pitchHeight+1)*TileSize + 32)
 	var err error
 
 	wincfg := pixelgl.WindowConfig{
@@ -873,185 +823,165 @@ func sun() {
 	showIntro(win)
 
 	win.Clear(colornames.Black)
-	txt.Print("Let's Start").Draw(win, pixel.IM.Scaled(pixel.V(0, 0), 3))
+	txt.Print("Let's Play").Draw(win, pixel.IM.Scaled(pixel.V(0, 0), 3))
 	win.Update()
 	time.Sleep(time.Second * 3)
 
-	//go sIntro.FadeOut()
 	//fadeOut(win)
 
-	s1 := sounds.NewSound(lv.GetMusic())
+	s1 := sounds.NewSound(levelDef.GetMusic())
 	go s1.PlaySound()
 
-	lev1 = gameStat.NewGameStat(lv, 1)
+	lv = gameStat.NewGameStat(levelDef, 1)
 
-	whiteBomberman = characters.NewPlayer(WhiteBomberman)
-	whiteBomberman.Ani().Show()
+	wB = characters.NewPlayer(WhiteBomberman)
+	wB.Ani().Show()
 
 	tb = titlebar.New((3 + uint16(pitchWidth)) * TileSize)
 	tb.SetMatrix(pixel.IM.Moved(pixel.V((3+float64(pitchWidth))*TileSize/2, (1+float64(pitchHeight))*TileSize+16)))
-	tb.SetLifePointers(whiteBomberman.GetLifePointer())
-	tb.SetPointsPointer(whiteBomberman.GetPointsPointer())
+	tb.SetLifePointers(wB.GetLifePointer())
+	tb.SetPointsPointer(wB.GetPointsPointer())
 	tb.SetPlayers(1)
 	go tb.Manager()
-	tb.SetSeconds(lv.GetTime())
-	tb.StartCountdown()
-	tb.Update()
-
-	setMonster()
-
-	// Bomberman is in lowleft Corner
-	whiteBomberman.MoveTo(lev1.A().GetLowerLeft())
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	itemBatch = pixel.NewBatch(&pixel.TrianglesData{}, animations.ItemImage)
-	win.SetMatrix(pixel.IM.Scaled(pixel.V(0, 0), zoomFactor))
-	win.Update()
-	last := time.Now()
-	dt := time.Since(last).Seconds()
 
 	// if player wants to continue:
-C:
-	if continu {
+	for continu {
 		continu = false
-		lev1.Reset()
+		lv.Reset()
 		setMonster()
-		whiteBomberman.MoveTo(lev1.A().GetLowerLeft())
-		whiteBomberman.SetDirection(Stay)
-		whiteBomberman.Ani().SetView(Down)
-		whiteBomberman.Ani().SetView(Stay)
-		whiteBomberman.Ani().SetVisible(true)
-		whiteBomberman.Reset()
-		win.SetMatrix(pixel.IM.Moved(win.Bounds().Center()))
+		wB.MoveTo(lv.A().GetLowerLeft())
+		wB.SetDirection(Stay)
+		wB.Ani().SetView(Down)
+		wB.Ani().SetView(Stay)
+		wB.Ani().Show()
+		wB.Reset()
+		tb.SetSeconds(levelDef.GetTime())
+		tb.Update()
+		tb.StartCountdown()
 		win.SetMatrix(pixel.IM.Scaled(pixel.V(0, 0), zoomFactor))
 		win.Update()
-		tb.SetSeconds(lv.GetTime())
-		tb.StartCountdown()
-		tb.Update()
-	}
+		last := time.Now()
+		dt := time.Since(last).Seconds()
 
-	for !win.Closed() && !win.Pressed(pixelgl.KeyEscape) {
+		for !win.Closed() && !win.Pressed(pixelgl.KeyEscape) {
 
-		if whiteBomberman.Ani().GetView() == Dead && whiteBomberman.Ani().SequenceFinished() {
-			lev1.Reset()
-			setMonster()
-			whiteBomberman.MoveTo(lev1.A().GetLowerLeft())
-			whiteBomberman.SetDirection(Stay)
-			whiteBomberman.Ani().SetView(Down)
-			whiteBomberman.Ani().SetView(Stay)
-			whiteBomberman.Ani().SetVisible(true)
-		}
-
-		keypressed := false
-		dt = time.Since(last).Seconds()
-		last = time.Now()
-
-		if win.Pressed(pixelgl.KeyLeft) && whiteBomberman.Ani().GetView() != Dead {
-			whiteBomberman.SetDirection(Left)
-			moveCharacter(whiteBomberman, dt)
-			keypressed = true
-		}
-		if win.Pressed(pixelgl.KeyRight) && whiteBomberman.Ani().GetView() != Dead {
-			whiteBomberman.SetDirection(Right)
-			moveCharacter(whiteBomberman, dt)
-			keypressed = true
-		}
-		if win.Pressed(pixelgl.KeyUp) && whiteBomberman.Ani().GetView() != Dead {
-			whiteBomberman.SetDirection(Up)
-			moveCharacter(whiteBomberman, dt)
-			keypressed = true
-		}
-		if win.Pressed(pixelgl.KeyDown) && whiteBomberman.Ani().GetView() != Dead {
-			whiteBomberman.SetDirection(Down)
-			moveCharacter(whiteBomberman, dt)
-			keypressed = true
-		}
-		if !keypressed {
-			if whiteBomberman.Ani().GetView() != Dead && whiteBomberman.IsAlife() {
-				/*				if !whiteBomberman.Ani().IsVisible() {
-									whiteBomberman.Ani().SetVisible(true)
-									whiteBomberman.Ani().SetView(Down)
-								}
-				*/whiteBomberman.Ani().SetView(Stay)
+			if wB.Ani().GetView() == Dead && wB.Ani().SequenceFinished() && wB.IsAlife() {
+				lv.Reset()
+				setMonster()
+				tb.SetSeconds(levelDef.GetTime())
+				wB.MoveTo(lv.A().GetLowerLeft())
+				wB.SetDirection(Stay)
+				wB.Ani().SetView(Down)
+				wB.Ani().SetView(Stay)
+				wB.Ani().Show()
+				wB.SetWallghost(false)
+				wB.SetBombghost(false)
 			}
-		}
-		if win.JustPressed(pixelgl.KeyB) && whiteBomberman.GetBombs() < whiteBomberman.GetMaxBombs() {
-			x, y := lev1.A().GetFieldCoord(whiteBomberman.GetPosBox().Center())
-			b, _ := isThereABomb(x, y)
-			c := lev1.IsTile(x, y)
-			if !b && !c && whiteBomberman.IsAlife() {
-				bombs = append(bombs, tiles.NewBomb(whiteBomberman, lev1.A().CoordToVec(x, y)))
-				whiteBomberman.IncBombs()
+
+			keypressed := false
+			dt = time.Since(last).Seconds()
+			last = time.Now()
+
+			if win.Pressed(pixelgl.KeyLeft) && wB.Ani().GetView() != Dead {
+				wB.SetDirection(Left)
+				moveCharacter(wB, dt)
+				keypressed = true
 			}
-		}
+			if win.Pressed(pixelgl.KeyRight) && wB.Ani().GetView() != Dead {
+				wB.SetDirection(Right)
+				moveCharacter(wB, dt)
+				keypressed = true
+			}
+			if win.Pressed(pixelgl.KeyUp) && wB.Ani().GetView() != Dead {
+				wB.SetDirection(Up)
+				moveCharacter(wB, dt)
+				keypressed = true
+			}
+			if win.Pressed(pixelgl.KeyDown) && wB.Ani().GetView() != Dead {
+				wB.SetDirection(Down)
+				moveCharacter(wB, dt)
+				keypressed = true
+			}
 
-		/////////////////////////////////////Moving Enemys ///////////////////////////////////////////////////////////
+			if !keypressed && wB.Ani().GetView() != Dead && wB.IsAlife() {
+				wB.Ani().SetView(Stay)
+			}
 
-		for _, m := range monster {
-			if m.IsAlife() && m.Ani().GetView() != Dead {
-				if whiteBomberman.Ani().GetView() != Dead && whiteBomberman.GetPosBox().Intersects(m.GetPosBox()) {
-					whiteBomberman.DecLife()
-					whiteBomberman.Ani().Die()
+			if win.JustPressed(pixelgl.KeySpace) && wB.GetBombs() < wB.GetMaxBombs() {
+				x, y := lv.A().GetFieldCoord(wB.GetPosBox().Center())
+				b, _ := isThereABomb(x, y)
+				c := lv.IsTile(x, y)
+				if !b && !c && wB.IsAlife() {
+					bombs = append(bombs, tiles.NewBomb(wB, lv.A().CoordToVec(x, y)))
+					wB.IncBombs()
 				}
 			}
-			moveCharacter(m, dt)
+
+			/////////////////////////////////////Moving Enemys ///////////////////////////////////////////////////////////
+
+			for _, m := range monster {
+				if m.IsAlife() && m.Ani().GetView() != Dead {
+					if wB.Ani().GetView() != Dead && wB.GetPosBox().Intersects(m.GetPosBox()) {
+						killPlayer(wB)
+					}
+				}
+				moveCharacter(m, dt)
+			}
+
+			/*if !wB.Ani().IsVisible() {
+				lv.Reset()
+				wB.MoveTo(lv.A().GetLowerLeft())
+				bombs = bombs[:0]
+				tempAniSlice = tempAniSlice[:0]
+			}
+			*/
+			/////////////////////////////////////////////////////////////////////////////////////////////////////////////7
+
+			lv.A().GetCanvas().Draw(win, *(lv.A().GetMatrix()))
+
+			checkForExplosions()
+			bombs = removeExplodedBombs(bombs)
+
+			itemBatch.Clear()
+
+			for i := 0; i < pitchHeight; i++ {
+				lv.DrawColumn(i, itemBatch)
+			}
+
+			for _, item := range bombs {
+				item.Draw(itemBatch)
+			}
+
+			itemBatch.Draw(win)
+
+			showExplosions(win)
+			tempAniSlice = clearExplosions(tempAniSlice)
+
+			wB.Draw(win)
+
+			for _, m := range monster {
+				m.Draw(win)
+			}
+
+			tb.Draw(win)
+
+			win.Update()
+
+			if !wB.IsAlife() {
+				break
+			}
+
 		}
-
-		/*if !whiteBomberman.Ani().IsVisible() {
-			lev1.Reset()
-			whiteBomberman.MoveTo(lev1.A().GetLowerLeft())
-			bombs = bombs[:0]
-			tempAniSlice = tempAniSlice[:0]
-		}
-		*/
-		/////////////////////////////////////////////////////////////////////////////////////////////////////////////7
-
-		lev1.A().GetCanvas().Draw(win, *(lev1.A().GetMatrix()))
-
-		checkForExplosions()
-		bombs = removeExplodedBombs(bombs)
-
-		itemBatch.Clear()
-
-		for i := 0; i < pitchHeight; i++ {
-			lev1.DrawColumn(i, itemBatch)
-		}
-
-		for _, item := range bombs {
-			item.Draw(itemBatch)
-		}
-
-		itemBatch.Draw(win)
-
-		showExplosions(win)
-		tempAniSlice = clearExplosions(tempAniSlice)
-
-		whiteBomberman.Draw(win)
-
-		for _, m := range monster {
-			m.Draw(win)
-		}
-
-		tb.Draw(win)
-
-		win.Update()
-
-		if !whiteBomberman.IsAlife() {
-			break
-		}
-
+		win.SetMatrix(pixel.IM.Moved(win.Bounds().Center()))
+		//if rand.Intn(2) == 1 {
+		//	victory(win)
+		//}else{
+		gameOver(win)
 	}
-	win.SetMatrix(pixel.IM.Moved(win.Bounds().Center()))
-	//if rand.Intn(2) == 1 {
-	//	victory(win)
-	//}else{
-	gameOver(win)
-	//}
-	if continu {
-		goto C
-	}
-
 }
 
 func main() {

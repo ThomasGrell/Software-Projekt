@@ -1,6 +1,9 @@
 package constants
 
 const (
+	MaxWinSizeX = 1600
+	MaxWinSizeY = 900
+
 	// Charactertypen
 	WhiteBomberman = 1 // Spielfiguren im Single Player Mode
 	BlackBomberman = 2
@@ -89,7 +92,7 @@ const (
 	ThroughSpace        = 1
 	TheFieldOfDreams    = 2
 	OrbitalColossus     = 3
-	Fight               = 4
+	Fight               = 4 // Super für Boss-Level
 	JuhaniJunkalaTitle  = 5
 	JuhaniJunkalaLevel1 = 6
 	JuhaniJunkalaLevel2 = 7

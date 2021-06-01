@@ -2,6 +2,7 @@ package arena
 
 import (
 	. "../constants"
+	"fmt"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	"image"
@@ -9,7 +10,6 @@ import (
 	"log"
 	"math"
 	"os"
-	"fmt"
 )
 
 type data struct {
@@ -35,16 +35,19 @@ func NewArena(typ, width, height int) *data {
 	for i := 0; i < len(a.permTiles[0]); i++ {
 		a.passably[a.w*a.permTiles[1][i]+a.permTiles[0][i]] = false
 	}
-	switch a.typ {
-	case MfS:
-		a.lowerLeft = pixel.V(24, 8)
-	case TurfNtrees:
-		a.lowerLeft = pixel.V(24, 8)
-	case Castle:
-		a.lowerLeft = pixel.V(24, 8)
-	}
+	a.lowerLeft = pixel.V(24, 8)
+	/*
+		switch a.typ {
+		case MfS:
+			a.lowerLeft = pixel.V(24, 8)
+		case TurfNtrees:
+			a.lowerLeft = pixel.V(24, 8)
+		case Castle:
+			a.lowerLeft = pixel.V(24, 8)
+		}
+	*/
 	a.matrix = pixel.IM.Moved(pixel.V((float64(width)*TileSize+WallWidth)/2-TileSize/4, (float64(height)*TileSize+WallHeight)/2-TileSize/2))
-	fmt.Println(float64(width),float64(height))
+	fmt.Println(float64(width), float64(height))
 	a.canvas = pixelgl.NewCanvas(pixel.R(-2*TileSize, -2*TileSize, float64(width)*TileSize+WallWidth+TileSize/2, float64(height)*TileSize+WallHeight))
 	a.drawWallsAndGround()
 	a.drawPermTiles()
@@ -86,6 +89,8 @@ func (a *data) GetPermTiles() [2][]int {
 func (a *data) GetWidth() int {
 	return a.w
 }
+
+/*
 func (a *data) GrantedDirections(posBox pixel.Rect) [4]bool { // {links,rechts,oben,unten}
 	var grDir [4]bool
 	var x1, x2, y1, y2 int
@@ -149,6 +154,8 @@ func (a *data) GrantedDirections(posBox pixel.Rect) [4]bool { // {links,rechts,o
 	return grDir
 	//return [4]bool{true,true,true,true}
 }
+*/
+
 func (a *data) IsFreeTile(x, y int) bool {
 	return a.passably[a.w*y+x]
 }
@@ -193,8 +200,8 @@ func (a *data) setPermTiles() {
 			{1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5, 5, 7, 7, 7, 7, 7, 7, 8, 9, 9, 9, 9, 9, 9, 10}}
 	case Castle:
 		permTilesDefault = [2][]int{
-			{1, 3, 5, 7, 9, 11, 2, 1, 3, 5, 7, 9, 11, 12, 1, 3, 5, 6, 7, 8, 9, 11, 2, 1, 3, 5, 7, 9, 11, 5, 11, 1, 3, 5, 7, 9, 11},
-			{1, 1, 1, 1, 1, 1, 2, 3, 3, 3, 3, 3, 3, 4, 5, 5, 5, 5, 5, 5, 5, 5, 6, 7, 7, 7, 7, 7, 7, 8, 8, 9, 9, 9, 9, 9, 9}}
+			{1, 3, 5, 7, 9, 11, 1, 3, 5, 7, 9, 11, 1, 3, 5, 7, 9, 11, 1, 3, 5, 7, 9, 11, 1, 3, 5, 7, 9, 11},
+			{1, 1, 1, 1, 1, 1, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5, 5, 7, 7, 7, 7, 7, 7, 9, 9, 9, 9, 9, 9}}
 	}
 	// Feld kleiner oder gleich groß wie das Standardfeld
 	for j := range permTilesDefault[0] {
@@ -232,7 +239,7 @@ func (a *data) drawPermTiles() {
 	var permSprite *pixel.Sprite
 	tilesPic, err := loadPicture("graphics/tiles.png")
 	if err != nil {
-		tilesPic, err = loadPicture("../graphics/tiles.png")	// for testing
+		tilesPic, err = loadPicture("../graphics/tiles.png") // for testing
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -255,7 +262,7 @@ func (a *data) drawWallsAndGround() { // baut Arena spaltenweise auf, beginnt un
 	var edgeLowLeft, wallLeft, edgeHiLeft, hiWall, edgeHiRight, wallRight, edgeLowRight, loWall, ground *pixel.Sprite
 	tilesPic, err := loadPicture("graphics/tiles.png")
 	if err != nil {
-		tilesPic, err = loadPicture("../graphics/tiles.png")	// for testing
+		tilesPic, err = loadPicture("../graphics/tiles.png") // for testing
 		if err != nil {
 			log.Fatal(err)
 		}

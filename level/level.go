@@ -2,7 +2,6 @@ package level
 
 import (
 	. "../constants"
-	"fmt"
 	"io"
 	"os"
 	"strconv"
@@ -62,7 +61,7 @@ func (sts *startstatus) GetTileType() int {
 func (sts *startstatus) statusFromFile(path string) {
 	f, fileerr := os.Open(path)
 	if fileerr != nil {
-		fmt.Println("Leveldatei mit pfad: ", path, " konnte nicht erzeugt werden. Fehlermeldung: ", fileerr)
+		println("Leveldatei mit pfad: ", path, " konnte nicht erzeugt werden. Fehlermeldung: ", fileerr)
 		return
 	}
 	var b []byte = make([]byte, 1)
@@ -81,7 +80,7 @@ func (sts *startstatus) statusFromFile(path string) {
 			n, err = f.Read(b)
 		}
 		// eine Zeile ist ausgelesen
-		//fmt.Println("Status: ",status[i],"; ausgelesen: ",string(save))
+		//println("Status: ",status[i],"; ausgelesen: ",string(save))
 		if string(save) == "" {
 			return
 		}
@@ -282,7 +281,7 @@ func parseConstants(str string) int {
 	case "MyVeryOwnDeadShip":
 		return MyVeryOwnDeadShip
 	default:
-		fmt.Println("Unbekanntes Format parseConstants hat nicht geklappt")
+		println("Unbekanntes Format parseConstants hat nicht geklappt")
 	}
 	return -1
 }

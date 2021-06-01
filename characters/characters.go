@@ -232,6 +232,7 @@ func (c *player) Reset() {
 	c.maxBombs = 1
 	c.mortal = true
 	c.wins = 0
+	c.fieldNo = 0
 }
 func (c *player) ResetWins()          { c.wins = 0 }
 func (c *player) SetLife(l uint8)     { c.life = l }

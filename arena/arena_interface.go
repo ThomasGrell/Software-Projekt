@@ -51,7 +51,7 @@ type Arena interface {
 	//Vor.: /
 	//Erg.: Ein Feld mit 4 Wahrheitswerten ist geliefert. Jeder der Werte gibt für eine Richtung an, ob Laufen
 	//		in diese Richtung erlaubt ist. Die Reihenfolge der Richtungen ist: links - rechts - oben - unten.
-	GrantedDirections(posBox pixel.Rect) [4]bool
+	// GrantedDirections(posBox pixel.Rect) [4]bool
 
 	//Vor.: /
 	//Erg.: Falls auf der Kachel mit den Koordinaten x,y ein permanentes Hindernis steht, so ist false geliefert, sonst
@@ -62,5 +62,4 @@ type Arena interface {
 	//Erg.: Falls auf der Kachel mit den Koordinaten x,y ein permanentes Hindernis steht, so ist true geliefert, sonst
 	//		false.
 	IsTile(x, y int) bool
-
 }
