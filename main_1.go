@@ -219,6 +219,9 @@ func killPlayer(bm characters.Player) {
 	bm.SetWallghost(false)
 	bm.SetBombghost(false)
 	bm.SetRemote(false)
+	for _, bom := range bombs {
+		bom.SetTimeStamp(time.Now())
+	}
 	go sounds.NewSound(Falling10).PlaySound()
 }
 
@@ -626,13 +629,20 @@ func moveCharacter(c interface{}, dt float64) {
 		isT = lv.IsTile
 	}
 
+	var isB func(int, int) (bool, tiles.Bombe)
+	if chr.IsBombghost() {
+		isB = func(int, int) (bool, tiles.Bombe) { return false, nil }
+	} else {
+		isB = isThereABomb
+	}
+
 	// Versperren Wände den Weg? Falls ja, geht es in dieser Richtung nicht weiter.
 	// Eine neue Richtung muss her, also wird newDirChoice auf true gesetzt.
 	switch chr.GetDirection() {
 	case Left:
 		x1, y1 := lv.A().GetFieldCoord(nextPos.Min)
-		bombThere1, _ := isThereABomb(xv-1, yv)
-		bombThere2, _ := isThereABomb(xnow-1, ynow)
+		bombThere1, _ := isB(xv-1, yv)
+		bombThere2, _ := isB(xnow-1, ynow)
 		if isT(x1, y1) || x1 < 0 || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
@@ -642,8 +652,8 @@ func moveCharacter(c interface{}, dt float64) {
 		}
 	case Right:
 		x1, y1 := lv.A().GetFieldCoord(nextPos.Max)
-		bombThere1, _ := isThereABomb(xv+1, yv)
-		bombThere2, _ := isThereABomb(xnow+1, ynow)
+		bombThere1, _ := isB(xv+1, yv)
+		bombThere2, _ := isB(xnow+1, ynow)
 		if isT(x1, y1) || x1 > lv.A().GetWidth() || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
@@ -653,8 +663,8 @@ func moveCharacter(c interface{}, dt float64) {
 		}
 	case Up:
 		x1, y1 := lv.A().GetFieldCoord(nextPos.Max)
-		bombThere1, _ := isThereABomb(xv, yv+1)
-		bombThere2, _ := isThereABomb(xnow, ynow+1)
+		bombThere1, _ := isB(xv, yv+1)
+		bombThere2, _ := isB(xnow, ynow+1)
 		if isT(x1, y1) || y1 > lv.A().GetHeight() || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
@@ -664,8 +674,8 @@ func moveCharacter(c interface{}, dt float64) {
 		}
 	case Down:
 		x1, y1 := lv.A().GetFieldCoord(nextPos.Min)
-		bombThere1, _ := isThereABomb(xv, yv-1)
-		bombThere2, _ := isThereABomb(xnow, ynow-1)
+		bombThere1, _ := isB(xv, yv-1)
+		bombThere2, _ := isB(xnow, ynow-1)
 		if isT(x1, y1) || y1 < 0 || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
@@ -994,7 +1004,7 @@ func sun() {
 
 			win.Update()
 
-			if !wB.IsAlife() {
+			if !wB.IsAlife() && wB.Ani().SequenceFinished() {
 				break
 			}
 
