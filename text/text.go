@@ -8,6 +8,21 @@ import (
 	"os"
 )
 
+/****************************************************************************************
+
+Simples Paket zur Ausgabe von Retro-Text über ein Canvas-Element.
+
+_________________________________
+< Implementiert von Rayk von Ende >
+ ---------------------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+
+****************************************************************************************/
+
 var fontImage *pixel.PictureData
 var sprite *pixel.Sprite
 

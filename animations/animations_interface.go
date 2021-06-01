@@ -35,15 +35,6 @@ type Animation interface {
 	Die()
 
 	//	Vor.: keine
-	//	Eff.: Koordinaten der Mitte der Animation werden geliefert. Bei Explosionen ist dies das Zentrum der Explosion.
-	ToCenter() pixel.Vec
-
-	//	Vor.: keine
-	//	Eff.: Vektor zur Verschiebung des Sprites auf die Mitte der Grundlinie der Animation wird geliefert.
-	//		  Bei Explosionen ist dies die Mitte der Grundlinie des Explosionszentrums.
-	ToBaseline() pixel.Vec
-
-	//	Vor.: keine
 	//	Eff.: Vektor mit der Breite und Höhe der aktuellen Animation wird geliefert.
 	//        Nach Aufruf der Methode Update() kann sich dieser aber ändern.
 	GetSize() pixel.Vec
@@ -68,17 +59,17 @@ type Animation interface {
 	SequenceFinished() bool
 
 	//	Vor.: keine
+	//	Eff.: Legt die Zeit in Nanosekunden fest, die beim Wechsel zwischen zwei Sprites mindestens vergehen muss.
+	//  	  Je kürzer die Zeit, desto schneller die Animation.
+	SetIntervall(int64)
+
+	//	Vor.: keine
 	//	Eff.: Mittels der Konstanten Intro, Dead, Left, Right, Up, Down und Stay kann das Aussehen der Animation
 	//		  festgelegt werden. Viele der Animationen haben kein Intro, in diesem Fall wird der View auf Stay gesetzt.
 	//		  Nur für die Bombermen und einige Enemies gibt es unterschiedliche Sprites für die Bewegungsrichtungen
 	//		  Up, Down, Left, Right. Bomben haben keine Todessequenz, sondern einen eigenen Konstruktor für die
 	//		  Explosion NewExplosion().
 	SetView(uint8)
-
-	//	Vor.: keine
-	//	Eff.: Legt die Zeit in Nanosekunden fest, die beim Wechsel zwischen zwei Sprites mindestens vergehen muss.
-	//  	  Je kürzer die Zeit, desto schneller die Animation.
-	SetIntervall(int64)
 
 	//	Vor.: keine
 	//	Eff.: Legt fest, ob die Animation sichtbar ist.
@@ -88,6 +79,15 @@ type Animation interface {
 	//	Eff.: Macht eine Animation sichtbar und startet diese. Muss nach dem Anlegen der Animation mittels NewAnimation()
 	//		  oder NewExplosion() aufgerufen werden.
 	Show()
+
+	//	Vor.: keine
+	//	Eff.: Vektor zur Verschiebung des Sprites auf die Mitte der Grundlinie der Animation wird geliefert.
+	//		  Bei Explosionen ist dies die Mitte der Grundlinie des Explosionszentrums.
+	ToBaseline() pixel.Vec
+
+	//	Vor.: keine
+	//	Eff.: Koordinaten der Mitte der Animation werden geliefert. Bei Explosionen ist dies das Zentrum der Explosion.
+	ToCenter() pixel.Vec
 
 	//	Vor.: Die Animation wurde mittels Show() gestartet und ist sichtbar.
 	//	Eff.: Die Systemzeit wird abgefragt. Ist das Zeitintervall, welches mit SetIntervall() verändert werden kann,

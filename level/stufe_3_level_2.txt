@@ -1,3 +1,5 @@
+*************** Leveldesign: Rayk von Ende ****************
+*
 * Breite der Arena:
 33
 -
