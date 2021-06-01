@@ -139,4 +139,4 @@ Perl
 JuhaniJunkalaLevel1
 -
 * maximale Spieldauer:
-240
+180

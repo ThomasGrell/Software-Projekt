@@ -173,10 +173,12 @@ func NewEnemy(t uint8) *enemy {
 		c.speed = 50
 		c.life = 2
 		c.points = 180
+		c.behave = 2
 	case PinkDevil:
 		c.speed = 50
 		c.wallghost = true
 		c.points = 190
+		c.behave = 2
 	case Penguin:
 		c.wallghost = true
 		c.bombghost = true
@@ -196,6 +198,7 @@ func NewEnemy(t uint8) *enemy {
 		c.bombghost = true
 		c.life = 5
 		c.points = 500
+		c.behave = 3
 	default:
 		panic("Unknown Enemy")
 	}

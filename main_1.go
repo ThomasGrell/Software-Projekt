@@ -21,9 +21,10 @@ import (
 )
 
 var bombs []tiles.Bombe
-var continu bool = true
+var continu = true
 var tb titlebar.Titlebar
 var lv gameStat.GameStat
+var music sounds.Sound
 var levelDef level.Level
 var tempAniSlice [][]interface{} // [Animation][Matrix]
 var monster []characters.Enemy
@@ -33,7 +34,7 @@ var pitchWidth int
 var pitchHeight int
 var itemBatch *pixel.Batch
 
-var clearingNeeded bool = false
+var clearingNeeded = false
 
 func loadPic(path string) (pixel.Picture, error) {
 	file, err := os.Open(path)
@@ -50,10 +51,9 @@ func loadPic(path string) (pixel.Picture, error) {
 
 func showIntro(win *pixelgl.Window) {
 	var zoom float64
-	var intro sounds.Sound
 
-	intro = sounds.NewSound(ThroughSpace)
-	go intro.PlaySound()
+	music = sounds.NewSound(ThroughSpace)
+	go music.PlaySound()
 
 	pic, err := loadPic("graphics/bomberman.png")
 	if err != nil {
@@ -91,7 +91,7 @@ func showIntro(win *pixelgl.Window) {
 		time.Sleep(100 * time.Millisecond)
 	}
 
-	intro.FadeOut()
+	music.FadeOut()
 	fadeOut(win)
 
 	win.SetSmooth(false)
@@ -152,6 +152,9 @@ func victory(win *pixelgl.Window) {
 	win.SetSmooth(false)
 }
 func gameOver(win *pixelgl.Window) {
+	music.StopSound()
+	music = sounds.NewSound(JuhaniJunkalaEnd)
+	go music.PlaySound()
 	var picGoOn pixel.Picture
 	picEnd, err := loadPic("graphics/Screenshots/gameOverEnd.png")
 	if err != nil {
@@ -184,6 +187,7 @@ func gameOver(win *pixelgl.Window) {
 			continu = true
 		} else if win.Pressed(pixelgl.KeyEnter) {
 			win.SetSmooth(false)
+			music.StopSound()
 			return
 		}
 		time.Sleep(1e7)
@@ -226,7 +230,7 @@ func killPlayer(bm characters.Player) {
 }
 
 // Vor: ...
-// Eff: Ist der Counddown der Bombe abgelaufen passiert folgendes:
+// Eff: Ist der Countdown der Bombe abgelaufen passiert folgendes:
 //     		- Eine neue Explosionsanimation ist erstellt und an die Position der ehemaligen bombe gesetzt.
 //      	- Es ertönt der Explosionssound.
 //      Ist der Countdown nicht abgelaufen, passiert nichts.
@@ -402,7 +406,7 @@ func checkForExplosions() {
 				lv.RemoveTile(xu, yu)
 			}
 
-			// Items, die im Expolsionsradius liegen werden zerstört, die Expolion wird aber nicht kleiner!
+			// Items, die im Explosionsradius liegen werden zerstört, die Explosion wird aber nicht kleiner!
 
 			lv.RemoveItems(x, y, pixel.V(float64(-l), 0))
 			lv.RemoveItems(x, y, pixel.V(float64(r), 0))
@@ -494,8 +498,10 @@ func isThereABomb(x, y int) (bool, tiles.Bombe) {
 	return false, nil
 }
 
-func getPossibleDirections(x int, y int, inclBombs bool, inclTiles bool) (possibleDir [4]uint8, n uint8) {
-	var b bool = false
+func getPossibleDirections(x int, y int, inclBombs bool, inclTiles bool, follow bool) (possibleDir [4]uint8, n uint8) {
+	var b = false
+	var hori, vert int8
+
 	var isT func(int, int) bool
 	if inclTiles {
 		isT = lv.IsTile
@@ -503,10 +509,24 @@ func getPossibleDirections(x int, y int, inclBombs bool, inclTiles bool) (possib
 		isT = lv.IsUndestroyableTile
 	}
 
+	if follow {
+		xb, yb := lv.A().GetFieldCoord(wB.GetPosBox().Center())
+		if xb < x {
+			hori = -1
+		} else if xb > x {
+			hori = 1
+		}
+		if yb < y {
+			vert = -1
+		} else if yb > y {
+			vert = 1
+		}
+	}
+
 	if inclBombs {
 		b, _ = isThereABomb(x-1, y)
 	}
-	if x != 0 && !isT(x-1, y) && !b {
+	if x != 0 && !isT(x-1, y) && !b && (!follow || hori < 1) {
 		possibleDir[n] = Left
 		n++
 	}
@@ -514,7 +534,7 @@ func getPossibleDirections(x int, y int, inclBombs bool, inclTiles bool) (possib
 	if inclBombs {
 		b, _ = isThereABomb(x+1, y)
 	}
-	if x != lv.A().GetWidth()-1 && !isT(x+1, y) && !b {
+	if x != lv.A().GetWidth()-1 && !isT(x+1, y) && !b && (!follow || hori > -1) {
 		possibleDir[n] = Right
 		n++
 	}
@@ -522,7 +542,7 @@ func getPossibleDirections(x int, y int, inclBombs bool, inclTiles bool) (possib
 	if inclBombs {
 		b, _ = isThereABomb(x, y-1)
 	}
-	if y != 0 && !isT(x, y-1) && !b {
+	if y != 0 && !isT(x, y-1) && !b && (!follow || vert < 1) {
 		possibleDir[n] = Down
 		n++
 	}
@@ -530,7 +550,7 @@ func getPossibleDirections(x int, y int, inclBombs bool, inclTiles bool) (possib
 	if inclBombs {
 		b, _ = isThereABomb(x, y+1)
 	}
-	if y != lv.A().GetHeight()-1 && !isT(x, y+1) && !b {
+	if y != lv.A().GetHeight()-1 && !isT(x, y+1) && !b && (!follow || vert > -1) {
 		possibleDir[n] = Up
 		n++
 	}
@@ -601,7 +621,7 @@ func transformVecBack(dir uint8, v pixel.Vec) pixel.Vec {
 }
 
 func moveCharacter(c interface{}, dt float64) {
-	var newDirChoice bool = false
+	var newDirChoice = false
 	chr := c.(characters.Character)
 	if !chr.Ani().SequenceFinished() || !chr.IsAlife() {
 		return
@@ -636,7 +656,7 @@ func moveCharacter(c interface{}, dt float64) {
 		isB = isThereABomb
 	}
 
-	// Versperren Wände den Weg? Falls ja, geht es in dieser Richtung nicht weiter.
+	// Versperren Wände oder Bomben den Weg? Falls ja, geht es in dieser Richtung nicht weiter.
 	// Eine neue Richtung muss her, also wird newDirChoice auf true gesetzt.
 	switch chr.GetDirection() {
 	case Left:
@@ -646,7 +666,7 @@ func moveCharacter(c interface{}, dt float64) {
 		if isT(x1, y1) || x1 < 0 || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
-		x1, y1 = lv.A().GetFieldCoord(pixel.Vec{nextPos.Min.X, nextPos.Max.Y})
+		x1, y1 = lv.A().GetFieldCoord(pixel.Vec{X: nextPos.Min.X, Y: nextPos.Max.Y})
 		if isT(x1, y1) || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
@@ -657,7 +677,7 @@ func moveCharacter(c interface{}, dt float64) {
 		if isT(x1, y1) || x1 > lv.A().GetWidth() || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
-		x1, y1 = lv.A().GetFieldCoord(pixel.Vec{nextPos.Max.X, nextPos.Min.Y})
+		x1, y1 = lv.A().GetFieldCoord(pixel.Vec{X: nextPos.Max.X, Y: nextPos.Min.Y})
 		if isT(x1, y1) || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
@@ -668,7 +688,7 @@ func moveCharacter(c interface{}, dt float64) {
 		if isT(x1, y1) || y1 > lv.A().GetHeight() || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
-		x1, y1 = lv.A().GetFieldCoord(pixel.Vec{nextPos.Min.X, nextPos.Max.Y})
+		x1, y1 = lv.A().GetFieldCoord(pixel.Vec{X: nextPos.Min.X, Y: nextPos.Max.Y})
 		if isT(x1, y1) || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
@@ -679,13 +699,13 @@ func moveCharacter(c interface{}, dt float64) {
 		if isT(x1, y1) || y1 < 0 || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
-		x1, y1 = lv.A().GetFieldCoord(pixel.Vec{nextPos.Max.X, nextPos.Min.Y})
+		x1, y1 = lv.A().GetFieldCoord(pixel.Vec{X: nextPos.Max.X, Y: nextPos.Min.Y})
 		if isT(x1, y1) || (bombThere1 && bombThere2) {
 			newDirChoice = true
 		}
 	}
 
-	switch c.(type) {
+	switch chr := c.(type) {
 	case characters.Enemy:
 
 		// War kein Hindernis im Weg?
@@ -704,7 +724,7 @@ func moveCharacter(c interface{}, dt float64) {
 			var psblDirs [4]uint8
 			var n uint8
 			x, y := lv.A().GetFieldCoord(chr.GetPosBox().Center())
-			psblDirs, n = getPossibleDirections(x, y, !chr.IsBombghost(), !chr.IsWallghost())
+			psblDirs, n = getPossibleDirections(x, y, !chr.IsBombghost(), !chr.IsWallghost(), chr.IsFollowing())
 			if n == 0 { // keine erlaubte Richtung
 				chr.SetDirection(Stay) // Stay
 			} else if n == 1 { // 1 erlaubte Richtung --> lauf sie
@@ -725,7 +745,7 @@ func moveCharacter(c interface{}, dt float64) {
 					}
 					return false
 				}
-				if isStraigtForwardPossible() && rand.Intn(int(c.(characters.Enemy).GetBehaviour())) != 0 {
+				if isStraigtForwardPossible() && rand.Intn(int(chr.GetBehaviour())) != 0 {
 					newDirChoice = false
 					break
 				}
@@ -743,22 +763,22 @@ func moveCharacter(c interface{}, dt float64) {
 		if b {
 			switch t {
 			case BombItem:
-				wB.IncMaxBombs()
+				chr.IncMaxBombs()
 			case LifeItem:
-				wB.IncLife()
+				chr.IncLife()
 			case PowerItem:
-				wB.IncPower()
+				chr.IncPower()
 			case RollerbladeItem:
-				wB.IncSpeed()
+				chr.IncSpeed()
 			case WallghostItem:
-				wB.SetWallghost(true)
+				chr.SetWallghost(true)
 			case BombghostItem:
-				wB.SetBombghost(true)
+				chr.SetBombghost(true)
 			case SkullItem:
-				wB.DecLife()
-				wB.Ani().Die()
+				chr.DecLife()
+				chr.Ani().Die()
 			case HeartItem:
-				wB.SetRemote(true)
+				chr.SetRemote(true)
 			}
 		}
 	}
@@ -794,7 +814,7 @@ func deathSequence() {
 
 func setMonster() {
 	monster = monster[:0]
-	// Enemys from level
+	// Enemies from level
 	for _, enemyType := range levelDef.GetLevelEnemys() {
 		monster = append(monster, characters.NewEnemy(uint8(enemyType)))
 	}
@@ -815,7 +835,7 @@ func setMonster() {
 }
 
 func sun() {
-	levelDef = level.NewLevel("./level/stufe_3_level_1.txt")
+	levelDef = level.NewLevel("./level/stufe_3_level_2.txt")
 	pitchWidth, pitchHeight = levelDef.GetBounds()
 	var zoomFactor float64
 	if float64((pitchHeight+1)*TileSize+32)/float64((pitchWidth+3)*TileSize) > float64(MaxWinSizeY)/MaxWinSizeX {
@@ -823,8 +843,8 @@ func sun() {
 	} else {
 		zoomFactor = MaxWinSizeX / float64((pitchWidth+3)*TileSize)
 	}
-	var winSizeX float64 = zoomFactor * float64(pitchWidth+3) * TileSize
-	var winSizeY float64 = zoomFactor * (float64(pitchHeight+1)*TileSize + 32)
+	var winSizeX = zoomFactor * float64(pitchWidth+3) * TileSize
+	var winSizeY = zoomFactor * (float64(pitchHeight+1)*TileSize + 32)
 	var err error
 
 	wincfg := pixelgl.WindowConfig{
@@ -851,9 +871,6 @@ func sun() {
 
 	//fadeOut(win)
 
-	s1 := sounds.NewSound(levelDef.GetMusic())
-	go s1.PlaySound()
-
 	lv = gameStat.NewGameStat(levelDef, 1)
 
 	wB = characters.NewPlayer(WhiteBomberman)
@@ -872,6 +889,8 @@ func sun() {
 	// if player wants to continue:
 	for continu {
 		continu = false
+		music = sounds.NewSound(levelDef.GetMusic())
+		go music.PlaySound()
 		lv.Reset()
 		setMonster()
 		wB.MoveTo(lv.A().GetLowerLeft())
@@ -953,10 +972,10 @@ func sun() {
 				}
 			}
 
-			/////////////////////////////////////Moving Enemys ///////////////////////////////////////////////////////////
+			/////////////////////////////////////Moving Enemies ///////////////////////////////////////////////////////////
 
 			for _, m := range monster {
-				if m.IsAlife() && m.Ani().GetView() != Dead {
+				if m.IsAlife() && m.Ani().SequenceFinished() {
 					if wB.Ani().GetView() != Dead && wB.GetPosBox().Intersects(m.GetPosBox()) {
 						killPlayer(wB)
 					}

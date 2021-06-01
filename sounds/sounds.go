@@ -14,6 +14,7 @@ import (
 type snd struct {
 	nr   uint8
 	path string
+	play bool
 	done chan bool
 	quit chan bool
 	fade chan bool
@@ -118,6 +119,8 @@ func (s *snd) PlaySound() {
 	}
 	defer streamer.Close()
 
+	s.play = true
+
 	var ctrl *beep.Ctrl
 	if s.nr < 100 {
 		ctrl = &beep.Ctrl{Streamer: beep.Loop(-1, streamer), Paused: false}
@@ -152,34 +155,39 @@ func (s *snd) PlaySound() {
 		}
 	}
 
-A:
-	for {
-		select {
-		case <-s.quit:
-			speaker.Clear()
-		case <-s.fade:
-			for i := 0; i < 1000; i++ {
-				time.Sleep(time.Millisecond * 2)
-				speaker.Lock()
-				volume.Volume -= 0.01
-				speaker.Unlock()
-			}
+	select {
+	case <-s.quit:
+		speaker.Clear()
+	case <-s.fade:
+		for i := 0; i < 1000; i++ {
+			time.Sleep(time.Millisecond * 2)
 			speaker.Lock()
-			volume.Silent = true
+			volume.Volume -= 0.01
 			speaker.Unlock()
-			break A
-		case <-s.done:
-			break A
 		}
+		speaker.Lock()
+		volume.Silent = true
+		speaker.Unlock()
+	case <-s.done:
 	}
 }
 
 func (s *snd) StopSound() {
-	s.quit <- true
+	// s.nr<100 betrifft nur Musik, welche in einer Endlosschleife abgespielt wird.
+	// s.play verhindert ein Deadlock bei mehrmaligem Aufruf von StopSound oder FadeOut
+	if s.nr < 100 && s.play {
+		s.play = false
+		s.quit <- true
+	}
 }
 
 func (s *snd) FadeOut() {
-	s.fade <- true
+	// s.nr<100 betrifft nur Musik, welche in einer Endlosschleife abgespielt wird.
+	// s.play verhindert ein Deadlock bei mehrmaligem Aufruf von StopSound oder FadeOut
+	if s.nr < 100 && s.play {
+		s.play = false
+		s.fade <- true
+	}
 }
 
 func init() {
