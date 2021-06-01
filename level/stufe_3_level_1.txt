@@ -122,6 +122,7 @@ BombItem:2
 RollerbladeItem:2
 SkullItem:5
 BombghostItem:1
+HeartItem:1
 -
 * Art und Anzahl der Gegner:
 Fire:2
@@ -138,4 +139,4 @@ Perl
 JuhaniJunkalaLevel1
 -
 * maximale Spieldauer:
-120
+240

@@ -42,8 +42,17 @@ type Enemy interface {
 	Character
 
 	// Vor.: -
+	// Eff.: Je höher der gelieferte Wert, desto unwahrscheinlicher ist ein Richtungswechsel des Enemy.
+	GetBehaviour() uint8
+
+	// Vor.: -
 	// Eff.: Liefert true, wenn das Monster die Spieler verfolgen kann, sonst false.
 	IsFollowing() bool
+
+	// Vor.: val > 0
+	// Eff.: Setzt einen Wert für die Wahrscheinlichkeit eines Richtungswechsels.
+	//       Je höher, desto unwahrscheinlicher ist ein Wechsel.
+	SetBehaviour(val uint8)
 }
 
 // Alle Methoden, die nur Spieler besitzen.
@@ -77,6 +86,10 @@ type Player interface {
 	// Vor.: -
 	// Eff.: Liefert die Anzahl an Siegen eines Spielers im Multiplayer-Modus.
 	GetWins() uint8
+
+	// Vor.: -
+	// Eff.: Gibt Auskunft, ob der Bomberman eine Fernzündung durchführen darf
+	HasRemote() bool
 
 	// Vor.: -
 	// Eff.: Erhöht den Zähler für aktuell gelegte Bomben.
@@ -121,6 +134,10 @@ type Player interface {
 	// Vor.: -
 	// Eff.: Legt den Explosionsradius der Bomben fest.
 	SetPower(uint8)
+
+	// Vor.: -
+	// Eff.: Legt fest, ob der Bomberman seine Bomben fernzünden kann.
+	SetRemote(bool)
 
 	// Vor.: -
 	// Eff.: Legt fest, ob der Spieler durch Wände laufen kann (true) oder nicht (false).

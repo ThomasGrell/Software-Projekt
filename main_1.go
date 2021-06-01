@@ -207,6 +207,8 @@ func killEnemy(m characters.Enemy) {
 	m.DecLife()
 	if !m.IsAlife() {
 		m.Ani().Die()
+	} else {
+		m.Ani().SetView(Intro)
 	}
 	go sounds.NewSound(Falling1).PlaySound()
 }
@@ -214,6 +216,9 @@ func killEnemy(m characters.Enemy) {
 func killPlayer(bm characters.Player) {
 	bm.DecLife()
 	bm.Ani().Die()
+	bm.SetWallghost(false)
+	bm.SetBombghost(false)
+	bm.SetRemote(false)
 	go sounds.NewSound(Falling10).PlaySound()
 }
 
@@ -287,7 +292,6 @@ func checkForExplosions() {
 			}
 
 			// falls sich ein Monster oder Player im Explosionsradius befindet
-
 			bmX, bmY := lv.A().GetFieldCoord(wB.GetPosBox().Center())
 			for i := 0; i <= l; i++ {
 				for _, m := range monster {
@@ -312,7 +316,6 @@ func checkForExplosions() {
 					break
 				}
 			}
-
 			for i := 1; i <= r; i++ {
 				for _, m := range monster {
 					if !m.Ani().SequenceFinished() {
@@ -336,7 +339,6 @@ func checkForExplosions() {
 					break
 				}
 			}
-
 			for i := 1; i <= u; i++ {
 				for _, m := range monster {
 					if !m.Ani().SequenceFinished() {
@@ -360,7 +362,6 @@ func checkForExplosions() {
 					break
 				}
 			}
-
 			for i := 1; i <= d; i++ {
 				for _, m := range monster {
 					if !m.Ani().SequenceFinished() {
@@ -463,11 +464,11 @@ func removeExplodedBombs(existingBombs []tiles.Bombe) (remainingBombs []tiles.Bo
 	return remainingBombs
 }
 
-func showExplosions(win *pixelgl.Window) {
+func showExplosions(target pixel.Target) {
 	for _, a := range tempAniSlice {
 		ani := (a[0]).(animations.Animation)
 		ani.Update()
-		ani.GetSprite().Draw(win, (a[1]).(pixel.Matrix))
+		ani.GetSprite().Draw(target, (a[1]).(pixel.Matrix))
 	}
 }
 
@@ -597,12 +598,13 @@ func transformVecBack(dir uint8, v pixel.Vec) pixel.Vec {
 }
 
 func moveCharacter(c interface{}, dt float64) {
-	nextPos := getNextPosition(c, dt)
 	var newDirChoice bool = false
 	chr := c.(characters.Character)
-	if !chr.Ani().SequenceFinished() {
+	if !chr.Ani().SequenceFinished() || !chr.IsAlife() {
 		return
 	}
+
+	nextPos := getNextPosition(c, dt)
 
 	// Blickt man in Bewegungsrichtung, so werden von der hinteren linken Ecke (Min) der PosBox die
 	// ganzzahligen Koordinaten im Spielfeld berechnet.
@@ -610,10 +612,6 @@ func moveCharacter(c interface{}, dt float64) {
 
 	// Aus den Koordinaten wird nun eine Spielfeldnummer berechnet.
 	newFieldNo := xnow + ynow*lv.A().GetWidth()
-
-	if !chr.IsAlife() {
-		return
-	}
 
 	// Koordinaten des Spielfeldes, in welchem sich die vordere rechte Ecke
 	// der PosBox in Bezug zur Bewegungsrichtung des Characters befindet
@@ -693,23 +691,35 @@ func moveCharacter(c interface{}, dt float64) {
 
 		// Ein Richtungswechsel steht ggf. an
 		if newDirChoice {
-			var possibleDirections [4]uint8
+			var psblDirs [4]uint8
 			var n uint8
 			x, y := lv.A().GetFieldCoord(chr.GetPosBox().Center())
-			possibleDirections, n = getPossibleDirections(x, y, !chr.IsBombghost(), !chr.IsWallghost())
+			psblDirs, n = getPossibleDirections(x, y, !chr.IsBombghost(), !chr.IsWallghost())
 			if n == 0 { // keine erlaubte Richtung
 				chr.SetDirection(Stay) // Stay
 			} else if n == 1 { // 1 erlaubte Richtung --> lauf sie
-				chr.SetDirection(possibleDirections[0])
+				chr.SetDirection(psblDirs[0])
 			} else if n == 2 { //	2 erlaubte Richtungen
 				// Wenn es nur vor oder zurück geht, dann lauf weiter
-				if chr.GetDirection() != possibleDirections[0] && chr.GetDirection() != possibleDirections[1] {
+				if chr.GetDirection() != psblDirs[0] && chr.GetDirection() != psblDirs[1] {
 					// Wenn du abbiegen kannst, tu das oder lauf zurück
-					chr.SetDirection(possibleDirections[rand.Intn(2)])
+					chr.SetDirection(psblDirs[rand.Intn(2)])
 				}
 			} else { // drei oder vier erlaubte Richtungen
 				// wähle eine zufällige
-				chr.SetDirection(possibleDirections[rand.Intn(int(n))])
+				isStraigtForwardPossible := func() bool {
+					for _, val := range psblDirs {
+						if val == chr.GetDirection() {
+							return true
+						}
+					}
+					return false
+				}
+				if isStraigtForwardPossible() && rand.Intn(int(c.(characters.Enemy).GetBehaviour())) != 0 {
+					newDirChoice = false
+					break
+				}
+				chr.SetDirection(psblDirs[rand.Intn(int(n))])
 			}
 		}
 
@@ -737,6 +747,8 @@ func moveCharacter(c interface{}, dt float64) {
 			case SkullItem:
 				wB.DecLife()
 				wB.Ani().Die()
+			case HeartItem:
+				wB.SetRemote(true)
 			}
 		}
 	}
@@ -836,7 +848,6 @@ func sun() {
 
 	wB = characters.NewPlayer(WhiteBomberman)
 	wB.Ani().Show()
-
 	tb = titlebar.New((3 + uint16(pitchWidth)) * TileSize)
 	tb.SetMatrix(pixel.IM.Moved(pixel.V((3+float64(pitchWidth))*TileSize/2, (1+float64(pitchHeight))*TileSize+16)))
 	tb.SetLifePointers(wB.GetLifePointer())
@@ -859,6 +870,8 @@ func sun() {
 		wB.Ani().SetView(Stay)
 		wB.Ani().Show()
 		wB.Reset()
+		wB.SetMaxBombs(10)
+		wB.SetPower(10)
 		tb.SetSeconds(levelDef.GetTime())
 		tb.Update()
 		tb.StartCountdown()
@@ -869,17 +882,20 @@ func sun() {
 
 		for !win.Closed() && !win.Pressed(pixelgl.KeyEscape) {
 
+			if tb.GetSeconds() == 0 && wB.Ani().GetView() != Dead {
+				killPlayer(wB)
+			}
+
 			if wB.Ani().GetView() == Dead && wB.Ani().SequenceFinished() && wB.IsAlife() {
 				lv.Reset()
 				setMonster()
 				tb.SetSeconds(levelDef.GetTime())
+				tb.StartCountdown()
 				wB.MoveTo(lv.A().GetLowerLeft())
 				wB.SetDirection(Stay)
 				wB.Ani().SetView(Down)
 				wB.Ani().SetView(Stay)
 				wB.Ani().Show()
-				wB.SetWallghost(false)
-				wB.SetBombghost(false)
 			}
 
 			keypressed := false
@@ -904,6 +920,12 @@ func sun() {
 			if win.Pressed(pixelgl.KeyDown) && wB.Ani().GetView() != Dead {
 				wB.SetDirection(Down)
 				moveCharacter(wB, dt)
+				keypressed = true
+			}
+			if win.Pressed(pixelgl.KeyX) && wB.Ani().GetView() != Dead && wB.HasRemote() {
+				for _, bom := range bombs {
+					bom.SetTimeStamp(time.Now())
+				}
 				keypressed = true
 			}
 
@@ -959,6 +981,7 @@ func sun() {
 			itemBatch.Draw(win)
 
 			showExplosions(win)
+
 			tempAniSlice = clearExplosions(tempAniSlice)
 
 			wB.Draw(win)

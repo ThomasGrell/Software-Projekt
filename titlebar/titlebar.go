@@ -2,6 +2,8 @@ package titlebar
 
 import (
 	"../animations"
+	. "../constants"
+	"../sounds"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/imdraw"
 	"github.com/faiface/pixel/pixelgl"
@@ -157,6 +159,9 @@ func (t *titlebarStruct) countdown() {
 			t.timeLeft--
 		}
 		t.mutex.Unlock()
+		if t.timeLeft == 10 {
+			go sounds.NewSound(Alarm2).PlaySound()
+		}
 		t.Update()
 		time.Sleep(time.Second - time.Since(last)) // Etwa alle 2 Sekunden wird der Countdown heruntergezählt
 		last = time.Now()

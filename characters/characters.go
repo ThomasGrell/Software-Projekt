@@ -31,10 +31,12 @@ type player struct {
 	maxBombs uint8 // maximale Anzahl der legbaren Bomben
 	power    uint8 // Wirkungsradius der Bomben
 	wins     uint8 // Siege für Multi-Player-Modus
+	remote   bool  // Bomben per Tastendruck zünden
 }
 type enemy struct {
 	character
-	follow bool // Folgt einem Spieler
+	follow bool  // Folgt einem Spieler
+	behave uint8 // Je höher der Wert, desto wahrscheinlicher geht das Monster geradeaus
 }
 type character struct {
 	ani          animations.Animation
@@ -85,15 +87,19 @@ func NewEnemy(t uint8) *enemy {
 		c.speed = 15
 		c.points = 30
 		c.wallghost = true
+		c.behave = 3
 	case Drop:
 		c.speed = 20
+		c.behave = 3
 		c.points = 40
 	case Pinky:
 		c.speed = 20
 		c.bombghost = true
 		c.points = 50
+		c.behave = 2
 	case BluePopEye:
 		c.speed = 25
+		c.behave = 3
 		c.points = 50
 	case Jellyfish:
 		c.speed = 25
@@ -102,29 +108,37 @@ func NewEnemy(t uint8) *enemy {
 		c.life = 2
 		c.speed = 25
 		c.points = 70
+		c.behave = 2
 	case YellowPopEye:
 		c.speed = 30
 		c.points = 80
+		c.behave = 4
 	case Spinner:
 		c.speed = 50
 		c.points = 90
+		c.behave = 3
 	case YellowBubble:
 		c.speed = 30
 		c.bombghost = true
+		c.behave = 2
 		c.points = 90
 	case PinkPopEye:
 		c.speed = 35
+		c.behave = 3
 		c.points = 100
 	case Fire:
 		c.speed = 35
 		c.wallghost = true
 		c.points = 110
+		c.behave = 2
 	case Crocodile:
 		c.life = 2
 		c.speed = 35
 		c.points = 120
+		c.behave = 3
 	case Coin:
 		c.speed = 40
+		c.behave = 4
 		c.points = 130
 	case Puddle:
 		c.follow = true
@@ -132,13 +146,16 @@ func NewEnemy(t uint8) *enemy {
 		c.points = 140
 	case PinkCyclops:
 		c.speed = 45
+		c.behave = 2
 		c.points = 150
 	case RedCyclops:
 		c.life = 2
+		c.behave = 3
 		c.speed = 45
 		c.points = 150
 	case PinkFlower:
 		c.follow = true
+		c.behave = 4
 		c.speed = 50
 		c.points = 160
 	case Fireball:
@@ -185,8 +202,15 @@ func NewEnemy(t uint8) *enemy {
 	return c
 }
 
+func (c *enemy) GetBehaviour() uint8 { return c.behave }
 func (c *enemy) IsFollowing() bool {
 	return c.follow
+}
+func (c *enemy) SetBehaviour(val uint8) {
+	if val == 0 {
+		val++
+	}
+	c.behave = val
 }
 
 func (c *player) AddPoints(p uint32) {
@@ -206,6 +230,7 @@ func (c *player) GetBombs() uint8    { return c.bombs }
 func (c *player) GetMaxBombs() uint8 { return c.maxBombs }
 func (c *player) GetWins() uint8     { return c.wins }
 func (c *player) GetPower() uint8    { return c.power }
+func (c *player) HasRemote() bool    { return c.remote }
 func (c *player) IncBombs() {
 	c.bombs++
 }
@@ -238,9 +263,8 @@ func (c *player) ResetWins()          { c.wins = 0 }
 func (c *player) SetLife(l uint8)     { c.life = l }
 func (c *player) SetMaxBombs(b uint8) { c.maxBombs = b }
 func (c *player) SetMortal(b bool)    { c.mortal = b }
-func (c *player) SetPower(p uint8) {
-	c.power = p
-}
+func (c *player) SetPower(p uint8)    { c.power = p }
+func (c *player) SetRemote(b bool)    { c.remote = b }
 func (c *player) SetWallghost(w bool) { c.wallghost = w }
 
 func (c *character) Ani() animations.Animation { return c.ani }
@@ -334,6 +358,7 @@ func init() {
 	// Monster Prototyp
 	en = new(enemy)
 	en.life = 1
+	en.behave = 1
 	en.speed = 30
 	en.direction = 1
 	en.mortal = true

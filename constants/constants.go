@@ -115,6 +115,14 @@ const (
 	Falling10  = 110
 	Falling11  = 111
 	Falling12  = 112
+	Alarm1     = 113
+	Alarm2     = 114
+	Alarm3     = 115
+	Alarm4     = 116
+	Alarm5     = 117
+	Alarm6     = 118
+	Alarm7     = 119
+	Alarm8     = 120
 
 	// Arena Details
 	TileSize   = 16

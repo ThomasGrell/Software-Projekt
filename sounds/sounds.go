@@ -84,7 +84,22 @@ func NewSound(nr uint8) Sound {
 		s.path = "soundeffects/The Essential Retro/Movement/Falling Sounds/sfx_sounds_falling11.ogg"
 	case Falling12:
 		s.path = "soundeffects/The Essential Retro/Movement/Falling Sounds/sfx_sounds_falling12.ogg"
-
+	case Alarm1:
+		s.path = "soundeffects/The Essential Retro/General Sounds/Alarms/Alarms/sfx_alarm_loop1.ogg"
+	case Alarm2:
+		s.path = "soundeffects/The Essential Retro/General Sounds/Alarms/Alarms/sfx_alarm_loop2.ogg"
+	case Alarm3:
+		s.path = "soundeffects/The Essential Retro/General Sounds/Alarms/Alarms/sfx_alarm_loop3.ogg"
+	case Alarm4:
+		s.path = "soundeffects/The Essential Retro/General Sounds/Alarms/Alarms/sfx_alarm_loop4.ogg"
+	case Alarm5:
+		s.path = "soundeffects/The Essential Retro/General Sounds/Alarms/Alarms/sfx_alarm_loop5.ogg"
+	case Alarm6:
+		s.path = "soundeffects/The Essential Retro/General Sounds/Alarms/Alarms/sfx_alarm_loop6.ogg"
+	case Alarm7:
+		s.path = "soundeffects/The Essential Retro/General Sounds/Alarms/Alarms/sfx_alarm_loop7.ogg"
+	case Alarm8:
+		s.path = "soundeffects/The Essential Retro/General Sounds/Alarms/Alarms/sfx_alarm_loop8.ogg"
 	}
 	return s
 }
@@ -97,13 +112,19 @@ func (s *snd) PlaySound() {
 	}
 	defer f.Close()
 
-	streamer, _, err := vorbis.Decode(f)
+	streamer, format, err := vorbis.Decode(f)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer streamer.Close()
 
-	ctrl := &beep.Ctrl{Streamer: beep.Loop(-1, streamer), Paused: false}
+	var ctrl *beep.Ctrl
+	if s.nr < 100 {
+		ctrl = &beep.Ctrl{Streamer: beep.Loop(-1, streamer), Paused: false}
+	} else {
+		ctrl = &beep.Ctrl{Streamer: beep.Loop(1, streamer), Paused: false}
+	}
+
 	volume := &effects.Volume{
 		Streamer: ctrl,
 		Base:     2,
@@ -116,9 +137,19 @@ func (s *snd) PlaySound() {
 		speaker.Play(volume)
 	} else {
 		// Soundeffekt
-		speaker.Play(beep.Seq(streamer, beep.Callback(func() {
-			s.done <- true
-		})))
+		if s.nr == Deathflash {
+			speaker.Lock()
+			volume.Volume = 2
+			speaker.Unlock()
+			speaker.Play(beep.Seq(volume, beep.Callback(func() {
+				s.done <- true
+			})))
+		} else {
+			// Merkwürdigerweise ist für die Falling-Sounds und Alarm-Sounds ein Resample notwendig
+			speaker.Play(beep.Seq(beep.Resample(1, format.SampleRate, format.SampleRate*2, streamer), beep.Callback(func() {
+				s.done <- true
+			})))
+		}
 	}
 
 A:
@@ -133,21 +164,11 @@ A:
 				volume.Volume -= 0.01
 				speaker.Unlock()
 			}
+			speaker.Lock()
 			volume.Silent = true
+			speaker.Unlock()
 			break A
 		case <-s.done:
-			// Falls es Musik ist dann wird diese in einer Endlosschleife wiederholt.
-			/*
-				if s.nr < 100 {
-					streamer.Seek(0)
-					speaker.Play(beep.Seq(streamer, beep.Callback(func() {
-						s.done <- true
-					})))
-
-				} else {
-					break A
-				}
-			*/
 			break A
 		}
 	}

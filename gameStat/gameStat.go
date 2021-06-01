@@ -164,9 +164,11 @@ func (l *gs) RemoveItems(x, y int, dir pixel.Vec) {
 		fmt.Println("Kein Gültiger Vektor übergeben.")
 	} else {
 		for i := 1; i <= int(dir.Len()); i++ {
-			if len((*l).tileMatrix[y+i*int(dir.Y)/int(dir.Len())][x+i*int(dir.X)/int(dir.Len())]) == 1 {
-				(*l).tileMatrix[y+i*int(dir.Y)/int(dir.Len())][x+i*int(dir.X)/int(dir.Len())][0].Ani().Die()
-				(*l).tileMatrix[y+i*int(dir.Y)/int(dir.Len())][x+i*int(dir.X)/int(dir.Len())][0].Ani().Update()
+			yy := y + i*int(dir.Y)/int(dir.Len())
+			xx := x + i*int(dir.X)/int(dir.Len())
+			if len((*l).tileMatrix[yy][xx]) == 1 && (*l).tileMatrix[yy][xx][0].GetType() != Exit {
+				(*l).tileMatrix[yy][xx][0].Ani().Die()
+				(*l).tileMatrix[yy][xx][0].Ani().Update()
 			}
 		}
 	}
@@ -174,7 +176,7 @@ func (l *gs) RemoveItems(x, y int, dir pixel.Vec) {
 
 func (g *gs) Reset() {
 	for layer := 0; layer < g.height; layer++ {
-		g.tileMatrix [layer] = make([][]tiles.Tile, g.width)
+		g.tileMatrix[layer] = make([][]tiles.Tile, g.width)
 	}
 	for y := 0; y < g.height; y++ {
 		for x := 0; x < g.width; x++ {

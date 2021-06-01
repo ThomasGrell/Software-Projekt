@@ -120,91 +120,6 @@ func NewAnimation(t uint8) Animation {
 		c.lastUpdate = time.Now().UnixNano()
 		c.intervall = 2e8
 		return c
-	case Snowy:
-		c := new(enhancedAnimation)
-		c.whatAmI = t
-		*c = *en
-		c.pos.X = 208 + 16
-		c.pos.Y = 224
-		c.upos.X = 256
-		c.upos.Y = 224
-		c.dpos.X = 208
-		c.dpos.Y = 224
-		c.lpos.X = 304
-		c.lpos.Y = 224
-		c.ln = 2
-		c.rpos.X = 336
-		c.rpos.Y = 224
-		c.rn = 2
-		c.kpos.X = 336 + 2*16
-		c.kpos.Y = 224
-		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
-		c.lastUpdate = time.Now().UnixNano()
-		c.intervall = 2e8
-		return c
-	case PinkDevil:
-		c := new(enhancedAnimation)
-		c.whatAmI = t
-		*c = *en
-		c.pos.X = 0
-		c.dpos.X = 0
-		c.lpos.X = 3 * 16
-		c.upos.X = 6 * 16
-		c.rpos.X = 9 * 16
-		c.kpos.X = 12 * 16
-		c.pos.Y = 17 * 16
-		c.upos.Y = 17 * 16
-		c.dpos.Y = 17 * 16
-		c.lpos.Y = 17 * 16
-		c.rpos.Y = 17 * 16
-		c.kpos.Y = 17 * 16
-		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
-		c.lastUpdate = time.Now().UnixNano()
-		c.intervall = 2e8
-		return c
-	case Penguin:
-		c := new(enhancedAnimation)
-		c.whatAmI = t
-		*c = *en
-		c.pos.X = 16
-		c.dpos.X = 0
-		c.lpos.X = 6 * 16
-		c.upos.X = 3 * 16
-		c.rpos.X = 9 * 16
-		c.kpos.X = 12 * 16
-		c.pos.Y = 16 * 16
-		c.upos.Y = 16 * 16
-		c.dpos.Y = 16 * 16
-		c.lpos.Y = 16 * 16
-		c.rpos.Y = 16 * 16
-		c.kpos.Y = 16 * 16
-		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
-		c.lastUpdate = time.Now().UnixNano()
-		c.intervall = 2e8
-		return c
-	case BlueCyclops:
-		c := new(enhancedAnimation)
-		c.whatAmI = t
-		*c = *en
-		c.pos.X = 0
-		c.dpos.X = 0
-		c.lpos.X = 3 * 16
-		c.upos.X = 6 * 16
-		c.rpos.X = 9 * 16
-		c.kpos.X = 0
-		c.kn = 14
-		c.pos.Y = 10 * 16
-		c.upos.Y = 10 * 16
-		c.dpos.Y = 10 * 16
-		c.lpos.Y = 10 * 16
-		c.rpos.Y = 10 * 16
-		c.kpos.Y = 8 * 16
-		c.width = pixel.V(16, 32)
-		c.kwidth = pixel.V(32, 32)
-		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
-		c.lastUpdate = time.Now().UnixNano()
-		c.intervall = 2e8
-		return c
 	case Balloon:
 		c := new(basicAnimation)
 		c.whatAmI = t
@@ -284,6 +199,16 @@ func NewAnimation(t uint8) Animation {
 		c.intervall = 2e8
 		c.lastUpdate = time.Now().UnixNano()
 		return c
+	case YellowPopEye:
+		c := new(basicAnimation)
+		c.whatAmI = t
+		*c = *be
+		c.pos.Y = 13 * 16
+		c.kpos.Y = 13 * 16
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
+		c.intervall = 2e8
+		c.lastUpdate = time.Now().UnixNano()
+		return c
 	case Spinner:
 		c := new(basicAnimation)
 		c.whatAmI = t
@@ -295,16 +220,6 @@ func NewAnimation(t uint8) Animation {
 		c.kpos.X = 304 + 4*16
 		c.kpos.Y = 15 * 16
 		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
-		c.lastUpdate = time.Now().UnixNano()
-		return c
-	case YellowPopEye:
-		c := new(basicAnimation)
-		c.whatAmI = t
-		*c = *be
-		c.pos.Y = 13 * 16
-		c.kpos.Y = 13 * 16
-		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
-		c.intervall = 2e8
 		c.lastUpdate = time.Now().UnixNano()
 		return c
 	case YellowBubble:
@@ -395,21 +310,6 @@ func NewAnimation(t uint8) Animation {
 		c.intervall = 2e8
 		c.lastUpdate = time.Now().UnixNano()
 		return c
-	case BlueRabbit:
-		c := new(basicAnimation)
-		c.whatAmI = t
-		*c = *be
-		c.pos.X = 0
-		c.kpos.X = 4 * 16
-		c.n = 4
-		c.kn = 8
-		c.seesaw = false
-		c.pos.Y = 13 * 16
-		c.kpos.Y = 13 * 16
-		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
-		c.intervall = 2e8
-		c.lastUpdate = time.Now().UnixNano()
-		return c
 	case PinkFlower:
 		c := new(basicAnimation)
 		c.whatAmI = t
@@ -423,24 +323,6 @@ func NewAnimation(t uint8) Animation {
 		c.iwidth = pixel.V(16, 16)
 		c.in = 6
 		c.kn = 12
-		c.seesaw = true
-		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
-		c.intervall = 2e8
-		c.lastUpdate = time.Now().UnixNano()
-		return c
-	case BlueDevil:
-		c := new(basicAnimation)
-		c.whatAmI = t
-		*c = *be
-		c.view = Intro
-		c.introFinished = false
-		c.hasIntro = true
-		c.pos = pixel.V(0, 4*16)
-		c.ipos = pixel.V(10*16, 3*16)
-		c.kpos = pixel.V(6*16, 4*16)
-		c.iwidth = pixel.V(16, 16)
-		c.in = 5
-		c.kn = 7
 		c.seesaw = true
 		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
 		c.intervall = 2e8
@@ -464,6 +346,124 @@ func NewAnimation(t uint8) Animation {
 		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
 		c.intervall = 2e8
 		c.lastUpdate = time.Now().UnixNano()
+		return c
+	case Snowy:
+		c := new(enhancedAnimation)
+		c.whatAmI = t
+		*c = *en
+		c.pos.X = 208 + 16
+		c.pos.Y = 224
+		c.upos.X = 256
+		c.upos.Y = 224
+		c.dpos.X = 208
+		c.dpos.Y = 224
+		c.lpos.X = 304
+		c.lpos.Y = 224
+		c.ln = 2
+		c.rpos.X = 336
+		c.rpos.Y = 224
+		c.rn = 2
+		c.kpos.X = 336 + 2*16
+		c.kpos.Y = 224
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
+		c.lastUpdate = time.Now().UnixNano()
+		c.intervall = 2e8
+		return c
+	case BlueRabbit:
+		c := new(basicAnimation)
+		c.whatAmI = t
+		*c = *be
+		c.pos.X = 0
+		c.kpos.X = 4 * 16
+		c.n = 4
+		c.kn = 8
+		c.seesaw = false
+		c.pos.Y = 13 * 16
+		c.kpos.Y = 13 * 16
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
+		c.intervall = 2e8
+		c.lastUpdate = time.Now().UnixNano()
+		return c
+	case PinkDevil:
+		c := new(enhancedAnimation)
+		c.whatAmI = t
+		*c = *en
+		c.pos.X = 0
+		c.dpos.X = 0
+		c.lpos.X = 3 * 16
+		c.upos.X = 6 * 16
+		c.rpos.X = 9 * 16
+		c.kpos.X = 12 * 16
+		c.pos.Y = 17 * 16
+		c.upos.Y = 17 * 16
+		c.dpos.Y = 17 * 16
+		c.lpos.Y = 17 * 16
+		c.rpos.Y = 17 * 16
+		c.kpos.Y = 17 * 16
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
+		c.lastUpdate = time.Now().UnixNano()
+		c.intervall = 2e8
+		return c
+	case Penguin:
+		c := new(enhancedAnimation)
+		c.whatAmI = t
+		*c = *en
+		c.pos.X = 16
+		c.dpos.X = 0
+		c.lpos.X = 6 * 16
+		c.upos.X = 3 * 16
+		c.rpos.X = 9 * 16
+		c.kpos.X = 12 * 16
+		c.pos.Y = 16 * 16
+		c.upos.Y = 16 * 16
+		c.dpos.Y = 16 * 16
+		c.lpos.Y = 16 * 16
+		c.rpos.Y = 16 * 16
+		c.kpos.Y = 16 * 16
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
+		c.lastUpdate = time.Now().UnixNano()
+		c.intervall = 2e8
+		return c
+	case BlueDevil:
+		c := new(basicAnimation)
+		c.whatAmI = t
+		*c = *be
+		c.view = Intro
+		c.introFinished = false
+		c.hasIntro = true
+		c.pos = pixel.V(0, 4*16)
+		c.ipos = pixel.V(10*16, 3*16)
+		c.kpos = pixel.V(6*16, 4*16)
+		c.iwidth = pixel.V(16, 16)
+		c.in = 5
+		c.kn = 7
+		c.seesaw = true
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
+		c.intervall = 2e8
+		c.lastUpdate = time.Now().UnixNano()
+		return c
+	case BlueCyclops:
+		c := new(enhancedAnimation)
+		c.whatAmI = t
+		*c = *en
+		c.pos.X = 0
+		c.dpos.X = 0
+		c.lpos.X = 3 * 16
+		c.upos.X = 6 * 16
+		c.rpos.X = 9 * 16
+		c.kpos.X = 0
+		c.kn = 14
+		c.pos.Y = 10 * 16
+		c.upos.Y = 10 * 16
+		c.dpos.Y = 10 * 16
+		c.lpos.Y = 10 * 16
+		c.rpos.Y = 10 * 16
+		c.kpos.Y = 8 * 16
+		c.width = pixel.V(16, 32)
+		c.kwidth = pixel.V(32, 32)
+		c.sprite = pixel.NewSprite(CharacterImage, CharacterImage.Bounds())
+		c.lastUpdate = time.Now().UnixNano()
+		c.intervall = 2e8
 		return c
 	case PowerItem:
 		c := new(basicAnimation)
@@ -1036,7 +1036,7 @@ func NewExplosion(l, r, u, d uint8) Animation {
 	b.rPower = r
 	b.uPower = u
 	b.dPower = d
-	b.canvas = pixelgl.NewCanvas(pixel.R(0, 0, float64(16*(r+l+1)), float64(16*(u+d+1))))
+	b.canvas = pixelgl.NewCanvas(pixel.R(0, 0, 16*float64(r+l+1), 16*float64(u+d+1)))
 	b.sprite = pixel.NewSprite(b.canvas, b.canvas.Bounds())
 	b.batch = pixel.NewBatch(&pixel.TrianglesData{}, ItemImage)
 	b.delta = 1
@@ -1106,30 +1106,30 @@ func (c *explosionAnimation) drawCanvas() {
 
 	// Zeichne Mitte der Flamme
 	s.Set(ItemImage, pixel.R(2*16+float64(c.count)*5*16, 8*16, 3*16+float64(c.count)*5*16, 9*16))
-	s.Draw(c.batch, pixel.IM.Moved(pixel.V(float64(c.lPower*16+8), float64(c.dPower)*16+8)))
+	s.Draw(c.batch, pixel.IM.Moved(pixel.V(float64(c.lPower)*16+8, float64(c.dPower)*16+8)))
 
 	// Zeichne linken Explosionsast
 	for i := uint8(1); i < c.lPower; i++ {
 		s.Set(ItemImage, pixel.R(1*16+float64(c.count)*5*16, 8*16, 2*16+float64(c.count)*5*16, 9*16))
-		s.Draw(c.batch, pixel.IM.Moved(pixel.V(float64(i*16+8), float64(c.dPower)*16+8)))
+		s.Draw(c.batch, pixel.IM.Moved(pixel.V(float64(i)*16+8, float64(c.dPower)*16+8)))
 	}
 
 	// Zeichne rechten Explosionsast
 	for i := uint8(1); i < c.rPower; i++ {
 		s.Set(ItemImage, pixel.R(3*16+float64(c.count)*5*16, 8*16, 4*16+float64(c.count)*5*16, 9*16))
-		s.Draw(c.batch, pixel.IM.Moved(pixel.V(float64((c.lPower+i)*16+8), float64(c.dPower)*16+8)))
+		s.Draw(c.batch, pixel.IM.Moved(pixel.V(float64(c.lPower+i)*16+8, float64(c.dPower)*16+8)))
 	}
 
 	// Zeichne unteren Explosionsast
 	for i := uint8(1); i < c.dPower; i++ {
 		s.Set(ItemImage, pixel.R(2*16+float64(c.count)*5*16, 7*16, 3*16+float64(c.count)*5*16, 8*16))
-		s.Draw(c.batch, pixel.IM.Moved(pixel.V(float64(c.lPower*16+8), float64(i*16+8))))
+		s.Draw(c.batch, pixel.IM.Moved(pixel.V(float64(c.lPower)*16+8, float64(i)*16+8)))
 	}
 
 	// Zeichne oberen Explosionsast
 	for i := uint8(1); i < c.uPower; i++ {
 		s.Set(ItemImage, pixel.R(2*16+float64(c.count)*5*16, 9*16, 3*16+float64(c.count)*5*16, 10*16))
-		s.Draw(c.batch, pixel.IM.Moved(pixel.V(float64(c.lPower*16+8), float64((i+c.dPower)*16+8))))
+		s.Draw(c.batch, pixel.IM.Moved(pixel.V(float64(c.lPower)*16+8, float64(i+c.dPower)*16+8)))
 	}
 
 	c.batch.Draw(c.canvas)
@@ -1473,6 +1473,11 @@ func init() {
 	bm.kpos.Y = 360
 	bm.kn = 4
 	bm.kwidth = bm.width
+	bm.hasIntro = true
+	bm.introFinished = false
+	bm.ipos = pixel.V(10*16, 3*16)
+	bm.in = 5
+	bm.iwidth = pixel.V(16, 16)
 
 	// Monster Prototyp
 	en = new(enhancedAnimation)
@@ -1506,6 +1511,11 @@ func init() {
 	en.kpos.Y = 23 * 16
 	en.kn = 7
 	en.kwidth = en.width
+	en.hasIntro = true
+	en.introFinished = false
+	en.ipos = pixel.V(10*16, 3*16)
+	en.in = 5
+	en.iwidth = pixel.V(16, 16)
 	// Monster Prototyp
 
 	be = new(basicAnimation)
@@ -1513,7 +1523,6 @@ func init() {
 	be.delta = 1
 	be.seesaw = true
 	be.visible = false
-	be.hasIntro = false
 	be.introFinished = true
 	be.view = Stay
 	be.width = pixel.V(16, 16)
@@ -1522,4 +1531,10 @@ func init() {
 	be.kpos = pixel.V(304+3*16, 23*16)
 	be.n = 3
 	be.kn = 7
+	be.hasIntro = true
+	be.introFinished = false
+	be.ipos = pixel.V(10*16, 3*16)
+	be.in = 5
+	be.iwidth = pixel.V(16, 16)
+
 }
