@@ -155,6 +155,8 @@ func gameOver(win *pixelgl.Window) {
 	music.StopSound()
 	music = sounds.NewSound(JuhaniJunkalaEnd)
 	go music.PlaySound()
+	win.SetBounds(pixel.R(0, 0, MaxWinSizeX, MaxWinSizeY))
+	win.Update()
 	var picGoOn pixel.Picture
 	picEnd, err := loadPic("graphics/Screenshots/gameOverEnd.png")
 	if err != nil {
@@ -815,7 +817,7 @@ func deathSequence() {
 func setMonster() {
 	monster = monster[:0]
 	// Enemies from level
-	for _, enemyType := range levelDef.GetLevelEnemys() {
+	for _, enemyType := range levelDef.GetLevelEnemies() {
 		monster = append(monster, characters.NewEnemy(uint8(enemyType)))
 	}
 
@@ -849,7 +851,7 @@ func sun() {
 
 	wincfg := pixelgl.WindowConfig{
 		Title:  "Bomberman 2021",
-		Bounds: pixel.R(0, 0, winSizeX, winSizeY),
+		Bounds: pixel.R(0, 0, MaxWinSizeX, MaxWinSizeY),
 		VSync:  true,
 	}
 	win, err = pixelgl.NewWindow(wincfg)
@@ -867,9 +869,9 @@ func sun() {
 	win.Clear(colornames.Black)
 	txt.Print("Let's Play").Draw(win, pixel.IM.Scaled(pixel.V(0, 0), 3))
 	win.Update()
-	time.Sleep(time.Second * 3)
+	time.Sleep(time.Second * 2)
 
-	//fadeOut(win)
+	fadeOut(win)
 
 	lv = gameStat.NewGameStat(levelDef, 1)
 
@@ -891,6 +893,8 @@ func sun() {
 		continu = false
 		music = sounds.NewSound(levelDef.GetMusic())
 		go music.PlaySound()
+		win.SetBounds(pixel.R(0, 0, winSizeX, winSizeY))
+		win.Update()
 		lv.Reset()
 		setMonster()
 		wB.MoveTo(lv.A().GetLowerLeft())

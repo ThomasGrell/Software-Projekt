@@ -9,14 +9,14 @@ import (
 )
 
 type startstatus struct {
-	partsPos     [][2]int
-	listOfItems  []int // never empty, because exit ist everytime in this list
-	listOfEnemys []int
-	w, h         int
-	walltype     int
-	arenaType    int
-	music        int
-	time         int
+	partsPos      [][2]int
+	listOfItems   []int // never empty, because exit ist everytime in this list
+	listOfEnemies []int
+	w, h          int
+	walltype      int
+	arenaType     int
+	music         int
+	time          int
 }
 
 func NewLevel(path string) *startstatus {
@@ -34,8 +34,8 @@ func (sts *startstatus) GetLevelItems() []int {
 	return sts.listOfItems
 }
 
-func (sts *startstatus) GetLevelEnemys() []int {
-	return sts.listOfEnemys
+func (sts *startstatus) GetLevelEnemies() []int {
+	return sts.listOfEnemies
 }
 
 func (sts *startstatus) GetBounds() (int, int) {
@@ -122,7 +122,7 @@ func (sts *startstatus) statusFromFile(path string) {
 				enemyType := parseConstants(sSlice[0])
 				anzE, _ := strconv.Atoi(sSlice[1])
 				for i := 0; i < anzE; i++ {
-					sts.listOfEnemys = append(sts.listOfEnemys, enemyType)
+					sts.listOfEnemies = append(sts.listOfEnemies, enemyType)
 				}
 				save = save[:0]
 			case "walltype":
