@@ -80,37 +80,45 @@ func (sts *startstatus) statusFromFile(path string) {
 			n, err = f.Read(b)
 		}
 		// eine Zeile ist ausgelesen
-		//println("Status: ",status[i],"; ausgelesen: ",string(save))
-		if string(save) == "" {
+		// println("Status: ",status[i],"; ausgelesen: ",string(save))
+
+		str := string(save)
+
+		// Entfernt ein Carriage Return (\r) aus dem String bei Windows als Betriebssystem
+		if str[len(str)-1] == '\r' {
+			str = str[:len(str)-1]
+		}
+
+		if str == "" {
 			return
 		}
-		if save[0] == byte('-') {
+		if str[0] == byte('-') {
 			save = save[:0]
 			i++
-		} else if save[0] == byte('*') {
+		} else if str[0] == byte('*') {
 			// Es wurde nur eine Kommentarzeile eingelesen.
 			save = save[:0]
 			continue
 		} else {
 			switch status[i] {
 			case "w":
-				sts.w, _ = strconv.Atoi(string(save))
+				sts.w, _ = strconv.Atoi(str)
 				save = save[:0]
 			case "h":
-				sts.h, _ = strconv.Atoi(string(save))
+				sts.h, _ = strconv.Atoi(str)
 				save = save[:0]
 			case "arena":
-				sts.arenaType, _ = strconv.Atoi(string(save))
+				sts.arenaType, _ = strconv.Atoi(str)
 				save = save[:0]
 			case "pos":
-				sSlice := strings.Split(string(save), ",")
+				sSlice := strings.Split(str, ",")
 				var pos [2]int
 				pos[0], _ = strconv.Atoi(sSlice[0])
 				pos[1], _ = strconv.Atoi(sSlice[1])
 				sts.partsPos = append(sts.partsPos, pos)
 				save = save[:0]
 			case "item":
-				sSlice := strings.Split(string(save), ":")
+				sSlice := strings.Split(str, ":")
 				itemType := parseConstants(sSlice[0])
 				anzItems, _ := strconv.Atoi(sSlice[1])
 				for i := 0; i < anzItems; i++ {
@@ -118,7 +126,7 @@ func (sts *startstatus) statusFromFile(path string) {
 				}
 				save = save[:0]
 			case "enemy":
-				sSlice := strings.Split(string(save), ":")
+				sSlice := strings.Split(str, ":")
 				enemyType := parseConstants(sSlice[0])
 				anzE, _ := strconv.Atoi(sSlice[1])
 				for i := 0; i < anzE; i++ {
@@ -126,13 +134,13 @@ func (sts *startstatus) statusFromFile(path string) {
 				}
 				save = save[:0]
 			case "walltype":
-				sts.walltype = parseConstants(string(save))
+				sts.walltype = parseConstants(str)
 				save = save[:0]
 			case "music":
-				sts.music = parseConstants(string(save))
+				sts.music = parseConstants(str)
 				save = save[:0]
 			case "time":
-				sts.time, _ = strconv.Atoi(string(save))
+				sts.time, _ = strconv.Atoi(str)
 				save = save[:0]
 			}
 		}
