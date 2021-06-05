@@ -21,3 +21,4 @@ main.go: Steuerung eines Bomberman mit Pfeiltasten vor dem Hintergrund von Level
 ### gelegte Bomben bleiben beim Zurücksetzen erhalten
 ### Teddy läuft in die Ecke und bewegt sich nicht mehr
 ### Alles zurücksetzen nach Lebensverlust stört manchmal
+### Game over Anzeige passt sich nicht in Fenster ein (braucht Intro-Fenster, bekommt Spielfenster).
