@@ -1,0 +1,43 @@
+*************** Leveldesign: Sebastian Rösch ****************
+*
+* Breite der Arena:
+10
+-
+* Höhe der Arena:
+7
+-
+* Arenatyp:
+0
+-
+* Positionen der Hindernisse:
+2,2
+1,2
+3,2
+2,1
+2,3
+9,2
+5,4
+6,4
+7,4
+6,3
+6,5
+0,6
+-
+* Art und Anzahl der Items:
+PowerItem: 1
+LifeItem: 1
+RollerbladeItem:2
+SkullItem:3
+HeartItem:1
+-
+* Art und Anzahl der Gegner:
+Balloon:12
+-
+* Art der Hindernisse:
+Tree
+-
+* Musik:
+TheFieldOfDreams
+-
+* maximale Spieldauer:
+100

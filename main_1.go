@@ -185,16 +185,31 @@ func gameOver(win *pixelgl.Window) {
 	spriteEnd := pixel.NewSprite(picEnd, picEnd.Bounds())
 	win.Clear(colornames.Black)
 	win.SetSmooth(true)
-	// victory picGoOn: zoom in
 	winSize := win.Bounds().Size()
 	picSize := picGoOn.Bounds().Size()
 	zoomFactor := winSize.Len() / picSize.Len()
 	for i := float64(0); i <= zoomFactor; i = i + 0.01 {
-		spriteGoOn.Draw(win, pixel.IM.Scaled(pixel.ZV, i))
+		//spriteGoOn.Draw(win, pixel.IM.Scaled(pixel.ZV, i))
+		if win.Pressed(pixelgl.KeyDown) {
+			spriteEnd.Draw(win, pixel.IM.Scaled(pixel.ZV, i))
+			continu = false
+		} else if win.Pressed(pixelgl.KeyUp) {
+			spriteGoOn.Draw(win, pixel.IM.Scaled(pixel.ZV, i))
+			continu = true
+		} else if win.Pressed(pixelgl.KeyEnter) {
+			win.SetSmooth(false)
+			music.StopSound()
+			return
+		} else {
+			if continu {
+				spriteGoOn.Draw(win, pixel.IM.Scaled(pixel.ZV, i))
+			} else {
+				spriteEnd.Draw(win, pixel.IM.Scaled(pixel.ZV, i))
+			}
+		}
 		win.Update()
 	}
-	continu = true
-	// victory picGoOn: toggle
+	// game over picGoOn: toggle
 	for !win.Closed() && !win.Pressed(pixelgl.KeyEscape) {
 		if win.Pressed(pixelgl.KeyDown) {
 			spriteEnd.Draw(win, pixel.IM.Scaled(pixel.ZV, zoomFactor))
@@ -852,7 +867,7 @@ func setMonster() {
 }
 
 func sun() {
-	levelDef = level.NewLevel("./level/stufe_3_level_2.txt")
+	levelDef = level.NewLevel("./level/stufe_1_level_1.txt")
 	pitchWidth, pitchHeight = levelDef.GetBounds()
 	var zoomFactor float64
 	if float64((pitchHeight+1)*TileSize+32)/float64((pitchWidth+3)*TileSize) > float64(MaxWinSizeY)/MaxWinSizeX {
@@ -876,10 +891,10 @@ func sun() {
 
 	win.SetMatrix(pixel.IM.Moved(win.Bounds().Center()))
 
-	//sIntro := sounds.NewSound(ThroughSpace)
-	//go sIntro.PlaySound()
+	sIntro := sounds.NewSound(ThroughSpace)
+	go sIntro.PlaySound()
 
-	showIntro(win)
+	showIntro(win) // INTROOOOOOOOOOOOOOOO
 
 	win.Clear(colornames.Black)
 	txt.Print("Let's Play").Draw(win, pixel.IM.Scaled(pixel.V(0, 0), 3))

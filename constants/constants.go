@@ -46,17 +46,17 @@ const (
 
 	//Items:
 	Bomb            = 100
-	PowerItem       = 101
+	PowerItem       = 101 // increases bomb power
 	BombItem        = 102
 	PunchItem       = 103
-	HeartItem       = 104
-	RollerbladeItem = 105
-	SkullItem       = 106
-	WallghostItem   = 107
-	BombghostItem   = 108
-	LifeItem        = 109
+	HeartItem       = 104 // remote detonator for bombs
+	RollerbladeItem = 105 // increases player's speed
+	SkullItem       = 106 // decreases player's lifes
+	WallghostItem   = 107 // lets player walk through destroyable tiles
+	BombghostItem   = 108 // lets player walk over bombs
+	LifeItem        = 109 // increases lifes by 1
 	Exit            = 110
-	KickItem        = 111
+	KickItem        = 111 // ability to kick bombs away
 
 	//Wände bzw. Hindernisse zum Wegsprengen:
 	Stub           = 120
