@@ -1,8 +1,8 @@
 package constants
 
 const (
-	MaxWinSizeX = 1600
-	MaxWinSizeY = 900
+	MaxWinSizeX = 1000
+	MaxWinSizeY = 700
 
 	// Charactertypen
 	WhiteBomberman = 1 // Spielfiguren im Single Player Mode
@@ -19,14 +19,14 @@ const (
 	Drop           = 12
 	Pinky          = 13
 	BluePopEye     = 14
-	Jellyfish      = 15
+	Jellyfish      = 15	// stufe 2
 	Snake          = 16
 	Spinner        = 17
 	YellowPopEye   = 18
 	Snowy          = 19
 	YellowBubble   = 20
 	PinkPopEye     = 21
-	Fire           = 22
+	Fire           = 22	// stufe 3
 	Crocodile      = 23
 	Coin           = 24
 	Puddle         = 25

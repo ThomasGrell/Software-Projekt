@@ -867,7 +867,7 @@ func setMonster() {
 }
 
 func sun() {
-	levelDef = level.NewLevel("./level/stufe_3_level_1.txt")
+	levelDef = level.NewLevel("./level/stufe_2_level_3.txt")
 	pitchWidth, pitchHeight = levelDef.GetBounds()
 	var zoomFactor float64
 	if float64((pitchHeight+1)*TileSize+32)/float64((pitchWidth+3)*TileSize) > float64(MaxWinSizeY)/MaxWinSizeX {
@@ -888,6 +888,7 @@ func sun() {
 	if err != nil {
 		panic(err)
 	}
+	
 
 	win.SetMatrix(pixel.IM.Moved(win.Bounds().Center()))
 

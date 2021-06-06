@@ -1,0 +1,80 @@
+*************** Leveldesign: Sebastian Rösch ****************
+*
+* Breite der Arena:
+17
+-
+* Höhe der Arena:
+13
+-
+* Arenatyp:
+1
+-
+* Positionen der Hindernisse:
+0,3
+2,3
+4,3
+6,3
+8,3
+12,3
+14,3
+16,3
+1,6
+1,10
+6,1
+6,2
+3,4
+3,6
+3,8
+3,10
+3,12
+7,2
+7,4
+7,6
+7,8
+8,0
+8,1
+8,3
+8,4
+8,5
+8,11
+8,12
+9,10
+10,9
+11,8
+12,7
+13,6
+14,5
+15,4
+14,0
+14,1
+14,2
+14,4
+14,6
+14,7
+14,9
+14,10
+14,11
+14,12
+-
+* Art und Anzahl der Items:
+RollerbladeItem:2
+SkullItem:6
+WallghostItem:1
+BombItem:2
+PowerItem:2
+-
+* Art und Anzahl der Gegner:
+Snake:2
+Spinner:2
+Jellyfish:2
+Snowy:1
+Ghost:4
+-
+* Art der Hindernisse:
+Brushwood
+-
+* Musik:
+JuhaniJunkalaLevel2
+-
+* maximale Spieldauer:
+120
