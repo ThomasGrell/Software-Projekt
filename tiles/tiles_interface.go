@@ -12,7 +12,9 @@ import (
 	das weder ein Item noch eine Bombe ist, ist an Position pos geliefert.
 	*data erfüllt das Interface Item
 
-	NewTile(constant uint8, pos pixel.Vec) *data
+	NewTile(constant uint8, pos pixel.Vec) *tile
+
+	*tile erfüllt das Interface Tile 
 */
 
 /*	Vor.: "constant" muss ein gültiger Bezeichner für ein Item sein
@@ -20,14 +22,18 @@ import (
 	das keine Bombe ist, ist an Position pos geliefert.
 	*data erfüllt das Interface Item
 
-	NewItem(constant uint8, pos pixel.Vec) *data
+	NewItem(constant uint8, pos pixel.Vec) *item
+	
+	*item erfüllt das Interface Item 
 */
 
 /*	Vor.: -
 	Eff.: Ein Bomben-Objekt ist geliefert.
 	*bombe erfüllt das Interface Item
 
-	NewBomb() *bombe
+	NewBomb(p characters.Player, pos pixel.Vec) *bombe
+	
+	*bombe erfüllt das Interface Bombe 
 */
 
 type Tile interface {
