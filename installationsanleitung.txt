@@ -1,0 +1,26 @@
+Installationsanleitung
+
+go get github.com/faiface/pixel
+go get -u github.com/faiface/beep
+go get github.com/faiface/pixel/imdraw
+go get github.com/faiface/pixel/pixelgl
+go get -u golang.org/x/image/...
+go get github.com/faiface/glhf
+go get -u -tags=gles2 github.com/go-gl/glfw/v3.3/glfw
+go get github.com/hajimehoshi/oto
+go get github.com/jfreymuth/oggvorbis
+
+Requirements nachinstallieren: https://github.com/faiface/pixel#requirements
+
+->ubuntu: 
+apt install libasound2-dev
+apt install libg11-mesa-dev
+
+->fedora/centos: 
+yum install libasound2-dev
+yum install libg11-mesa-dev
+
+
+
+
+
