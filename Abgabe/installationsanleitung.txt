@@ -1,0 +1,36 @@
+Installationsanleitung
+
+1. Requirements installieren: 
+	(Details unter: https://github.com/faiface/pixel#requirements)
+
+	->ubuntu: 
+	apt install libasound2-dev
+	apt install xorg-dev
+	apt install libgl1-mesa-dev
+
+	->fedora/centos: 
+	Folgende Pakete installieren:
+	libX11-devel 
+	libXcursor-devel 
+	libXrandr-devel 
+	libXinerama-devel 
+	mesa-libGL-devel 
+	libXi-devel
+
+2. Pakete installieren:
+	go get github.com/faiface/pixel
+	go get -u github.com/faiface/beep
+	go get github.com/faiface/pixel/imdraw
+	go get github.com/faiface/pixel/pixelgl
+	go get -u golang.org/x/image/...
+	go get github.com/faiface/glhf
+	go get -u -tags=gles2 github.com/go-gl/glfw/v3.3/glfw
+	go get github.com/hajimehoshi/oto
+	go get github.com/jfreymuth/oggvorbis
+
+
+
+
+
+
+
