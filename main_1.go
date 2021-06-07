@@ -32,6 +32,7 @@ import (
 	"image/png"
 	"math/rand"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -106,8 +107,7 @@ func showIntro(win *pixelgl.Window) {
 		win.Update()
 		time.Sleep(100 * time.Millisecond)
 	}
-
-	music.StopSound()
+	music.FadeOut()
 	fadeOut(win)
 
 	win.SetSmooth(false)
@@ -953,12 +953,19 @@ func sun() {
 		//println("continue! nextLevel:", nextLevel, "Levelcount:", levelCount)
 		if nextLevel {
 			levelCount++
-			//nextLevel = false
+			nextLevel = false
+			win.Clear(colornames.Black)
+			txt.Print("Level "+strconv.Itoa(int(levelCount))).Draw(win, pixel.IM.Moved(win.Bounds().Center()))
+			for !win.Pressed(pixelgl.KeySpace) {
+				win.Update()
+				time.Sleep(time.Millisecond)
+			}
 		} else {
 			levelCount = 1
 			wB.Reset()
 		}
 		levelDef = level.NewLevel(loadLevel(levelCount))
+		lv = gameStat.NewGameStat(levelDef, 1)
 		pitchWidth, pitchHeight = levelDef.GetBounds()
 		if float64((pitchHeight+1)*TileSize+32)/float64((pitchWidth+3)*TileSize) > float64(MaxWinSizeY)/MaxWinSizeX {
 			zoomFactor = MaxWinSizeY / float64((pitchHeight+1)*TileSize+32)
@@ -983,6 +990,8 @@ func sun() {
 		//wB.Reset()
 		//wB.SetMaxBombs(10)
 		//wB.SetPower(10)
+		tb.Resize((3 + uint16(pitchWidth)) * TileSize)
+		tb.SetMatrix(pixel.IM.Moved(pixel.V((3+float64(pitchWidth))*TileSize/2, (1+float64(pitchHeight))*TileSize+16)))
 		tb.SetSeconds(levelDef.GetTime())
 		tb.Update()
 		tb.StartCountdown()

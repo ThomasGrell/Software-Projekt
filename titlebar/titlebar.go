@@ -86,6 +86,14 @@ func New(width uint16) Titlebar {
 	return t
 }
 
+func (t *titlebarStruct) Resize(width uint16) {
+	t.width = float64(width & 0xFFF8)
+	t.canvas = pixelgl.NewCanvas(pixel.R(0, 0, t.width, 32))
+	t.background.Push(t.canvas.Bounds().Min)
+	t.background.Push(t.canvas.Bounds().Max)
+	t.background.Rectangle(0)
+}
+
 func (t *titlebarStruct) Draw(target pixel.Target) {
 	t.canvas.Draw(target, t.matrix)
 }

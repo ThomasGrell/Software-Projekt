@@ -46,6 +46,10 @@ type (
 		Manager()
 
 		// Vor.: -
+		// Erg.: Die Breite des Titlebar wird geändert.
+		Resize(uint16)
+
+		// Vor.: -
 		// Erg.: Die übergebenen Pointeradressen auf die uint8-Werte der Spielerleben werden
 		//       im Objekt gespeichert. Die Anzeige zeigt nun die verbleibenden Leben der
 		//       Spieler an.
