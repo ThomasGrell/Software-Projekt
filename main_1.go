@@ -921,9 +921,6 @@ func sun() {
 
 	win.SetMatrix(pixel.IM.Moved(win.Bounds().Center()))
 
-	sIntro := sounds.NewSound(ThroughSpace)
-	go sIntro.PlaySound()
-
 	showIntro(win) // INTROOOOOOOOOOOOOOOO
 
 	win.Clear(colornames.Black)
@@ -954,8 +951,9 @@ func sun() {
 		if nextLevel {
 			levelCount++
 			nextLevel = false
+			win.SetMatrix(pixel.IM)
 			win.Clear(colornames.Black)
-			txt.Print("Level "+strconv.Itoa(int(levelCount))).Draw(win, pixel.IM.Moved(win.Bounds().Center()))
+			txt.Print("Level "+strconv.Itoa(int(levelCount))).Draw(win, pixel.IM.Scaled(pixel.V(0, 0), 3).Moved(win.Bounds().Center()))
 			for !win.Pressed(pixelgl.KeySpace) {
 				win.Update()
 				time.Sleep(time.Millisecond)
@@ -975,6 +973,8 @@ func sun() {
 		winSizeX = zoomFactor * float64(pitchWidth+3) * TileSize
 		winSizeY = zoomFactor * (float64(pitchHeight+1)*TileSize + 32)
 		continu = false
+
+		music.StopSound()
 		music = sounds.NewSound(levelDef.GetMusic())
 		go music.PlaySound()
 		win.SetBounds(pixel.R(0, 0, winSizeX, winSizeY))
