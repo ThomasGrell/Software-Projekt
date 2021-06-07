@@ -47,7 +47,7 @@ const (
 	//Items:
 	Bomb            = 100
 	PowerItem       = 101 // increases bomb power
-	BombItem        = 102
+	BombItem        = 102 // ability to put several bombs
 	PunchItem       = 103
 	HeartItem       = 104 // remote detonator for bombs
 	RollerbladeItem = 105 // increases player's speed
