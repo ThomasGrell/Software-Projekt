@@ -953,6 +953,7 @@ func sun() {
 		println("continue! nextLevel:", nextLevel, "Levelcount:", levelCount)
 		if nextLevel {
 			levelCount++
+			nextLevel = false
 		} else {
 			levelCount = 1
 			wB.Reset()
