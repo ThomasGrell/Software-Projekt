@@ -64,6 +64,15 @@ func (g *gs) setTilesAndItems(partPos [][2]int, itemList []int, tile int) {
 	var index, x, y int
 	copy(cParts, partPos)
 	copy(cItems, itemList)
+	x = cParts[0][0]
+	y = cParts[0][1]
+	ni = tiles.NewItem(uint8(cItems[0]), g.ar.CoordToVec(x, y))
+	g.tileMatrix[y][x] = append(g.tileMatrix[y][x], ni)
+	cItems = cItems[1:]
+	nt = tiles.NewTile(uint8(tile), g.ar.CoordToVec(x, y))
+	g.tileMatrix[y][x] = append(g.tileMatrix[y][x], nt)
+	g.freePos[y][x] = Destroyable
+	cParts = cParts[1:]
 	for len(cParts) != 0 {
 		index = rand.Intn(len(cParts))
 		x = cParts[index][0]
