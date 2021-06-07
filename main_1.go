@@ -1123,6 +1123,7 @@ func sun() {
 			}
 
 		}
+		tb.StopCountdown()
 		//if rand.Intn(2) == 1 {
 		//	victory(win)
 		//}else{

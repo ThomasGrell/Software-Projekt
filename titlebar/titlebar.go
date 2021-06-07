@@ -15,28 +15,30 @@ import (
 const (
 	startCountdown = 0
 	stopCountdown  = 1
+	decCounter     = 2
 )
 
 type titlebarStruct struct {
-	background *imdraw.IMDraw  // Oranges Rechteck als Hintergrund
-	batch      *pixel.Batch    // Batch für schnelles Zeichnen
-	blackBox   pixel.Rect      // Kästchen für abgelaufene Zeit
-	canvas     *pixelgl.Canvas // Leinwand für die Anzeige
-	clock      pixel.Rect      // Rechteck der Uhr im itemImage
-	command    chan uint8      // Sendet Befehle an den Manager-Prozess
-	heads      [4]pixel.Rect   // Rechtecke der Bombermenköpfe im itemImage
-	life       [4]*uint8       // Pointer zu den Variablen der Bombermenleben
-	matrix     pixel.Matrix    // Matrix zur Positionierung im Fenster
-	mutex      sync.Mutex      // Semaphor für paralleles Schreiben der Zeit
-	num        [10]pixel.Rect  // Rechtecke der Ziffern im itemImage
-	players    uint8           // Anzahl der Spieler
-	points     *uint32         // Pointer zu den Punkten des Spielers
-	sadHeads   [4]pixel.Rect   // Rechtecke der traurigen Bombermenköpfe im itemImage
-	score      pixel.Rect      // Rechteck des Scorefeldes im itemImage
-	sprite     *pixel.Sprite   // Sprite zum Zeichnen aller Elemente
-	timeLeft   uint16          // Restzeit. Muss wegen des countdown durch ein Mutex geschützt werden!!!
-	whiteBox   pixel.Rect      // Kästchen für verbleibende Zeit
-	width      float64         // Breite des Titlebars in Pixeln. Wird auf ein Vielfaches von 8 abgerundet.
+	background     *imdraw.IMDraw  // Oranges Rechteck als Hintergrund
+	batch          *pixel.Batch    // Batch für schnelles Zeichnen
+	blackBox       pixel.Rect      // Kästchen für abgelaufene Zeit
+	canvas         *pixelgl.Canvas // Leinwand für die Anzeige
+	clock          pixel.Rect      // Rechteck der Uhr im itemImage
+	command        chan uint8      // Sendet Befehle an den Manager-Prozess
+	managerStarted bool
+	heads          [4]pixel.Rect  // Rechtecke der Bombermenköpfe im itemImage
+	life           [4]*uint8      // Pointer zu den Variablen der Bombermenleben
+	matrix         pixel.Matrix   // Matrix zur Positionierung im Fenster
+	mutex          sync.Mutex     // Semaphor für paralleles Schreiben der Zeit
+	num            [10]pixel.Rect // Rechtecke der Ziffern im itemImage
+	players        uint8          // Anzahl der Spieler
+	points         *uint32        // Pointer zu den Punkten des Spielers
+	sadHeads       [4]pixel.Rect  // Rechtecke der traurigen Bombermenköpfe im itemImage
+	score          pixel.Rect     // Rechteck des Scorefeldes im itemImage
+	sprite         *pixel.Sprite  // Sprite zum Zeichnen aller Elemente
+	timeLeft       uint16         // Restzeit. Muss wegen des countdown durch ein Mutex geschützt werden!!!
+	whiteBox       pixel.Rect     // Kästchen für verbleibende Zeit
+	width          float64        // Breite des Titlebars in Pixeln. Wird auf ein Vielfaches von 8 abgerundet.
 }
 
 // New() definiert einen neuen Titlebar der Breite width
@@ -59,7 +61,7 @@ func New(width uint16) Titlebar {
 
 	// Gepufferter Channel für die nebenläufige Steuerung des Titlebars.
 	// Kommandos sind oben über Konstanten definiert.
-	t.command = make(chan uint8, 10)
+	t.command = make(chan uint8, 1)
 
 	// Rechtecke der Ziffern im Spriteimage definieren
 	for i := 0; i < 10; i++ {
@@ -140,39 +142,45 @@ func (t *titlebarStruct) StopCountdown() {
 }
 
 func (t *titlebarStruct) Manager() {
-	var countdownStarted bool = false
+	var countdownStarted bool
+	if t.managerStarted {
+		return
+	}
+	t.managerStarted = true
+	go t.ticker()
 	for {
 		command := <-t.command
 		switch command {
 		case startCountdown:
-			if !countdownStarted {
-				go t.countdown()
-			}
 			countdownStarted = true
+		case decCounter:
+			if countdownStarted {
+				t.mutex.Lock()
+				if t.timeLeft > 0 {
+					t.timeLeft--
+				} else {
+					countdownStarted = false
+				}
+				t.mutex.Unlock()
+				if t.timeLeft == 10 {
+					go sounds.NewSound(Alarm2).PlaySound()
+				}
+				t.Update()
+			}
 		case stopCountdown:
-			t.mutex.Lock()
-			t.timeLeft = 0
-			t.mutex.Unlock()
 			countdownStarted = false
 		}
 	}
 }
 
-// countdown() ist ein nebenläufiger Prozess, der durch Manager() gestartet wird.
-func (t *titlebarStruct) countdown() {
-	last := time.Now()
-	for t.timeLeft > 0 {
-		t.mutex.Lock()
-		if t.timeLeft > 0 {
-			t.timeLeft--
-		}
-		t.mutex.Unlock()
-		if t.timeLeft == 10 {
-			go sounds.NewSound(Alarm2).PlaySound()
-		}
-		t.Update()
-		time.Sleep(time.Second - time.Since(last)) // Etwa alle 2 Sekunden wird der Countdown heruntergezählt
-		last = time.Now()
+// ticker() ist ein nebenläufiger Prozess, der durch Manager() gestartet wird.
+func (t *titlebarStruct) ticker() {
+	for {
+		last := time.Now()
+		for time.Second-time.Since(last) > 0 {
+			time.Sleep(time.Millisecond * 100)
+		} // Etwa alle Sekunde wird der Countdown heruntergezählt
+		t.command <- decCounter
 	}
 }
 

@@ -83,7 +83,7 @@ type (
 		StartCountdown()
 
 		// Vor.: Die Funktion Manager() wurde vorher einmalig nebenläufig gestartet.
-		// Erg.: Die verbleibende Spielzeit ist auf null gesetzt.
+		// Erg.: Der Countdown wird gestoppt.
 		StopCountdown()
 
 		// Vor.: -
