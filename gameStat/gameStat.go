@@ -175,15 +175,19 @@ func (l *gs) RemoveItems(x, y int, dir pixel.Vec) {
 		for i := 1; i <= int(dir.Len()); i++ {
 			yy := y + i*int(dir.Y)/int(dir.Len())
 			xx := x + i*int(dir.X)/int(dir.Len())
-			if len((*l).tileMatrix[yy][xx]) == 1 && (*l).tileMatrix[yy][xx][0].GetType() != Exit {
-				(*l).tileMatrix[yy][xx][0].Ani().Die()
-				(*l).tileMatrix[yy][xx][0].Ani().Update()
+			if len((*l).tileMatrix[yy][xx]) == 1 {
+				if (*l).tileMatrix[yy][xx][0].GetType() != Exit {
+					(*l).tileMatrix[yy][xx][0].Ani().Die()
+					(*l).tileMatrix[yy][xx][0].Ani().Update()
+				}
 			}
 		}
 		if dir.Len()==0 {
-			if len((*l).tileMatrix[y][x]) == 1 && (*l).tileMatrix[y][x][0].GetType() != Exit {
-				(*l).tileMatrix[y][x][0].Ani().Die()
-				(*l).tileMatrix[y][x][0].Ani().Update()
+			if len((*l).tileMatrix[y][x]) == 1 {
+				if (*l).tileMatrix[y][x][0].GetType() != Exit {
+					(*l).tileMatrix[y][x][0].Ani().Die()
+					(*l).tileMatrix[y][x][0].Ani().Update()
+				}
 			}
 		}
 	}
