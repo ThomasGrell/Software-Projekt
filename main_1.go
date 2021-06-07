@@ -107,7 +107,7 @@ func showIntro(win *pixelgl.Window) {
 		time.Sleep(100 * time.Millisecond)
 	}
 
-	music.FadeOut()
+	music.StopSound()
 	fadeOut(win)
 
 	win.SetSmooth(false)
