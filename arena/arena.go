@@ -2,7 +2,6 @@ package arena
 
 import (
 	. "../constants"
-	"fmt"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 	"image"
