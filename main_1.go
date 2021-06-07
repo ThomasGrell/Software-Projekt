@@ -949,6 +949,7 @@ func sun() {
 	for continu {
 		//println("continue! nextLevel:", nextLevel, "Levelcount:", levelCount)
 		if nextLevel {
+			music.FadeOut()
 			levelCount++
 			nextLevel = false
 			win.SetMatrix(pixel.IM)

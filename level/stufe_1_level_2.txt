@@ -26,7 +26,6 @@
 * Art und Anzahl der Items:
 PowerItem:1
 LifeItem:1
-RollerbladeItem:2
 SkullItem:3
 HeartItem:1
 BombItem:1

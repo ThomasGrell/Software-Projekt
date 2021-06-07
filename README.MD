@@ -14,11 +14,3 @@
 
 bomberman_rayk.go:  Testfile für Grafik, Sound etc.
 main.go: Steuerung eines Bomberman mit Pfeiltasten vor dem Hintergrund von Level2
-
-# Diskussion
-### Die Feuerkraft erhöht sich ohne Einsammeln von Items?
-### Bereits von Beginn an können beliebig viele Bomben gelegt werden 
-### gelegte Bomben bleiben beim Zurücksetzen erhalten
-### Teddy läuft in die Ecke und bewegt sich nicht mehr
-### Alles zurücksetzen nach Lebensverlust stört manchmal
-### Game over Anzeige passt sich nicht in Fenster ein (braucht Intro-Fenster, bekommt Spielfenster).
