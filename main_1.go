@@ -172,6 +172,7 @@ func gameOver(win *pixelgl.Window) {
 	music = sounds.NewSound(JuhaniJunkalaEnd)
 	go music.PlaySound()
 	win.SetBounds(pixel.R(0, 0, MaxWinSizeX, MaxWinSizeY))
+	win.SetMatrix(pixel.IM.Moved(win.Bounds().Center()))
 	win.Update()
 	var picGoOn pixel.Picture
 	picEnd, err := loadPic("graphics/Screenshots/gameOverEnd.png")
@@ -233,7 +234,6 @@ func gameOver(win *pixelgl.Window) {
 func clearMonsters() {
 	remains := make([]characters.Enemy, 0)
 	for _, m := range monster {
-		win.SetMatrix(pixel.IM.Moved(win.Bounds().Center()))
 		if m.IsAlife() || !m.Ani().SequenceFinished() {
 			remains = append(remains, m)
 		}
@@ -950,6 +950,7 @@ func sun() {
 
 	// if player wants to continue:
 	for continu {
+		println("continue! nextLevel:", nextLevel, "Levelcount:", levelCount)
 		if nextLevel {
 			levelCount++
 		} else {
@@ -969,6 +970,7 @@ func sun() {
 		music = sounds.NewSound(levelDef.GetMusic())
 		go music.PlaySound()
 		win.SetBounds(pixel.R(0, 0, winSizeX, winSizeY))
+		win.SetMatrix(pixel.IM.Scaled(pixel.V(0, 0), zoomFactor))
 		win.Update()
 		//lv.Reset()
 		setMonster()
@@ -978,18 +980,18 @@ func sun() {
 		wB.Ani().SetView(Stay)
 		wB.Ani().Show()
 		//wB.Reset()
-		wB.SetMaxBombs(10)
-		wB.SetPower(10)
+		//wB.SetMaxBombs(10)
+		//wB.SetPower(10)
 		tb.SetSeconds(levelDef.GetTime())
 		tb.Update()
 		tb.StartCountdown()
-		win.SetMatrix(pixel.IM.Scaled(pixel.V(0, 0), zoomFactor))
 		win.Update()
 		last := time.Now()
 		dt := time.Since(last).Seconds()
 
 		for !win.Closed() && !win.Pressed(pixelgl.KeyEscape) {
 			if nextLevel {
+				continu = true
 				break
 			}
 			if tb.GetSeconds() == 0 && wB.Ani().GetView() != Dead {
@@ -1113,7 +1115,6 @@ func sun() {
 		//	victory(win)
 		//}else{
 		if !nextLevel {
-			win.SetMatrix(pixel.IM.Moved(win.Bounds().Center()))
 			gameOver(win)
 		}
 	}
