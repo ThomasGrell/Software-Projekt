@@ -122,14 +122,9 @@ type Bombe interface {
 	 * 	geliefert.
 	 */
 	Owner() (bool, characters.Player)
-
+	
 	/*	Vor.: -
-	 * 	Eff.: Die Animation der Bombe ist nun verändert
+	 * 	Eff.: Die Bombe hat nun den Wirkradius newPower
 	 */
-	SetAnimation(animations.Animation)
-
-	/*	Vor.: Das Objekt hat noch keinen Besitzer.
-	 * 	Eff.: Der Besitzer des Objekt ist nun der übergebene player.
-	 */
-	SetOwner(player characters.Player)
+	SetPower(newPower float64)
 }

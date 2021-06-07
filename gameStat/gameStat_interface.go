@@ -33,7 +33,7 @@ type GameStat interface {
 	DrawColumn(y int, win pixel.Target)
 
 	// Vor.: -
-	// Eff.: Die Positionskoordinaten (xx,yy) des nächsten Zerstörbaren Teils in Richtug dir
+	// Eff.: Die Positionskoordinaten (xx,yy) des nächsten Teils in Richtug dir
 	//       ausgehend von der aktuellen Position (x,y) ist geliefert, falls es ein solches 
 	//       gibt. In dem Fall wird true , xx , yy zurück gegeben. Falls es kein zerstörbarens
 	//       Teil gibt, wird false, -1 ,-1 zurück gegeben.
@@ -54,9 +54,11 @@ type GameStat interface {
 	//       ein zerstörbares oder unzerstörbares Teil befindet. Falls nicht wird false zurück gegeben.
 	IsTile(x, y int) bool
 
-	// Vor.: -
-	// Eff.: Falls ein Item an den übergebenen Koordinaten lag, ist dieses nun zerstört und die 
+	// Vor.: eine Koordinate von dir muss 0 sein.
+	// Eff.: Falls dir der Nullvektor ist: Falls ein Item an den übergebenen Koordinaten lag, ist dieses nun zerstört und die 
 	//       entsprechnde Animation beginnt.
+	//		 Falls dir kein Nullvektor ist: Alle Items ausgehend in richtung dir werden zerstört, 
+	//		 falls sie weniger als | dir| von x,y entfernt liegen, ein Item auf x,y wird aber nicht zerstört. 
 	RemoveItems(x, y int, dir pixel.Vec)
 
 	// Vor.: -

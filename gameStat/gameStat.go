@@ -171,6 +171,12 @@ func (l *gs) RemoveItems(x, y int, dir pixel.Vec) {
 				(*l).tileMatrix[yy][xx][0].Ani().Update()
 			}
 		}
+		if dir.Len()==0 {
+			if len((*l).tileMatrix[y][x]) == 1 && (*l).tileMatrix[y][x][0].GetType() != Exit {
+				(*l).tileMatrix[y][x][0].Ani().Die()
+				(*l).tileMatrix[y][x][0].Ani().Update()
+			}
+		}
 	}
 }
 

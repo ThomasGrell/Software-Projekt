@@ -168,14 +168,6 @@ func (it *bombe) Owner() (bool, characters.Player) {
 	return (*it).owner != nil, (*it).owner
 }
 
-func (it *bombe) SetAnimation(newAni animations.Animation) {
-	(*it).ani = newAni
-	((*it).ani).Update()
-}
-
-func (it *bombe) SetOwner(player characters.Player) {
-	(*it).owner = player
-}
 
 func (it *bombe) SetPower(newPower float64) {
 	(*it).power = newPower
