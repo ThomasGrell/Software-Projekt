@@ -48,6 +48,7 @@ var win *pixelgl.Window
 var pitchWidth int
 var pitchHeight int
 var itemBatch *pixel.Batch
+var nextLevel bool
 
 var clearingNeeded = false
 
@@ -232,6 +233,7 @@ func gameOver(win *pixelgl.Window) {
 func clearMonsters() {
 	remains := make([]characters.Enemy, 0)
 	for _, m := range monster {
+		win.SetMatrix(pixel.IM.Moved(win.Bounds().Center()))
 		if m.IsAlife() || !m.Ani().SequenceFinished() {
 			remains = append(remains, m)
 		}
@@ -811,6 +813,9 @@ func moveCharacter(c interface{}, dt float64) {
 				chr.Ani().Die()
 			case HeartItem:
 				chr.SetRemote(true)
+			case Exit:
+				nextLevel = true
+				continu = true
 			}
 		}
 	}
@@ -865,9 +870,34 @@ func setMonster() {
 		}
 	}
 }
-
+func loadLevel(nr uint8) string {
+	switch nr {
+	case 1:
+		return "./level/stufe_1_level_1.txt"
+	case 2:
+		return "./level/stufe_1_level_2.txt"
+	case 3:
+		return "./level/stufe_1_level_3.txt"
+	case 4:
+		return "./level/stufe_2_level_1.txt"
+	case 5:
+		return "./level/stufe_2_level_2.txt"
+	case 6:
+		return "./level/stufe_2_level_3.txt"
+	case 7:
+		return "./level/stufe_3_level_1.txt"
+	case 8:
+		return "./level/stufe_3_level_2.txt"
+	case 9:
+		return "./level/stufe_3_level_3.txt"
+	case 10:
+		return "./level/stufe_3_level_Boss.txt"
+	}
+	return "./level/stufe_3_level_Boss.txt"
+}
 func sun() {
-	levelDef = level.NewLevel("./level/stufe_2_level_3.txt")
+	var levelCount uint8 = 1
+	levelDef = level.NewLevel(loadLevel(levelCount))
 	pitchWidth, pitchHeight = levelDef.GetBounds()
 	var zoomFactor float64
 	if float64((pitchHeight+1)*TileSize+32)/float64((pitchWidth+3)*TileSize) > float64(MaxWinSizeY)/MaxWinSizeX {
@@ -888,7 +918,6 @@ func sun() {
 	if err != nil {
 		panic(err)
 	}
-	
 
 	win.SetMatrix(pixel.IM.Moved(win.Bounds().Center()))
 
@@ -921,19 +950,34 @@ func sun() {
 
 	// if player wants to continue:
 	for continu {
+		if nextLevel {
+			levelCount++
+		} else {
+			levelCount = 1
+			wB.Reset()
+		}
+		levelDef = level.NewLevel(loadLevel(levelCount))
+		pitchWidth, pitchHeight = levelDef.GetBounds()
+		if float64((pitchHeight+1)*TileSize+32)/float64((pitchWidth+3)*TileSize) > float64(MaxWinSizeY)/MaxWinSizeX {
+			zoomFactor = MaxWinSizeY / float64((pitchHeight+1)*TileSize+32)
+		} else {
+			zoomFactor = MaxWinSizeX / float64((pitchWidth+3)*TileSize)
+		}
+		winSizeX = zoomFactor * float64(pitchWidth+3) * TileSize
+		winSizeY = zoomFactor * (float64(pitchHeight+1)*TileSize + 32)
 		continu = false
 		music = sounds.NewSound(levelDef.GetMusic())
 		go music.PlaySound()
 		win.SetBounds(pixel.R(0, 0, winSizeX, winSizeY))
 		win.Update()
-		lv.Reset()
+		//lv.Reset()
 		setMonster()
 		wB.MoveTo(lv.A().GetLowerLeft())
 		wB.SetDirection(Stay)
 		wB.Ani().SetView(Down)
 		wB.Ani().SetView(Stay)
 		wB.Ani().Show()
-		wB.Reset()
+		//wB.Reset()
 		wB.SetMaxBombs(10)
 		wB.SetPower(10)
 		tb.SetSeconds(levelDef.GetTime())
@@ -945,7 +989,9 @@ func sun() {
 		dt := time.Since(last).Seconds()
 
 		for !win.Closed() && !win.Pressed(pixelgl.KeyEscape) {
-
+			if nextLevel {
+				break
+			}
 			if tb.GetSeconds() == 0 && wB.Ani().GetView() != Dead {
 				killPlayer(wB)
 			}
@@ -1063,11 +1109,13 @@ func sun() {
 			}
 
 		}
-		win.SetMatrix(pixel.IM.Moved(win.Bounds().Center()))
 		//if rand.Intn(2) == 1 {
 		//	victory(win)
 		//}else{
-		gameOver(win)
+		if !nextLevel {
+			win.SetMatrix(pixel.IM.Moved(win.Bounds().Center()))
+			gameOver(win)
+		}
 	}
 }
 
