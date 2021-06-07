@@ -950,10 +950,10 @@ func sun() {
 
 	// if player wants to continue:
 	for continu {
-		println("continue! nextLevel:", nextLevel, "Levelcount:", levelCount)
+		//println("continue! nextLevel:", nextLevel, "Levelcount:", levelCount)
 		if nextLevel {
 			levelCount++
-			nextLevel = false
+			//nextLevel = false
 		} else {
 			levelCount = 1
 			wB.Reset()
