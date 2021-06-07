@@ -1,0 +1,49 @@
+* Breite der Arena:
+13
+-
+* Höhe der Arena:
+11
+-
+* Arenatyp:
+2
+-
+* Positionen der Hindernisse:
+0,5
+0,6
+0,7
+0,8
+1,4
+3,10
+4,1
+4,4
+4,5
+4,6
+4,10
+5,10
+6,10
+10,4
+10,5
+10,6
+10,7
+12,0
+12,6
+-
+* Art und Anzahl der Items:
+PowerItem:1
+BombItem:1
+RollerbladeItem:1
+SkullItem:1
+-
+* Art und Anzahl der Gegner:
+Balloon:2
+Teddy:2
+Ghost:1
+-
+* Art der Hindernisse:
+Greenwall
+-
+* Musik:
+MyVeryOwnDeadShip
+-
+* maximale Spieldauer:
+120
