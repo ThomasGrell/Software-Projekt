@@ -149,8 +149,11 @@ func victory(win *pixelgl.Window) {
 	}
 	sprite1 := pixel.NewSprite(pic1, pic1.Bounds())
 	sprite2 := pixel.NewSprite(pic2, pic2.Bounds())
+	win.SetBounds(pixel.R(0, 0, MaxWinSizeX, MaxWinSizeY))
+	win.SetMatrix(pixel.IM.Moved(win.Bounds().Center()))
 	win.Clear(colornames.Black)
 	win.SetSmooth(true)
+	win.Update()
 	// victory pic: zoom in
 	winSize := win.Bounds().Size()
 	picSize := pic1.Bounds().Size()
@@ -951,6 +954,10 @@ func sun() {
 		if nextLevel {
 			music.FadeOut()
 			levelCount++
+			if levelCount == 11 {
+				victory(win)
+				break
+			}
 			nextLevel = false
 			win.SetMatrix(pixel.IM)
 			win.Clear(colornames.Black)
